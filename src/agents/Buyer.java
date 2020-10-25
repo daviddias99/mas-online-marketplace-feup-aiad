@@ -2,8 +2,8 @@ package src.agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.lang.acl.ACLMessage;
 import src.behaviours.AskPrice;
-import src.behaviours.ReceivePrices;
 
 public class Buyer extends Agent{
     // TODO: depois por lista de produtos (??)/received
@@ -24,8 +24,7 @@ public class Buyer extends Agent{
         // TODO: depois ver se dá para mudar para um que repita ciclicamente até success true
         // se calhar dá para chegar ao final e por reset se success false
         SequentialBehaviour seq = new SequentialBehaviour();
-        seq.addSubBehaviour(new AskPrice(this));
-        seq.addSubBehaviour(new ReceivePrices(this));
+        seq.addSubBehaviour(new AskPrice(this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(seq);
     }
 }

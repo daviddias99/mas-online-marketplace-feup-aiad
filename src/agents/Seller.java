@@ -1,12 +1,14 @@
 package src.agents;
 
-import java.io.IOException;
+import src.behaviours.ResponsePrice;
 
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 public class Seller extends Agent {
     private int orginalPrice;
@@ -20,7 +22,8 @@ public class Seller extends Agent {
 
     protected void setup() {
         register();
-
+        // TODO: ver depois isto pq deve acabar e depois nunca mais
+        addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }
 
     protected void takeDown() {
