@@ -1,7 +1,9 @@
 package src.behaviours;
 
 import src.agents.Buyer;
+import src.models.Product;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import jade.domain.DFService;
@@ -10,7 +12,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
-
 
 public class AskPrice extends AchieveREInitiator {
 
@@ -23,24 +24,36 @@ public class AskPrice extends AchieveREInitiator {
 
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
-        // TODO: por depois certo o produto q se procura
-        sd.setType("seller");
-        template.addServices(sd);
-        
-        msg.setContent(((Buyer)this.getAgent()).getProduct());
-        
-        try {
-            DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-            for(int i=0; i<result.length; ++i) {
-                msg.addReceiver(result[i].getName());
-                v.add(msg);
-            }
-        } catch(FIPAException fe) {
-            fe.printStackTrace();
-        }
-        
-        v.add(msg);
 
+        for (Product p : ((Buyer) this.getAgent()).getProducts()) {
+            sd.setType(p.getName());
+            template.addServices(sd);
+
+            try {
+                msg.setContentObject(p);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                continue;
+            }
+
+            try {
+                DFAgentDescription[] result = DFService.search(this.getAgent(), template);
+                for(int i=0; i<result.length; ++i) {
+                    msg.addReceiver(result[i].getName());
+                    v.add(msg);
+                }
+            } catch(FIPAException fe) {
+                fe.printStackTrace();
+            }
+
+            // TODO: sera q se tem de fazer isto?
+            template.removeServices(sd);
+        }
+
+        
+        
+        
         return v;
     }
 

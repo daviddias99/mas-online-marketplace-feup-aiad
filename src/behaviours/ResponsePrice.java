@@ -1,11 +1,13 @@
 package src.behaviours;
 
 import src.agents.Seller;
+import src.models.Product;
 
 import java.io.IOException;
 
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
 import jade.proto.AchieveREResponder;
 
 public class ResponsePrice extends AchieveREResponder {
@@ -25,8 +27,13 @@ public class ResponsePrice extends AchieveREResponder {
 
         try {
             result.setPerformative(ACLMessage.INFORM);
-            result.setContentObject((Seller) this.getAgent());
-        } catch (IOException e) {
+
+            Product productRequested = (Product)request.getContentObject();
+
+            Seller s = (Seller) this.getAgent();
+            result.setContentObject(s.getProduct(productRequested.getName()));
+
+        } catch ( UnreadableException | IOException e) {
             result.setPerformative(ACLMessage.FAILURE);
             result.setContent(e.getMessage());
         }
