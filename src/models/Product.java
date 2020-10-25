@@ -2,13 +2,16 @@ package src.models;
 
 public class Product {
     private final String name;
-    private final int originalPrice;
+    private int originalPrice = 0;
     private int marketPrice;
 
-    public Product(String name, int originalPrice, int marketPrice) {
+    public Product(String name, int originalPrice) {
         this.name = name;
         this.originalPrice = originalPrice;
-        this.setMarketPrice(marketPrice);
+    }
+
+    public Product(String name) {
+        this.name = name;
     }
 
     public int getMarketPrice() {
@@ -19,6 +22,10 @@ public class Product {
         this.marketPrice = marketPrice;
     }
 
+    public void setOriginalPrice(int originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+    
     public int getOriginalPrice() {
         return originalPrice;
     }
@@ -29,6 +36,8 @@ public class Product {
 
     @Override
     public String toString(){
-        return getName() + ":" + getOriginalPrice() + ":" + getMarketPrice();
+        if(getOriginalPrice() == 0)
+            return getName();
+        return getName() + ":" + getOriginalPrice();
     }    
 }
