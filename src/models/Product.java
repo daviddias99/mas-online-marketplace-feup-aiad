@@ -8,13 +8,13 @@ public class Product implements Serializable {
     private int originalPrice = 0;
     private int marketPrice;
 
-    public Product(String name, int originalPrice) {
-        this.name = name;
-        this.originalPrice = originalPrice;
-    }
-
     public Product(String name) {
         this.name = name;
+    }
+
+    public Product(String name, int originalPrice) {
+        this(name);
+        this.originalPrice = originalPrice;
     }
 
     public int getMarketPrice() {
@@ -51,7 +51,7 @@ public class Product implements Serializable {
         if (getClass() != o.getClass()) return false;
 
         Product p = (Product) o;
-        return this.name == p.getName();
+        return this.name.equals(p.getName());
     }
 
     @Override

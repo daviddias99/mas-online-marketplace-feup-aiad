@@ -11,6 +11,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 import jade.proto.AchieveREInitiator;
 
 public class AskPrice extends AchieveREInitiator {
@@ -25,7 +26,7 @@ public class AskPrice extends AchieveREInitiator {
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 
-        for (Product p : ((Buyer) this.getAgent()).getProducts()) {
+        for (Product p : ((Buyer) this.getAgent()).getMissingProducts()) {
             sd.setType(p.getName());
             template.addServices(sd);
 
@@ -39,11 +40,11 @@ public class AskPrice extends AchieveREInitiator {
 
             try {
                 DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-                for(int i=0; i<result.length; ++i) {
+                for (int i = 0; i < result.length; ++i) {
                     msg.addReceiver(result[i].getName());
                     v.add(msg);
                 }
-            } catch(FIPAException fe) {
+            } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
 
@@ -51,18 +52,21 @@ public class AskPrice extends AchieveREInitiator {
             template.removeServices(sd);
         }
 
-        
-        
-        
         return v;
     }
 
     // TODO: ver se vale a pena handlers da 1st part
 
-    // TODO: escolher entre handleAllResultNotifications (analisar todos de uma vez no final)
+    // TODO: escolher entre handleAllResultNotifications (analisar todos de uma vez
+    // no final)
     // e como o professor tem
     protected void handleInform(ACLMessage inform) {
-        System.out.println(inform);
+        try {
+            System.out.println((Product)inform.getContentObject());
+        } catch (UnreadableException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     protected void handleFailure(ACLMessage failure) {
         System.out.println(failure);

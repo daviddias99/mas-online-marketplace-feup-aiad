@@ -13,38 +13,44 @@ import jade.lang.acl.ACLMessage;
 import src.behaviours.AskPrice;
 import src.models.Product;
 
-public class Buyer extends Agent{
+public class Buyer extends Agent {
     // TODO: depois por lista de produtos (??)/received
     private Map<Product, Boolean> products = new HashMap<>();
 
-    public Buyer(List<String> products){
-        for(int i = 0; i < products.size(); i++)
+    public Buyer(List<String> products) {
+        for (int i = 0; i < products.size(); i++)
             this.products.put(new Product(products.get(i)), false);
     }
 
-    public Set<Product> getProducts(){
+    public Set<Product> getProducts() {
         return this.products.keySet();
     }
 
-    public Set<Product> getMissingProducts(){
-        return (this.products.entrySet()
-                    .stream()
-                    .filter(map -> !map.getValue())
-                    .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()))).keySet();
+    public Set<Product> getMissingProducts() {
+        return (this.products.entrySet().stream().filter(map -> !map.getValue())
+                .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()))).keySet();
     }
 
     @Override
-    public String toString(){
-        String result = this.getName() +  ":\n";
-        for(Product p : this.products.keySet())
+    public String toString() {
+        String result = this.getName() + ":\n";
+        for (Product p : this.products.keySet())
             result += "  - " + p.toString() + ":" + this.products.get(p).toString() + "\n";
         return result;
     }
 
-
     protected void setup() {
-        // TODO: depois ver se dá para mudar para um que repita ciclicamente até success true
+        // TODO: depois ver se dá para mudar para um que repita ciclicamente até success
+        // true
         // se calhar dá para chegar ao final e por reset se success false
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Agent " + this.getAID() + " slept.");
         SequentialBehaviour seq = new SequentialBehaviour();
         seq.addSubBehaviour(new AskPrice(this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(seq);
