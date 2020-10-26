@@ -36,6 +36,7 @@ public class Olx {
 
         Map<String, Integer> products = new HashMap<>();
         products.put("pc", 150);
+        products.put("skate",20);
         for(int i = 0; i < 3; i++){
 
             Seller newSeller = new Seller(products, i * 33 + 34);
@@ -54,6 +55,7 @@ public class Olx {
     public void createBuyers(){
         List<String> products = new ArrayList<>();
         products.add("pc");
+        products.add("skate");
         Buyer newBuyer = new Buyer(products);
         try {
             this.container.acceptNewAgent("buyer_0", newBuyer).start();

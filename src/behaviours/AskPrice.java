@@ -16,8 +16,11 @@ import jade.proto.AchieveREInitiator;
 
 public class AskPrice extends AchieveREInitiator {
 
-    public AskPrice(Buyer a, ACLMessage msg) {
-        super(a, msg);
+    private Product product;
+
+    public AskPrice(Product product, Buyer buyerAgent, ACLMessage msg) {
+        super(buyerAgent, msg);
+        this.product = product;
     }
 
     protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
@@ -42,12 +45,12 @@ public class AskPrice extends AchieveREInitiator {
                 DFAgentDescription[] result = DFService.search(this.getAgent(), template);
                 for (int i = 0; i < result.length; ++i) {
                     msg.addReceiver(result[i].getName());
-                    v.add(msg);
                 }
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
-
+            
+            v.add(msg);
             // TODO: sera q se tem de fazer isto?
             template.removeServices(sd);
         }
@@ -62,7 +65,7 @@ public class AskPrice extends AchieveREInitiator {
     // e como o professor tem
     protected void handleInform(ACLMessage inform) {
         try {
-            System.out.println((Product)inform.getContentObject());
+            System.out.printf("%s received offer %s from %s\n",this.getAgent().getName(),(Product)inform.getContentObject(), inform.getSender().getName());
         } catch (UnreadableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
