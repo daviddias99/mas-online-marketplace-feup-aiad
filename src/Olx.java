@@ -23,10 +23,14 @@ public class Olx {
     
 
 
-    public Olx() {
+    public Olx(boolean mainMode) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
-        this.container = rt.createAgentContainer(p);
+        
+        if(mainMode)
+            this.container = rt.createMainContainer(p);
+        else
+            this.container = rt.createAgentContainer(p);
 
         createSellers();
         createBuyers();
@@ -36,8 +40,11 @@ public class Olx {
 
         Map<String, Integer> products = new HashMap<>();
         products.put("pc", 150);
-        products.put("skate",20);
         for(int i = 0; i < 3; i++){
+            if(i == 1)
+                products.put("skate",20);
+            else if(i==2)
+                products.remove("pc");
 
             Seller newSeller = new Seller(products, i * 33 + 34);
             try {
@@ -68,8 +75,8 @@ public class Olx {
 
     public static void main(String[] args) {
         // TODO: por a aceitar de args as variáveis independentes e passar para o Olx
-        
-        Olx olx = new Olx();
+        // TODO: controlar args
+        Olx olx = new Olx(Boolean.parseBoolean(args[0]));
 
         // try {
         //     olx.container.kill();

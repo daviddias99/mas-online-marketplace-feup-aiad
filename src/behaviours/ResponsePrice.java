@@ -31,7 +31,9 @@ public class ResponsePrice extends AchieveREResponder {
             Product productRequested = (Product)request.getContentObject();
 
             Seller s = (Seller) this.getAgent();
-            result.setContentObject(s.getProduct(productRequested.getName()));
+            Product respProduct = s.getProduct(productRequested.getName());
+            System.out.printf(" > SEND: %s with %s to %s\n", this.getAgent().getLocalName(), respProduct, request.getSender().getLocalName());
+            result.setContentObject(respProduct);
 
         } catch ( UnreadableException | IOException e) {
             result.setPerformative(ACLMessage.FAILURE);

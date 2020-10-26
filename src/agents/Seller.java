@@ -55,14 +55,14 @@ public class Seller extends Agent {
     }
 
     private void register() {
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName(getLocalName());
+        
 
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
         for(Product product : this.products){
-            // TODO: ver depois é preciso estar sempre a criar um SD por causa de apontadores e tal
+            ServiceDescription sd = new ServiceDescription();
+            sd.setName(getLocalName());
             sd.setType(product.getName());
             dfd.addServices(sd);
         }

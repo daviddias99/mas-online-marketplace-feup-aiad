@@ -29,31 +29,33 @@ public class AskPrice extends AchieveREInitiator {
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 
-        for (Product p : ((Buyer) this.getAgent()).getMissingProducts()) {
-            sd.setType(p.getName());
-            template.addServices(sd);
+        sd.setType(this.product.getName());
+        template.addServices(sd);
 
-            try {
-                msg.setContentObject(p);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                continue;
-            }
-
-            try {
-                DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-                for (int i = 0; i < result.length; ++i) {
-                    msg.addReceiver(result[i].getName());
-                }
-            } catch (FIPAException fe) {
-                fe.printStackTrace();
-            }
-            
-            v.add(msg);
-            // TODO: sera q se tem de fazer isto?
-            template.removeServices(sd);
+        try {
+            msg.setContentObject(this.product);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return v;
         }
+
+        try {
+            DFAgentDescription[] result = DFService.search(this.getAgent(), template);
+            if(result.length == 0){
+                System.out.println("// TODO: No available sellers at this time");
+                return v;
+            }
+
+            for (int i = 0; i < result.length; ++i) {
+                msg.addReceiver(result[i].getName());
+            }
+        } catch (FIPAException fe) {
+            // TODO Auto-generated catch block
+            fe.printStackTrace();
+        }
+        
+        v.add(msg);
 
         return v;
     }
@@ -65,7 +67,8 @@ public class AskPrice extends AchieveREInitiator {
     // e como o professor tem
     protected void handleInform(ACLMessage inform) {
         try {
-            System.out.printf("%s received offer %s from %s\n",this.getAgent().getName(),(Product)inform.getContentObject(), inform.getSender().getName());
+            Product productReponse = (Product)inform.getContentObject();
+            System.out.printf(" < RECEIVED: %s with %s from %s\n", this.getAgent().getLocalName(), productReponse, inform.getSender().getLocalName());
         } catch (UnreadableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

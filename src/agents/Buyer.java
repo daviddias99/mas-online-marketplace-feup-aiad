@@ -44,6 +44,7 @@ public class Buyer extends Agent {
         // true
         // se calhar dá para chegar ao final e por reset se success false
 
+        
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -51,15 +52,13 @@ public class Buyer extends Agent {
             e.printStackTrace();
         }
         System.out.println("Agent " + this.getAID() + " slept.");
-        SequentialBehaviour seq = new SequentialBehaviour();
+        
+        for (Product p : this.products.keySet()){
+            System.out.printf(" - START: Agent %s - Product %s\n", this.getLocalName(), p.getName());
+            SequentialBehaviour seq = new SequentialBehaviour();
+            seq.addSubBehaviour(new AskPrice(p, this, new ACLMessage(ACLMessage.REQUEST)));
+            addBehaviour(seq);
+        }
 
-        // TODO
-        // Maybe
-        // for (Product p : this.products.keySet()){
-        //     seq.addSubBehaviour(new AskPrice(this, new ACLMessage(ACLMessage.REQUEST),p));
-        // }
-
-        seq.addSubBehaviour(new AskPrice(null,this, new ACLMessage(ACLMessage.REQUEST)));
-        addBehaviour(seq);
     }
 }
