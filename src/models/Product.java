@@ -41,7 +41,9 @@ public class Product implements Serializable {
     public String toString(){
         if(getOriginalPrice() == 0)
             return getName();
+        // if(getMarketPrice() == 0)
         return getName() + ":" + getOriginalPrice();
+        // return getName() + ":" + getOriginalPrice() + ":" + getMarketPrice();
     }
 
     @Override

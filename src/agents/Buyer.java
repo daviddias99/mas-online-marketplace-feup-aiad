@@ -10,7 +10,7 @@ import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import src.behaviours.AskPrice;
+import src.behaviours.AskPriceBuyer;
 import src.models.Product;
 
 public class Buyer extends Agent {
@@ -56,7 +56,7 @@ public class Buyer extends Agent {
         for (Product p : this.products.keySet()){
             System.out.printf(" - START: Agent %s - Product %s\n", this.getLocalName(), p.getName());
             SequentialBehaviour seq = new SequentialBehaviour();
-            seq.addSubBehaviour(new AskPrice(p, this, new ACLMessage(ACLMessage.REQUEST)));
+            seq.addSubBehaviour(new AskPriceBuyer(p, this, new ACLMessage(ACLMessage.REQUEST)));
             addBehaviour(seq);
         }
 
