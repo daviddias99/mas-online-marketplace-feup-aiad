@@ -4,6 +4,7 @@ import src.behaviours.AskPriceSeller;
 import src.behaviours.ResponsePrice;
 import src.models.Product;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,14 +19,14 @@ import jade.lang.acl.MessageTemplate;
 
 public class Seller extends Agent {
     // TODO: assim ou String to Product pra acesso mais rápido
-    private Set<Product> products = new HashSet<>();
+    private HashMap<Product,Float> products = new HashMap<>();
     private int credibility;
 
     // TODO: ver como queremos dar input dos products
-    public Seller(Map<String, Integer> productMap, int credibility) {
+    public Seller(Map<String, Float> productMap, int credibility) {
         this.credibility = credibility;
         for(String productName : productMap.keySet())
-            this.products.add(new Product(productName, productMap.get(productName)));
+            this.products.put(new Product(productName,productMap.get(productName)),0.0f);
     }
 
     public int getCredibility(){
@@ -33,34 +34,38 @@ public class Seller extends Agent {
     }
 
     public void addProduct(String name, int originalPrice){
-        this.products.add(new Product(name, originalPrice));
+        this.products.put(new Product(name, originalPrice),0.0f);
     }
 
     public void addProduct(Product product){
-        this.products.add(product);
+        this.products.put(product,0.0f);
     }
 
-    public Set<Product> getProducts(){
+    public HashMap<Product,Float> getProducts(){
         return this.products;
     }
 
-    public boolean removeProduct(Product product){
+    public float removeProduct(Product product){
         return this.products.remove(product);
     }
 
     public Product getProduct(String name){
         Product search = new Product(name);
-        if (this.products.contains(search))
-            for (Product p : this.products)
+        if (this.products.get(search) != null)
+            for (Product p : this.products.keySet())
                 if (search.equals(p))
                     return p;
         return null;
     }
 
+    public Float getProductPrice(String name){
+        return this.products.get(this.getProduct(name)); 
+    }
+
     protected void setup() {
         // register();
         // TODO: ver depois sequencia
-        for (Product p : this.products)
+        for (Product p : this.products.keySet())
             addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }

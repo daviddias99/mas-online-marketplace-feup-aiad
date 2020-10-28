@@ -2,6 +2,7 @@ package src.behaviours;
 
 import src.agents.Seller;
 import src.models.Product;
+import src.models.SellerOfferInfo;
 
 import java.io.IOException;
 
@@ -16,12 +17,14 @@ public class ResponsePrice extends AchieveREResponder {
         super(a, mt);
     }
 
+    @Override
     protected ACLMessage handleRequest(ACLMessage request) {
         ACLMessage reply = request.createReply();
         reply.setPerformative(ACLMessage.AGREE);
         return reply;
     }
     
+    @Override
     protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
         ACLMessage result = request.createReply();
 
@@ -32,8 +35,9 @@ public class ResponsePrice extends AchieveREResponder {
 
             Seller s = (Seller) this.getAgent();
             Product respProduct = s.getProduct(productRequested.getName());
-            System.out.printf(" > SEND: %s with %s to %s\n", this.getAgent().getLocalName(), respProduct, request.getSender().getLocalName());
-            result.setContentObject(respProduct);
+            SellerOfferInfo info = new SellerOfferInfo(respProduct,s.getProductPrice(respProduct.getName()),s.getCredibility());
+            System.out.printf(" > SEND: %s with %s to %s%n", this.getAgent().getLocalName(), info, request.getSender().getLocalName());
+            result.setContentObject(info);
 
         } catch ( UnreadableException | IOException e) {
             result.setPerformative(ACLMessage.FAILURE);

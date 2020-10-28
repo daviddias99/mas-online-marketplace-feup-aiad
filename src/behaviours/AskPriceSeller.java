@@ -9,6 +9,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import src.agents.Seller;
 import src.models.Product;
+import src.models.SellerOfferInfo;
 
 public class AskPriceSeller extends AskPrice {
 
@@ -37,21 +38,21 @@ public class AskPriceSeller extends AskPrice {
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
-        List<Product> currSellers = new ArrayList<>();
+        List<SellerOfferInfo> marketPrices = new ArrayList<>();
 
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
             try {
-                currSellers.add((Product) message.getContentObject());
+                marketPrices.add((SellerOfferInfo) message.getContentObject());
             } catch (UnreadableException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
 
-        System.out.printf("Product %s has %d sellers with these prices:\n", this.getProduct().getName(), currSellers.size());
-        for(Product p: currSellers)
-            System.out.printf(" - %d\n", p.getMarketPrice());
+        System.out.printf("Product %s has %d sellers with these prices:%n", this.getProduct().getName(), marketPrices.size());
+        for(SellerOfferInfo p: marketPrices)
+            System.out.printf(" - %f%n", p.getOfferedPrice());
         // TODO: implement one function
         System.out.println("Calculating price for " + this.getAgent().getLocalName());
         // TODO: refactor pq é igual a cima para já (??)
