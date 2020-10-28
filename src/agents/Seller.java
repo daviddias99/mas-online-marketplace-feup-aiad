@@ -1,5 +1,6 @@
 package src.agents;
 
+import src.behaviours.AskPriceSeller;
 import src.behaviours.ResponsePrice;
 import src.models.Product;
 
@@ -27,12 +28,24 @@ public class Seller extends Agent {
             this.products.add(new Product(productName, productMap.get(productName)));
     }
 
+    public int getCredibility(){
+        return this.credibility;
+    }
+
     public void addProduct(String name, int originalPrice){
         this.products.add(new Product(name, originalPrice));
     }
 
+    public void addProduct(Product product){
+        this.products.add(product);
+    }
+
     public Set<Product> getProducts(){
         return this.products;
+    }
+
+    public boolean removeProduct(Product product){
+        return this.products.remove(product);
     }
 
     public Product getProduct(String name){
@@ -45,8 +58,10 @@ public class Seller extends Agent {
     }
 
     protected void setup() {
-        register();
-        // TODO: ver depois isto pq deve acabar e depois nunca mais
+        // register();
+        // TODO: ver depois sequencia
+        for (Product p : this.products)
+            addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }
 
@@ -54,18 +69,16 @@ public class Seller extends Agent {
         deregister();
     }
 
-    private void register() {
+    public void register(Product product) {
         
 
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
-        for(Product product : this.products){
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(getLocalName());
-            sd.setType(product.getName());
-            dfd.addServices(sd);
-        }
+        ServiceDescription sd = new ServiceDescription();
+        sd.setName(getLocalName());
+        sd.setType(product.getName());
+        dfd.addServices(sd);
 
         try {
             DFService.register(this, dfd);
