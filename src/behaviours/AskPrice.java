@@ -1,49 +1,80 @@
 package src.behaviours;
 
 import src.agents.Buyer;
+import src.models.Product;
 
-import jade.core.behaviours.Behaviour;
+import java.io.IOException;
+import java.util.Vector;
+
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
+import jade.proto.AchieveREInitiator;
 
-// TODO: ver se Behaviour ou SimpleBehaviour
-public class AskPrice extends Behaviour {
-    private Buyer buyer;
-    private boolean done = false;
+public class AskPrice extends AchieveREInitiator {
 
+    private Product product;
 
-    public AskPrice(Buyer buyer){
-        this.buyer = buyer;
+    public AskPrice(Product product, Buyer buyerAgent, ACLMessage msg) {
+        super(buyerAgent, msg);
+        this.product = product;
     }
 
-    @Override
-    public void action() {
+    protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
+        Vector<ACLMessage> v = new Vector<ACLMessage>();
+
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("seller");
+
+        sd.setType(this.product.getName());
         template.addServices(sd);
 
-        ACLMessage msg = new ACLMessage(ACLMessage.QUERY_IF);
-        msg.setContent(this.buyer.getProduct());
-        
         try {
-            DFAgentDescription[] result = DFService.search(this.buyer, template);
-            for(int i=0; i<result.length; ++i) {
-                msg.addReceiver(result[i].getName());
-                this.buyer.send(msg);
-            }
-        } catch(FIPAException fe) {
-            fe.printStackTrace();
+            msg.setContentObject(this.product);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return v;
         }
 
-        this.done = true;
+        try {
+            DFAgentDescription[] result = DFService.search(this.getAgent(), template);
+            if(result.length == 0){
+                System.out.println("// TODO: No available sellers at this time");
+                return v;
+            }
+
+            for (int i = 0; i < result.length; ++i) {
+                msg.addReceiver(result[i].getName());
+            }
+        } catch (FIPAException fe) {
+            // TODO Auto-generated catch block
+            fe.printStackTrace();
+        }
+        
+        v.add(msg);
+
+        return v;
     }
 
-    @Override
-    public boolean done() {
-        return this.done;
+    // TODO: ver se vale a pena handlers da 1st part
+
+    // TODO: escolher entre handleAllResultNotifications (analisar todos de uma vez
+    // no final)
+    // e como o professor tem
+    protected void handleInform(ACLMessage inform) {
+        try {
+            Product productReponse = (Product)inform.getContentObject();
+            System.out.printf(" < RECEIVED: %s with %s from %s\n", this.getAgent().getLocalName(), productReponse, inform.getSender().getLocalName());
+        } catch (UnreadableException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    protected void handleFailure(ACLMessage failure) {
+        System.out.println(failure);
     }
 }
