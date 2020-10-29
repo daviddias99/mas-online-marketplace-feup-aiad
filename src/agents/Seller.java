@@ -1,7 +1,7 @@
-package src.agents;
+package agents;
 
-import src.behaviours.ResponsePrice;
-import src.models.Product;
+import behaviours.ResponsePrice;
+import models.Product;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class Seller extends Agent {
     }
 
     private void register() {
-        
+
 
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -81,5 +81,5 @@ public class Seller extends Agent {
             e.printStackTrace();
         }
     }
-    
+
 }

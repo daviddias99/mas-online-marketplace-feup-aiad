@@ -1,5 +1,3 @@
-package src;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +9,8 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import src.agents.Buyer;
-import src.agents.Seller;
+import agents.Buyer;
+import agents.Seller;
 
 public class Olx {
     public Runtime rt;
@@ -20,13 +18,13 @@ public class Olx {
     public ContainerController container;
     private List<Seller> sellers = new ArrayList<>();
     private List<Buyer> buyers = new ArrayList<>();
-    
+
 
 
     public Olx(boolean mainMode) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
-        
+
         if(mainMode)
             this.container = rt.createMainContainer(p);
         else
@@ -87,5 +85,5 @@ public class Olx {
         // }
 
     }
-    
+
 }
