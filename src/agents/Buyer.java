@@ -1,4 +1,4 @@
-package src.agents;
+package agents;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +10,8 @@ import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import src.behaviours.AskPrice;
-import src.models.Product;
+import behaviours.AskPrice;
+import models.Product;
 
 public class Buyer extends Agent {
     // TODO: depois por lista de produtos (??)/received
@@ -44,7 +44,7 @@ public class Buyer extends Agent {
         // true
         // se calhar dá para chegar ao final e por reset se success false
 
-        
+
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -52,7 +52,7 @@ public class Buyer extends Agent {
             e.printStackTrace();
         }
         System.out.println("Agent " + this.getAID() + " slept.");
-        
+
         for (Product p : this.products.keySet()){
             System.out.printf(" - START: Agent %s - Product %s\n", this.getLocalName(), p.getName());
             SequentialBehaviour seq = new SequentialBehaviour();

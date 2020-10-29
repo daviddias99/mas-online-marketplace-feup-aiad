@@ -1,7 +1,7 @@
-package src.behaviours;
+package behaviours;
 
-import src.agents.Buyer;
-import src.models.Product;
+import agents.Buyer;
+import models.Product;
 
 import java.io.IOException;
 import java.util.Vector;
@@ -54,7 +54,7 @@ public class AskPrice extends AchieveREInitiator {
             // TODO Auto-generated catch block
             fe.printStackTrace();
         }
-        
+
         v.add(msg);
 
         return v;

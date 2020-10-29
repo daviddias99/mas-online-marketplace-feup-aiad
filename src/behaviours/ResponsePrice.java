@@ -1,7 +1,7 @@
-package src.behaviours;
+package behaviours;
 
-import src.agents.Seller;
-import src.models.Product;
+import agents.Seller;
+import models.Product;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.AchieveREResponder;
 
 public class ResponsePrice extends AchieveREResponder {
-    
+
     public ResponsePrice(Seller a, MessageTemplate mt) {
         super(a, mt);
     }
@@ -21,7 +21,7 @@ public class ResponsePrice extends AchieveREResponder {
         reply.setPerformative(ACLMessage.AGREE);
         return reply;
     }
-    
+
     protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
         ACLMessage result = request.createReply();
 
