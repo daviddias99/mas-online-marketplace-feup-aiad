@@ -1,8 +1,8 @@
-package src.agents;
+package agents;
 
-import src.behaviours.AskPriceSeller;
-import src.behaviours.ResponsePrice;
-import src.models.Product;
+import behaviours.AskPriceSeller;
+import behaviours.ResponsePrice;
+import models.Product;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -99,5 +99,5 @@ public class Seller extends Agent {
             e.printStackTrace();
         }
     }
-    
+
 }

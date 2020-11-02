@@ -1,15 +1,14 @@
-package src.behaviours;
+package behaviours;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import src.agents.Seller;
-import src.models.Product;
-import src.models.SellerOfferInfo;
+import agents.Seller;
+import models.Product;
+import models.SellerOfferInfo;
 
 public class AskPriceSeller extends AskPrice {
 

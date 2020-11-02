@@ -1,5 +1,3 @@
-package src;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +9,8 @@ import jade.core.Runtime;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import src.agents.Buyer;
-import src.agents.Seller;
+import agents.Buyer;
+import agents.Seller;
 
 public class Olx {
     public Runtime rt;
@@ -95,5 +93,5 @@ public class Olx {
         // }
 
     }
-    
+
 }

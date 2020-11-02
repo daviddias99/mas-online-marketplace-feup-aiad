@@ -1,8 +1,8 @@
-package src.behaviours;
+package behaviours;
 
-import src.agents.Seller;
-import src.models.Product;
-import src.models.SellerOfferInfo;
+import agents.Seller;
+import models.Product;
+import models.SellerOfferInfo;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.AchieveREResponder;
 
 public class ResponsePrice extends AchieveREResponder {
-    
+
     public ResponsePrice(Seller a, MessageTemplate mt) {
         super(a, mt);
     }

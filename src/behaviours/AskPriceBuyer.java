@@ -1,4 +1,4 @@
-package src.behaviours;
+package behaviours;
 
 import java.util.Vector;
 import java.util.HashMap;
@@ -6,11 +6,10 @@ import java.util.HashMap;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import src.agents.Buyer;
-import src.agents.Seller;
-import src.agents.strategies.SellerPickingStrategy;
-import src.models.Product;
-import src.models.SellerOfferInfo;
+import agents.Buyer;
+import agents.strategies.SellerPickingStrategy;
+import models.Product;
+import models.SellerOfferInfo;
 
 public class AskPriceBuyer extends AskPrice {
 

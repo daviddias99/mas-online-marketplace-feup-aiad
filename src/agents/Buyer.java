@@ -1,4 +1,4 @@
-package src.agents;
+package agents;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
-import src.agents.strategies.NaivePickingStrategy;
-import src.behaviours.AskPriceBuyer;
-import src.models.Product;
+import agents.strategies.NaivePickingStrategy;
+import behaviours.AskPriceBuyer;
+import models.Product;
 
 public class Buyer extends Agent {
     // TODO: depois por lista de produtos (??)/received
@@ -54,7 +54,7 @@ public class Buyer extends Agent {
             return;
         }
         System.out.println("Agent " + this.getAID() + " slept.");
-        
+
         for (Product p : this.products.keySet()){
             System.out.printf(" - START: Agent %s - Product %s%n", this.getLocalName(), p.getName());
             SequentialBehaviour seq = new SequentialBehaviour();

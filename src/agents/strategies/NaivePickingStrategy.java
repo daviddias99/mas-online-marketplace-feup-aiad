@@ -1,9 +1,9 @@
-package src.agents.strategies;
+package agents.strategies;
 
 import java.util.HashMap;
 
 import jade.core.AID;
-import src.models.SellerOfferInfo;
+import models.SellerOfferInfo;
 
 public class NaivePickingStrategy extends SellerPickingStrategy {
 
