@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
 
-import behaviours.AskPrice;
+import behaviours.AskPriceBuyer;
 import models.Product;
 
 public class Buyer extends Agent {
@@ -34,11 +35,12 @@ public class Buyer extends Agent {
     @Override
     public String toString() {
         String result = this.getName() + ":\n";
-        for (Product p : this.products.keySet())
-            result += "  - " + p.toString() + ":" + this.products.get(p).toString() + "\n";
+        for (Entry<Product,Boolean> p : this.products.entrySet())
+            result += "  - " + p.getKey().toString() + ":" + p.getValue().toString() + "\n";
         return result;
     }
 
+    @Override
     protected void setup() {
         // TODO: depois ver se dá para mudar para um que repita ciclicamente até success
         // true
@@ -54,9 +56,9 @@ public class Buyer extends Agent {
         System.out.println("Agent " + this.getAID() + " slept.");
 
         for (Product p : this.products.keySet()){
-            System.out.printf(" - START: Agent %s - Product %s\n", this.getLocalName(), p.getName());
+            System.out.printf(" - START: Agent %s - Product %s%n", this.getLocalName(), p.getName());
             SequentialBehaviour seq = new SequentialBehaviour();
-            seq.addSubBehaviour(new AskPrice(p, this, new ACLMessage(ACLMessage.REQUEST)));
+            seq.addSubBehaviour(new AskPriceBuyer(p, this, new ACLMessage(ACLMessage.REQUEST)));
             addBehaviour(seq);
         }
 

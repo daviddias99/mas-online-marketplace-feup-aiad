@@ -25,6 +25,7 @@ hs_err_pid*
 # Jade files
 APDescription.txt
 MTPs-Main-Container.txt
+jade.jar
 
 # Gradle
 .gradle/

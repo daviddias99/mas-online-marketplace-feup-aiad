@@ -1,11 +1,13 @@
 package agents;
 
+import behaviours.AskPriceSeller;
 import behaviours.ResponsePrice;
 import models.Product;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -23,16 +25,28 @@ public class Seller extends Agent {
     // TODO: ver como queremos dar input dos products
     public Seller(Map<String, Integer> productMap, int credibility) {
         this.credibility = credibility;
-        for(String productName : productMap.keySet())
-            this.products.add(new Product(productName, productMap.get(productName)));
+        for(Entry<String, Integer> product : productMap.entrySet())
+            this.products.add(new Product(product.getKey(), product.getValue()));
+    }
+
+    public int getCredibility(){
+        return this.credibility;
     }
 
     public void addProduct(String name, int originalPrice){
         this.products.add(new Product(name, originalPrice));
     }
 
+    public void addProduct(Product product){
+        this.products.add(product);
+    }
+
     public Set<Product> getProducts(){
         return this.products;
+    }
+
+    public boolean removeProduct(Product product){
+        return this.products.remove(product);
     }
 
     public Product getProduct(String name){
@@ -44,28 +58,29 @@ public class Seller extends Agent {
         return null;
     }
 
+    @Override
     protected void setup() {
-        register();
-        // TODO: ver depois isto pq deve acabar e depois nunca mais
+        // register();
+        // TODO: ver depois sequencia
+        for (Product p : this.products)
+            addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }
 
+    @Override
     protected void takeDown() {
         deregister();
     }
 
-    private void register() {
-
-
+    public void register(Product product) {
+        
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
-        for(Product product : this.products){
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(getLocalName());
-            sd.setType(product.getName());
-            dfd.addServices(sd);
-        }
+        ServiceDescription sd = new ServiceDescription();
+        sd.setName(getLocalName());
+        sd.setType(product.getName());
+        dfd.addServices(sd);
 
         try {
             DFService.register(this, dfd);

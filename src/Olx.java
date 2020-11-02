@@ -19,13 +19,11 @@ public class Olx {
     private List<Seller> sellers = new ArrayList<>();
     private List<Buyer> buyers = new ArrayList<>();
 
-
-
     public Olx(boolean mainMode) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
 
-        if(mainMode)
+        if (mainMode)
             this.container = rt.createMainContainer(p);
         else
             this.container = rt.createAgentContainer(p);
@@ -34,15 +32,21 @@ public class Olx {
         createBuyers();
     }
 
-    public void createSellers(){
+    public void createSellers() {
 
         Map<String, Integer> products = new HashMap<>();
         products.put("pc", 150);
-        for(int i = 0; i < 3; i++){
-            if(i == 1)
-                products.put("skate",20);
-            else if(i==2)
-                products.remove("pc");
+        for (int i = 0; i < 3; i++) {
+            // if(i == 1)
+            // products.put("skate",20);
+            // else if(i==2)
+            // products.remove("pc");
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
 
             Seller newSeller = new Seller(products, i * 33 + 34);
             try {
@@ -60,15 +64,19 @@ public class Olx {
     public void createBuyers(){
         List<String> products = new ArrayList<>();
         products.add("pc");
-        products.add("skate");
-        Buyer newBuyer = new Buyer(products);
+        // Buyer newBuyer = new Buyer(products);
+        // products.add("skate");
+        Buyer newBuyer2 = new Buyer(products);
+
         try {
-            this.container.acceptNewAgent("buyer_0", newBuyer).start();
+            // this.container.acceptNewAgent("buyer_0", newBuyer).start();
+            this.container.acceptNewAgent("buyer_1", newBuyer2).start();
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        this.buyers.add(newBuyer);
+        // this.buyers.add(newBuyer);
+        this.buyers.add(newBuyer2);
     }
 
     public static void main(String[] args) {
