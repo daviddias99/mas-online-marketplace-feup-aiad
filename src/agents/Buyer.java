@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import jade.core.Agent;
@@ -34,8 +35,8 @@ public class Buyer extends Agent {
     @Override
     public String toString() {
         String result = this.getName() + ":\n";
-        for (Product p : this.products.keySet())
-            result += "  - " + p.toString() + ":" + this.products.get(p).toString() + "\n";
+        for (Entry<Product,Boolean> p : this.products.entrySet())
+            result += "  - " + p.getKey().toString() + ":" + p.getValue().toString() + "\n";
         return result;
     }
     

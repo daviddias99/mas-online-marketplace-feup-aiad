@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -25,8 +26,8 @@ public class Seller extends Agent {
     // TODO: ver como queremos dar input dos products
     public Seller(Map<String, Float> productMap, int credibility) {
         this.credibility = credibility;
-        for(String productName : productMap.keySet())
-            this.products.put(new Product(productName,productMap.get(productName)),0.0f);
+        for(Entry<String, Float> product : productMap.entrySet())
+            this.products.put(new Product(product.getKey(), product.getValue()), 0.0f);
     }
 
     public int getCredibility(){
@@ -62,6 +63,7 @@ public class Seller extends Agent {
         return this.products.get(this.getProduct(name)); 
     }
 
+    @Override
     protected void setup() {
         // register();
         // TODO: ver depois sequencia
@@ -70,13 +72,13 @@ public class Seller extends Agent {
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }
 
+    @Override
     protected void takeDown() {
         deregister();
     }
 
     public void register(Product product) {
         
-
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 

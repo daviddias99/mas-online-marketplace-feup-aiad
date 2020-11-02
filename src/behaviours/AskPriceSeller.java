@@ -26,8 +26,7 @@ public class AskPriceSeller extends AskPrice {
         s.addProduct(p);
 
         s.register(p);
-        // s.addBehaviour(new ResponsePrice(s,
-        // MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
+        // s.addBehaviour(new ResponsePrice(s, MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
     }
 
     private int calculateInitialPrice() {
@@ -52,6 +51,7 @@ public class AskPriceSeller extends AskPrice {
         System.out.printf("Product %s has %d sellers with these prices:%n", this.getProduct().getName(), marketPrices.size());
         for(SellerOfferInfo p: marketPrices)
             System.out.printf(" - %f%n", p.getOfferedPrice());
+            
         // TODO: implement one function
         System.out.println("Calculating price for " + this.getAgent().getLocalName());
         // TODO: refactor pq é igual a cima para já (??)
