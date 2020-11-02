@@ -1,12 +1,13 @@
-package src.agents;
+package agents;
 
-import src.behaviours.AskPriceSeller;
-import src.behaviours.ResponsePrice;
-import src.models.Product;
+import behaviours.AskPriceSeller;
+import behaviours.ResponsePrice;
+import models.Product;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -24,8 +25,8 @@ public class Seller extends Agent {
     // TODO: ver como queremos dar input dos products
     public Seller(Map<String, Integer> productMap, int credibility) {
         this.credibility = credibility;
-        for(String productName : productMap.keySet())
-            this.products.add(new Product(productName, productMap.get(productName)));
+        for(Entry<String, Integer> product : productMap.entrySet())
+            this.products.add(new Product(product.getKey(), product.getValue()));
     }
 
     public int getCredibility(){
@@ -57,6 +58,7 @@ public class Seller extends Agent {
         return null;
     }
 
+    @Override
     protected void setup() {
         // register();
         // TODO: ver depois sequencia
@@ -65,13 +67,13 @@ public class Seller extends Agent {
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
     }
 
+    @Override
     protected void takeDown() {
         deregister();
     }
 
     public void register(Product product) {
         
-
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
@@ -94,5 +96,5 @@ public class Seller extends Agent {
             e.printStackTrace();
         }
     }
-    
+
 }

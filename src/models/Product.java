@@ -1,4 +1,4 @@
-package src.models;
+package models;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -28,7 +28,7 @@ public class Product implements Serializable {
     public void setOriginalPrice(int originalPrice) {
         this.originalPrice = originalPrice;
     }
-    
+
     public int getOriginalPrice() {
         return originalPrice;
     }

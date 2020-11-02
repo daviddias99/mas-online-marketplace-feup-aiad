@@ -1,14 +1,13 @@
-package src.behaviours;
+package behaviours;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import src.agents.Seller;
-import src.models.Product;
+import agents.Seller;
+import models.Product;
 
 public class AskPriceSeller extends AskPrice {
 
@@ -26,8 +25,7 @@ public class AskPriceSeller extends AskPrice {
         s.addProduct(p);
 
         s.register(p);
-        // s.addBehaviour(new ResponsePrice(s,
-        // MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
+        // s.addBehaviour(new ResponsePrice(s, MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
     }
 
     private int calculateInitialPrice() {
@@ -49,9 +47,9 @@ public class AskPriceSeller extends AskPrice {
             }
         }
 
-        System.out.printf("Product %s has %d sellers with these prices:\n", this.getProduct().getName(), currSellers.size());
+        System.out.printf("Product %s has %d sellers with these prices:%n", this.getProduct().getName(), currSellers.size());
         for(Product p: currSellers)
-            System.out.printf(" - %d\n", p.getMarketPrice());
+            System.out.printf(" - %d%n", p.getMarketPrice());
         // TODO: implement one function
         System.out.println("Calculating price for " + this.getAgent().getLocalName());
         // TODO: refactor pq é igual a cima para já (??)
