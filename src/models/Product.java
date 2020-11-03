@@ -1,5 +1,8 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -12,7 +15,8 @@ public class Product implements Serializable {
         this.name = name;
     }
 
-    public Product(String name, int originalPrice) {
+    @JsonCreator
+    public Product(@JsonProperty("name") String name, @JsonProperty("price") int originalPrice) {
         this(name);
         this.originalPrice = originalPrice;
     }

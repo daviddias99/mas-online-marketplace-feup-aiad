@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,8 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
 import agents.Seller;
+import models.Product;
+import utils.Config;
 
 public class Olx {
     public Runtime rt;
@@ -34,8 +37,8 @@ public class Olx {
 
     public void createSellers() {
 
-        Map<String, Integer> products = new HashMap<>();
-        products.put("pc", 150);
+        Product[] products = new Product[1];
+        products[0] = new Product("pc", 15);
         for (int i = 0; i < 3; i++) {
             // if(i == 1)
             // products.put("skate",20);
@@ -62,10 +65,7 @@ public class Olx {
     }
 
     public void createBuyers(){
-        List<String> products = new ArrayList<>();
-        products.add("pc");
-        // Buyer newBuyer = new Buyer(products);
-        // products.add("skate");
+        String[] products = new String[]{ "pc" };
         Buyer newBuyer2 = new Buyer(products);
 
         try {
@@ -79,10 +79,10 @@ public class Olx {
         this.buyers.add(newBuyer2);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // TODO: por a aceitar de args as variáveis independentes e passar para o Olx
         // TODO: controlar args
-        Olx olx = new Olx(Boolean.parseBoolean(args[0]));
+        // Olx olx = new Olx(Boolean.parseBoolean(args[0]));
 
         // try {
         //     olx.container.kill();
@@ -92,6 +92,16 @@ public class Olx {
         //     e.printStackTrace();
         // }
 
+        Config config = Config.read("config.yaml");
+        for (Product p : config.getProducts()) {
+            System.out.println(p.toString());
+        }
+        for (Buyer b : config.getBuyers()) {
+            System.out.println(b.toString());
+        }
+        for (Seller s : config.getSellers()) {
+            System.out.println(s.toString());
+        }
     }
 
 }

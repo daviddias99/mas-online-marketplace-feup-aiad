@@ -2,6 +2,8 @@ package agents;
 
 import behaviours.AskPriceSeller;
 import behaviours.ResponsePrice;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import models.Product;
 
 import java.util.HashSet;
@@ -23,10 +25,11 @@ public class Seller extends Agent {
     private int credibility;
 
     // TODO: ver como queremos dar input dos products
-    public Seller(Map<String, Integer> productMap, int credibility) {
+    @JsonCreator
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("credibility") int credibility) {
         this.credibility = credibility;
-        for(Entry<String, Integer> product : productMap.entrySet())
-            this.products.add(new Product(product.getKey(), product.getValue()));
+        for (Product p : products)
+            this.products.add(p);
     }
 
     public int getCredibility(){
@@ -97,4 +100,11 @@ public class Seller extends Agent {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Seller{" +
+                "products=" + products +
+                ", credibility=" + credibility +
+                '}';
+    }
 }

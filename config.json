@@ -1,0 +1,31 @@
+{
+  "products": [
+    {
+      "name": "prod1",
+      "price": 10
+    },
+    {
+      "name": "prod2",
+      "price": 20
+    }
+  ],
+  "buyers": [
+    {
+      "products": [
+        "prod1",
+        "prod2"
+      ]
+    }
+  ],
+  "sellers": [
+    {
+      "credibility": 20,
+      "products": [
+        {
+          "name": "prod2",
+          "price": 20
+        }
+      ]
+    }
+  ]
+}

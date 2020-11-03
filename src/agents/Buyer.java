@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -18,9 +20,10 @@ public class Buyer extends Agent {
     // TODO: depois por lista de produtos (??)/received
     private Map<Product, Boolean> products = new HashMap<>();
 
-    public Buyer(List<String> products) {
-        for (int i = 0; i < products.size(); i++)
-            this.products.put(new Product(products.get(i)), false);
+    @JsonCreator
+    public Buyer(@JsonProperty("products") String[] products) {
+        for (int i = 0; i < products.length; i++)
+            this.products.put(new Product(products[i]), false);
     }
 
     public Set<Product> getProducts() {
