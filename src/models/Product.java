@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public class Product implements Serializable {
     private final String name;
-    private int originalPrice = 0;
-    private int marketPrice;
+    private float originalPrice = 0;
+    private float marketPrice;
 
     public Product(String name) {
         this.name = name;
@@ -21,19 +21,19 @@ public class Product implements Serializable {
         this.originalPrice = originalPrice;
     }
 
-    public int getMarketPrice() {
+    public float getMarketPrice() {
         return marketPrice;
     }
 
-    public void setMarketPrice(int marketPrice) {
+    public void setMarketPrice(float marketPrice) {
         this.marketPrice = marketPrice;
     }
 
-    public void setOriginalPrice(int originalPrice) {
+    public void setOriginalPrice(float originalPrice) {
         this.originalPrice = originalPrice;
     }
-
-    public int getOriginalPrice() {
+    
+    public float getOriginalPrice() {
         return originalPrice;
     }
 
@@ -45,9 +45,7 @@ public class Product implements Serializable {
     public String toString(){
         if(getOriginalPrice() == 0)
             return getName();
-        // if(getMarketPrice() == 0)
         return getName() + ":" + getOriginalPrice();
-        // return getName() + ":" + getOriginalPrice() + ":" + getMarketPrice();
     }
 
     @Override

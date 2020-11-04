@@ -39,6 +39,7 @@ public class Olx {
 
         Product[] products = new Product[1];
         products[0] = new Product("pc", 15);
+
         for (int i = 0; i < 3; i++) {
             // if(i == 1)
             // products.put("skate",20);
@@ -96,6 +97,7 @@ public class Olx {
         for (Product p : config.getProducts()) {
             System.out.println(p.toString());
         }
+
         for (Buyer b : config.getBuyers()) {
             System.out.println(b.toString());
         }
