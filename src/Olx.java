@@ -1,8 +1,8 @@
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -19,10 +19,11 @@ public class Olx {
     public Runtime rt;
     private Profile p;
     public ContainerController container;
-    private List<Seller> sellers = new ArrayList<>();
-    private List<Buyer> buyers = new ArrayList<>();
+    private List<Seller> sellers;
+    private List<Buyer> buyers;
+    private List<Product> products;
 
-    public Olx(boolean mainMode) {
+    public Olx(boolean mainMode, Config config) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
 
@@ -31,20 +32,18 @@ public class Olx {
         else
             this.container = rt.createAgentContainer(p);
 
+        this.products = new ArrayList<>(Arrays.asList(config.getProducts()));
+        this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
+        this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
+
         createSellers();
-        createBuyers();
+        createBuyers(config.getBuyers());
     }
 
-    public void createSellers() {
+    private void createSellers() {
+        int i = 1;
 
-        Product[] products = new Product[1];
-        products[0] = new Product("pc", 15);
-
-        for (int i = 0; i < 3; i++) {
-            // if(i == 1)
-            // products.put("skate",20);
-            // else if(i==2)
-            // products.remove("pc");
+        for (Seller s : this.sellers) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e1) {
@@ -52,58 +51,66 @@ public class Olx {
                 e1.printStackTrace();
             }
 
-            Seller newSeller = new Seller(products, i * 33 + 34);
             try {
-                AgentController ac = this.container.acceptNewAgent("seller_" + i, newSeller);
+                AgentController ac = this.container.acceptNewAgent("seller_" + i, s);
                 ac.start();
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 continue;
             }
-            this.sellers.add(newSeller);
+            i++;
         }
     }
 
-    public void createBuyers(){
-        String[] products = new String[]{ "pc" };
-        Buyer newBuyer2 = new Buyer(products);
-
-        try {
-            // this.container.acceptNewAgent("buyer_0", newBuyer).start();
-            this.container.acceptNewAgent("buyer_1", newBuyer2).start();
-        } catch (StaleProxyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+    private void createBuyers(Buyer[] buyers) {
+        int i = 1;
+        for (Buyer b : this.buyers) {
+            try {
+                this.container.acceptNewAgent("buyer_" + i, b).start();
+            } catch (StaleProxyException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            i++;
         }
-        // this.buyers.add(newBuyer);
-        this.buyers.add(newBuyer2);
     }
 
     public static void main(String[] args) throws IOException {
-        // TODO: por a aceitar de args as variáveis independentes e passar para o Olx
-        // TODO: controlar args
-        // Olx olx = new Olx(Boolean.parseBoolean(args[0]));
+        if (args.length != 2) {
+            System.out.println("Expected 2 arguments.");
+            System.exit(-1);
+        }
 
-        // try {
-        //     olx.container.kill();
-        //     olx.rt.shutDown();
-        // } catch (StaleProxyException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
-        // }
+        String configPath = args[0];
+        String configExtension;
+        if (configPath.contains(".")) {
+            configExtension = configPath.substring(configPath.lastIndexOf('.') + 1);
+        } else {
+            configExtension = "";
+        }
+
+        if (!(configExtension.equals("json") || configExtension.equals("yaml") || configExtension.equals("yml"))) {
+            System.out.println("The configuration file format should be either JSON (.json) or YAML (.yaml, .yml).");
+            System.exit(-1);
+        }
+
+        if (!new File(configPath).exists()) {
+            System.out.println("Configuration file not found.");
+            System.exit(-1);
+        }
 
         Config config = Config.read("config.yaml");
-        for (Product p : config.getProducts()) {
-            System.out.println(p.toString());
-        }
+        boolean mainMode = Boolean.parseBoolean(args[1]);
 
-        for (Buyer b : config.getBuyers()) {
-            System.out.println(b.toString());
-        }
-        for (Seller s : config.getSellers()) {
-            System.out.println(s.toString());
-        }
+        Olx olx = new Olx(mainMode, config);
+
+        /*try {
+            olx.container.kill();
+            olx.rt.shutDown();
+        } catch (StaleProxyException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
     }
-
 }

@@ -1,15 +1,24 @@
 ---
 products:
-  - name: prod1
-    price: 10
-  - name: prod2
+  - name: pc
+    price: 15
+  - name: skate
     price: 20
 buyers:
   - products:
-      - prod1
-      - prod2
+      - pc
 sellers:
-  - credibility: 20
+  - credibility: 34
     products:
-      - name: prod2
+      - name: pc
+        price: 15
+  - credibility: 67
+    products:
+      - name: skate
         price: 20
+      - name: pc
+        price: 15
+  - credibility: 100
+    products:
+      - name: skate
+        price: 200

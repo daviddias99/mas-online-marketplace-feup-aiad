@@ -9,6 +9,7 @@ import models.Product;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Config {
     private final Buyer[] buyers;
@@ -46,5 +47,14 @@ public class Config {
 
     public Seller[] getSellers() {
         return sellers;
+    }
+
+    @Override
+    public String toString() {
+        return "Config{" +
+                "\n  buyers=" + Arrays.toString(buyers) +
+                ",\n  products=" + Arrays.toString(products) +
+                ",\n  sellers=" + Arrays.toString(sellers) +
+                "\n}";
     }
 }
