@@ -2,6 +2,8 @@ package agents;
 
 import behaviours.AskPriceSeller;
 import behaviours.ResponsePrice;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import models.Product;
 
 import java.util.HashMap;
@@ -20,14 +22,16 @@ import jade.lang.acl.MessageTemplate;
 
 public class Seller extends Agent {
     // TODO: assim ou String to Product pra acesso mais rápido
-    private HashMap<Product,Float> products = new HashMap<>();
+    private Map<Product,Float> products = new HashMap<>();
     private int credibility;
 
     // TODO: ver como queremos dar input dos products
-    public Seller(Map<String, Float> productMap, int credibility) {
+    @JsonCreator
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("credibility") int credibility) {
         this.credibility = credibility;
-        for(Entry<String, Float> product : productMap.entrySet())
-            this.products.put(new Product(product.getKey(), product.getValue()), 0.0f);
+        for (Product p : products)
+            this.products.put(p, 0.0f);
+
     }
 
     public int getCredibility(){
@@ -42,8 +46,8 @@ public class Seller extends Agent {
         this.products.put(product,0.0f);
     }
 
-    public HashMap<Product,Float> getProducts(){
-        return this.products;
+    public Set<Product> getProducts(){
+        return this.products.keySet();
     }
 
     public float removeProduct(Product product){
@@ -102,4 +106,11 @@ public class Seller extends Agent {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Seller{" +
+                "products=" + products +
+                ", credibility=" + credibility +
+                '}';
+    }
 }
