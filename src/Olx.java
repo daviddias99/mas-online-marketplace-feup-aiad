@@ -34,8 +34,8 @@ public class Olx {
 
     public void createSellers() {
 
-        Map<String, Integer> products = new HashMap<>();
-        products.put("pc", 150);
+        Map<String, Float> products = new HashMap<>();
+        products.put("pc", 150.0f);
         for (int i = 0; i < 3; i++) {
             // if(i == 1)
             // products.put("skate",20);

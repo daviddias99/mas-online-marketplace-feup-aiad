@@ -51,9 +51,9 @@ public abstract class AskPrice extends AchieveREInitiator {
                 return v;
             }
 
-            for (int i = 0; i < result.length; ++i) {
+            for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
-            }
+
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block
             fe.printStackTrace();
