@@ -23,6 +23,8 @@ public class Seller extends Agent {
     // TODO: assim ou String to Product pra acesso mais rápido
     private Map<Product,Float> products = new HashMap<>();
     private int credibility;
+    private DFAgentDescription dfd;
+    private boolean firstTime = true;
 
     // TODO: ver como queremos dar input dos products
     @JsonCreator
@@ -74,6 +76,8 @@ public class Seller extends Agent {
     protected void setup() {
         // register();
         // TODO: ver depois sequencia
+        this.dfd = new DFAgentDescription();
+        this.dfd.setName(getAID());
         for (Product p : this.products.keySet())
             addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
@@ -86,19 +90,43 @@ public class Seller extends Agent {
 
     public void register(Product product) {
         
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
-
         ServiceDescription sd = new ServiceDescription();
         sd.setName(getLocalName());
         sd.setType(product.getName());
-        dfd.addServices(sd);
+        this.dfd.addServices(sd);
+        
+        // Sujo mas funciona. Melhor era qd se fizesse this.dfd.getAllServices() o iterator funcionar para ver se havia ou não, mas estava me sempre a dar true
+        if(!this.firstTime)
+            try {
+                DFService.modify(this, this.dfd);
+            } catch (FIPAException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+        else
+            try {
+                DFService.register(this, this.dfd);
+                this.firstTime = false;
+            } catch (FIPAException e) {
+                e.printStackTrace();
+            }
 
+        // Assim ficaria mais clean que em cima, mas por alguma razão ele n apanha o Warning do Already-Register (dá certo, mas dá print do warning)
+        // Warning apenas aparece qd não se liga GUI atenção
+        /*
         try {
-            DFService.register(this, dfd);
+            DFService.register(this, this.dfd);
         } catch (FIPAException e) {
-            e.printStackTrace();
+            try {
+                DFService.modify(this, this.dfd);
+            } catch (FIPAException e1) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                e1.printStackTrace();
+            }
+
         }
+        */
     }
 
     private void deregister() {

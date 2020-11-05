@@ -16,9 +16,9 @@ sellers:
     products:
       - name: skate
         price: 20
-      # - name: pc
-      #   price: 15
+      - name: pc
+        price: 15
   - credibility: 100
     products:
       - name: skate
-        price: 200
+        price: 20

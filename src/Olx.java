@@ -45,7 +45,7 @@ public class Olx {
 
         for (Seller s : this.sellers) {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(1000);
             } catch (InterruptedException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
