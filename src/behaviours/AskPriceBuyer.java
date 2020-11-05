@@ -30,6 +30,7 @@ public class AskPriceBuyer extends AskPrice {
 
         System.out.printf("> %s got %d responses!%n", this.getAgent().getLocalName(),responses.size());
 
+        // Seller product offers
         HashMap<AID,SellerOfferInfo> offers = new HashMap<>();
         
         Vector<ACLMessage> convertedResponses = responses;
@@ -48,25 +49,9 @@ public class AskPriceBuyer extends AskPrice {
             }
         }
 
+        // Chose seller with which to negotiate
         AID chosenSeller = this.sellerPickingStrategy.pickSeller(offers);
         System.out.printf("> Picked seller %s%n", chosenSeller.getLocalName());
     }
-
-    // // TODO: escolher entre handleAllResultNotifications (analisar todos de uma vez
-    // // no final)
-    // // e como o professor tem
-    // protected void handleInform(ACLMessage inform) {
-    //     try {
-    //         Product productReponse = (Product)inform.getContentObject();
-    //         System.out.printf(" < RECEIVED: %s with %s from %s\n", this.getAgent().getLocalName(), productReponse, inform.getSender().getLocalName());
-    //     } catch (UnreadableException e) {
-    //         // TODO Auto-generated catch block
-    //         e.printStackTrace();
-    //     }
-    // }
-
-    // protected void handleFailure(ACLMessage failure) {
-    //     System.out.println(failure);
-    // }
     
 }

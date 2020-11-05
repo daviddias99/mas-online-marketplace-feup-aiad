@@ -23,6 +23,7 @@ public class Olx {
     private List<Buyer> buyers;
     private List<Product> products;
 
+    // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
@@ -41,9 +42,11 @@ public class Olx {
     }
 
     private void createSellers() {
-        int i = 1;
 
-        for (Seller s : this.sellers) {
+        // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are identified
+        // using the id "seller_i"
+
+        for (int j = 0; j < this.sellers.size(); j++) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
@@ -52,36 +55,39 @@ public class Olx {
             }
 
             try {
-                AgentController ac = this.container.acceptNewAgent("seller_" + i, s);
+                AgentController ac = this.container.acceptNewAgent("seller_" + j, this.sellers.get(j));
                 ac.start();
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 continue;
             }
-            i++;
         }
     }
 
     private void createBuyers() {
-        int i = 1;
-        for (Buyer b : this.buyers) {
+        for (int j = 0; j < this.buyers.size(); j++) {
             try {
-                this.container.acceptNewAgent("buyer_" + i, b).start();
+                this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            i++;
         }
     }
 
+    /**
+     * Create the OLX platform.
+     * @param args <configPath> <createHasMainContainer>
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
             System.out.println("Expected 2 arguments.");
             System.exit(-1);
         }
 
+        // Get config path
         String configPath = args[0];
         String configExtension;
         if (configPath.contains(".")) {
@@ -100,17 +106,12 @@ public class Olx {
             System.exit(-1);
         }
 
+        // Create config object
         Config config = Config.read("config.yaml");
         boolean mainMode = Boolean.parseBoolean(args[1]);
 
-        Olx olx = new Olx(mainMode, config);
+        new Olx(mainMode, config);
 
-        /*try {
-            olx.container.kill();
-            olx.rt.shutDown();
-        } catch (StaleProxyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
+        // TODO: kill plaform
     }
 }

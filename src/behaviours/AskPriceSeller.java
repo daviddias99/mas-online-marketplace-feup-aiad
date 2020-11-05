@@ -18,13 +18,16 @@ public class AskPriceSeller extends AskPrice {
 
     @Override
     protected void handleNoResults() {
+
+        // No other sellers are currenttly selling <product>
+        // set selling price accordingly
         System.out.println(" - NONE FOUND: no seller found for " + this.getProduct().getName() + ",  " + this.getAgent().getLocalName());
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
         s.addProduct(p, this.calculateInitialPrice(s, p));
-
+        
+        // Register that agent is selling <product> in the DF registry
         s.register(p);
-        // s.addBehaviour(new ResponsePrice(s, MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
     }
 
     private float calculateInitialPrice(Seller s, Product p) {
@@ -36,6 +39,7 @@ public class AskPriceSeller extends AskPrice {
     protected void handleAllResultNotifications(Vector resultNotifications) {
         List<SellerOfferInfo> marketPrices = new ArrayList<>();
 
+        // Collect current market prices
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
             try {
@@ -55,6 +59,9 @@ public class AskPriceSeller extends AskPrice {
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
         System.out.println("Calculating price of " + p.getName() + " for " + s.getLocalName());
+
+        // Other sellers are currenttly selling <product>
+        // set selling price accordingly
         s.addProduct(p, this.calculateInitialPrice(s, p));
         s.register(p);
     }

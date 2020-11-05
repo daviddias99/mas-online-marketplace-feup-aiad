@@ -11,13 +11,13 @@ public class NaivePickingStrategy extends SellerPickingStrategy {
     public AID pickSeller(HashMap<AID, SellerOfferInfo> offers) {
         
         AID bestSeller = null;
-        Float bestOffer = 150000.0f; //TODO: tirar esta jarvardice
+        Float bestOffer = null; 
 
         for(AID seller : offers.keySet()){
 
             SellerOfferInfo currentSeller = offers.get(seller);
 
-            if(currentSeller.getOfferedPrice() < bestOffer){
+            if(bestOffer == null || currentSeller.getOfferedPrice() < bestOffer){
                 bestOffer = currentSeller.getOfferedPrice();
                 bestSeller = seller;
             }

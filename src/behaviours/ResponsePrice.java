@@ -28,13 +28,14 @@ public class ResponsePrice extends AchieveREResponder {
     protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
         ACLMessage result = request.createReply();
 
+        // Inform querying agent of the offered price and own credibility
         try {
             result.setPerformative(ACLMessage.INFORM);
 
             Product productRequested = (Product)request.getContentObject();
-
             Seller s = (Seller) this.getAgent();
             Product respProduct = s.getProduct(productRequested.getName());
+
             SellerOfferInfo info = new SellerOfferInfo(respProduct,s.getProductPrice(respProduct.getName()),s.getCredibility());
             System.out.printf(" > SEND: %s with %s to %s%n", this.getAgent().getLocalName(), info, request.getSender().getLocalName());
             result.setContentObject(info);

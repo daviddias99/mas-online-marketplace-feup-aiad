@@ -17,7 +17,10 @@ public abstract class AskPrice extends AchieveREInitiator {
 
     private Product product;
 
-    public AskPrice(Product product, Agent agent, ACLMessage msg) {
+    /**
+     * <agent> is asking the selling price of <product>
+     */
+    protected AskPrice(Product product, Agent agent, ACLMessage msg) {
         super(agent, msg);
         this.product = product;
     }
@@ -30,6 +33,7 @@ public abstract class AskPrice extends AchieveREInitiator {
     protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
         Vector<ACLMessage> v = new Vector<ACLMessage>();
 
+        // Query df service for agents who are selling <product>
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 
@@ -37,26 +41,31 @@ public abstract class AskPrice extends AchieveREInitiator {
         template.addServices(sd);
 
         try {
-            msg.setContentObject(this.product);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return v;
-        }
-
-        try {
             DFAgentDescription[] result = DFService.search(this.getAgent(), template);
+            
+            // No agents are selling <product>
             if(result.length == 0){
                 this.handleNoResults();
                 return v;
             }
 
+            // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
 
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block
             fe.printStackTrace();
+        }
+
+        // The <product> is sent as the content so that the 
+        // seller knows to which product the request pertains to
+        try {
+            msg.setContentObject(this.product);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return v;
         }
 
         v.add(msg);
