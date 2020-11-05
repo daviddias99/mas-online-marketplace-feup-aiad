@@ -9,7 +9,6 @@ import java.util.Objects;
 public class Product implements Serializable {
     private final String name;
     private float originalPrice = 0;
-    private float marketPrice;
 
     public Product(String name) {
         this.name = name;
@@ -19,14 +18,6 @@ public class Product implements Serializable {
     public Product(@JsonProperty("name") String name, @JsonProperty("price") int originalPrice) {
         this(name);
         this.originalPrice = originalPrice;
-    }
-
-    public float getMarketPrice() {
-        return marketPrice;
-    }
-
-    public void setMarketPrice(float marketPrice) {
-        this.marketPrice = marketPrice;
     }
 
     public void setOriginalPrice(float originalPrice) {

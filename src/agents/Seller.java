@@ -7,10 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import models.Product;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -19,6 +17,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.leap.Iterator;
 
 public class Seller extends Agent {
     // TODO: assim ou String to Product pra acesso mais rápido
@@ -44,6 +43,10 @@ public class Seller extends Agent {
 
     public void addProduct(Product product){
         this.products.put(product,0.0f);
+    }
+
+    public void addProduct(Product product, float marketPrice){
+        this.products.put(product, marketPrice);
     }
 
     public Set<Product> getProducts(){

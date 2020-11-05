@@ -21,17 +21,15 @@ public class AskPriceSeller extends AskPrice {
         System.out.println(" - NONE FOUND: no seller found for " + this.getProduct().getName() + ",  " + this.getAgent().getLocalName());
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
-        s.removeProduct(p);
-        p.setMarketPrice(this.calculateInitialPrice());
-        s.addProduct(p);
+        s.addProduct(p, this.calculateInitialPrice(s, p));
 
         s.register(p);
         // s.addBehaviour(new ResponsePrice(s, MessageTemplate.MatchPerformative(ACLMessage.REQUEST))));
     }
 
-    private int calculateInitialPrice() {
+    private float calculateInitialPrice(Seller s, Product p) {
         // TODO: improve this function
-        return (int) (((Seller) this.getAgent()).getCredibility() / 100.0 * this.getProduct().getOriginalPrice());
+        return (float) (s.getCredibility() / 100.0 * p.getOriginalPrice());
     }
 
     @Override
@@ -53,14 +51,11 @@ public class AskPriceSeller extends AskPrice {
             System.out.printf(" - %f%n", p.getOfferedPrice());
             
         // TODO: implement one function
-        System.out.println("Calculating price for " + this.getAgent().getLocalName());
         // TODO: refactor pq é igual a cima para já (??)
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
-        s.removeProduct(p);
-        p.setMarketPrice(this.calculateInitialPrice());
-        s.addProduct(p);
-
+        System.out.println("Calculating price of " + p.getName() + " for " + s.getLocalName());
+        s.addProduct(p, this.calculateInitialPrice(s, p));
         s.register(p);
     }
 }

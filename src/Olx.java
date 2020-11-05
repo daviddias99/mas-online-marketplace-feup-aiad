@@ -37,7 +37,7 @@ public class Olx {
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
         createSellers();
-        createBuyers(config.getBuyers());
+        createBuyers();
     }
 
     private void createSellers() {
@@ -45,7 +45,7 @@ public class Olx {
 
         for (Seller s : this.sellers) {
             try {
-                Thread.sleep(200);
+                Thread.sleep(10000);
             } catch (InterruptedException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
@@ -63,7 +63,7 @@ public class Olx {
         }
     }
 
-    private void createBuyers(Buyer[] buyers) {
+    private void createBuyers() {
         int i = 1;
         for (Buyer b : this.buyers) {
             try {
