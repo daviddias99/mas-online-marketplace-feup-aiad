@@ -1,22 +1,81 @@
 package behaviours;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.UnreadableException;
-import agents.Seller;
 import models.Product;
 import models.SellerOfferInfo;
+import agents.Seller;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
+import jade.proto.AchieveREInitiator;
 
-public class AskPriceSeller extends AskPrice {
+public class AskPriceSeller extends AchieveREInitiator {
 
-    public AskPriceSeller(Product product, Seller seller, ACLMessage msg) {
-        super(product, seller, msg);
+    private Product product;
+
+    /**
+     * Seller <agent> is asking the selling price of <product>
+     */
+    public AskPriceSeller(Product product, Seller agent, ACLMessage msg) {
+        super(agent, msg);
+        this.product = product;
     }
 
+    protected Product getProduct(){
+        return this.product;
+    }
+    
     @Override
+    protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
+        Vector<ACLMessage> v = new Vector<ACLMessage>();
+
+        // Query df service for agents who are selling <product>
+        DFAgentDescription template = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+
+        sd.setType(this.product.getName());
+        template.addServices(sd);
+
+        try {
+            DFAgentDescription[] result = DFService.search(this.getAgent(), template);
+            
+            // No agents are selling <product>
+            if(result.length == 0){
+                this.handleNoResults();
+                return v;
+            }
+
+            // Add each one as receiver for price asking
+            for (int i = 0; i < result.length; ++i)
+                msg.addReceiver(result[i].getName());
+
+        } catch (FIPAException fe) {
+            // TODO Auto-generated catch block
+            fe.printStackTrace();
+        }
+
+        // The <product> is sent as the content so that the 
+        // seller knows to which product the request pertains to
+        try {
+            msg.setContentObject(this.product);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return v;
+        }
+
+        v.add(msg);
+
+        return v;
+    }
+
     protected void handleNoResults() {
 
         // No other sellers are currenttly selling <product>
@@ -65,4 +124,5 @@ public class AskPriceSeller extends AskPrice {
         s.addProduct(p, this.calculateInitialPrice(s, p));
         s.register(p);
     }
+    // TODO: ver se vale a pena handlers da 1st part
 }

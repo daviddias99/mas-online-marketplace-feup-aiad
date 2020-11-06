@@ -1,6 +1,6 @@
 package agents.strategies;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import jade.core.AID;
 import models.SellerOfferInfo;
@@ -8,7 +8,7 @@ import models.SellerOfferInfo;
 public class NaivePickingStrategy extends SellerPickingStrategy {
 
     @Override
-    public AID pickSeller(HashMap<AID, SellerOfferInfo> offers) {
+    public AID pickSeller(Map<AID, SellerOfferInfo> offers) {
         
         AID bestSeller = null;
         Float bestOffer = null; 

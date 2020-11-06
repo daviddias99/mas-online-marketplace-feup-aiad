@@ -1,6 +1,7 @@
 package agents;
 
 import behaviours.AskPriceSeller;
+import behaviours.NegotiateSeller;
 import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,9 +29,6 @@ public class Seller extends Agent {
     private int credibility;
     private DFAgentDescription dfd;
     
-    // True if this is the first time the seller is registering a product
-    private boolean firstTime = true;
-
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("credibility") int credibility) {
         this.credibility = credibility;
@@ -44,14 +42,22 @@ public class Seller extends Agent {
         // for each object he his selling.
         this.dfd = new DFAgentDescription();
         this.dfd.setName(getAID());
+        try {
+            DFService.register(this, this.dfd);
+        } catch (FIPAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // Query at what prices the other agents are selling the producs in order to decide
         // selling price.
         for (Product p : this.products.keySet())
             addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
 
-        // Listen for buyer queries about sellling price
+        // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
+        // Listen for buyer queries about selling price and negotiating
+        addBehaviour(new NegotiateSeller(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
     }
 
     @Override
@@ -71,13 +77,7 @@ public class Seller extends Agent {
         // iterator funcionar para ver se havia ou não, mas estava me sempre a dar true
 
         try {
-            if (!this.firstTime) {
-                DFService.modify(this, this.dfd);
-            } else {
-                DFService.register(this, this.dfd);
-                this.firstTime = false;
-            }
-
+            DFService.modify(this, this.dfd);
         } catch (FIPAException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
