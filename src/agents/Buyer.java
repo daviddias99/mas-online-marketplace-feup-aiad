@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
-import agents.strategies.NaivePickingStrategy;
+import agents.counterOfferStrategies.NaiveCounterOfferStrategy;
+import agents.filteringStrategies.NaiveFilterStrategy;
 import behaviours.NegotiateBuyer;
 import models.Product;
 
@@ -46,8 +47,11 @@ public class Buyer extends Agent {
         // The ask price behaviour will start the negotiation with the chosen seller.
         for (Product p : this.products.keySet()) {
             System.out.printf(" - START: Agent %s - Product %s%n", this.getLocalName(), p.getName());
-            addBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP), new NaivePickingStrategy()));
-            // addBehaviour(new AskPriceBuyer(p, this, new ACLMessage(ACLMessage.REQUEST), new NaivePickingStrategy()));
+            addBehaviour(new NegotiateBuyer(p, this, 
+                new ACLMessage(ACLMessage.CFP), 
+                new NaiveFilterStrategy(), 
+                new NaiveCounterOfferStrategy()
+                ));
         }
 
     }

@@ -73,9 +73,6 @@ public class Seller extends Agent {
         sd.setType(product.getName());
         this.dfd.addServices(sd);
 
-        // Sujo mas funciona. Melhor era qd se fizesse this.dfd.getAllServices() o
-        // iterator funcionar para ver se havia ou não, mas estava me sempre a dar true
-
         try {
             DFService.modify(this, this.dfd);
         } catch (FIPAException e1) {
@@ -83,16 +80,6 @@ public class Seller extends Agent {
             e1.printStackTrace();
         }
 
-        // Assim ficaria mais clean que em cima, mas por alguma razão ele n apanha o
-        // Warning do Already-Register (dá certo, mas dá print do warning)
-        // Warning apenas aparece qd não se liga GUI atenção
-        /*
-         * try { DFService.register(this, this.dfd); } catch (FIPAException e) { try {
-         * DFService.modify(this, this.dfd); } catch (FIPAException e1) { // TODO
-         * Auto-generated catch block e.printStackTrace(); e1.printStackTrace(); }
-         * 
-         * }
-         */
     }
 
     private void deregister() {
