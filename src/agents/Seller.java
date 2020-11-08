@@ -1,7 +1,7 @@
 package agents;
 
 import behaviours.AskPriceSeller;
-import behaviours.NegotiateSeller;
+import behaviours.NegotiationDispatcher;
 import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -57,7 +57,7 @@ public class Seller extends Agent {
         // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
         // Listen for buyer queries about selling price and negotiating
-        addBehaviour(new NegotiateSeller(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
+        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
     }
 
     @Override

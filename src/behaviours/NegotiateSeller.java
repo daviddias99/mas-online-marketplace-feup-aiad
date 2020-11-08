@@ -6,14 +6,13 @@ import agents.Seller;
 import models.Product;
 import models.SellerOfferInfo;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import jade.proto.ContractNetResponder;
+import jade.proto.SSIteratedContractNetResponder;
 
-public class NegotiateSeller extends ContractNetResponder {
+public class NegotiateSeller extends SSIteratedContractNetResponder {
 
-    public NegotiateSeller(Seller s, MessageTemplate mt) {
-        super(s, mt);
+    public NegotiateSeller(Seller s, ACLMessage cfp) {
+        super(s, cfp);
     }
 
     protected ACLMessage handleCfp(ACLMessage cfp) {
