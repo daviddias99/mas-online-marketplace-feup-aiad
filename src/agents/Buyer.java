@@ -1,16 +1,13 @@
 package agents;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
-import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
 import agents.strategies.NaivePickingStrategy;
 import behaviours.AskPriceBuyer;
@@ -73,10 +70,9 @@ public class Buyer extends Agent {
     // - skate : 100 : true
     @Override
     public String toString() {
-        String result = this.getName() + ":\n";
-        for (Entry<Product, Boolean> p : this.products.entrySet())
-            result += "  - " + p.getKey().toString() + ":" + p.getValue().toString() + "\n";
-        return result;
+        if(this.getLocalName() != null)
+            return this.getLocalName() + "{" + "products=" + this.products + "}";
+        return "Buyer{" + "products=" + this.products + "}";
     }
 
 }

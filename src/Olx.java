@@ -2,7 +2,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -21,7 +23,7 @@ public class Olx {
     public ContainerController container;
     private List<Seller> sellers;
     private List<Buyer> buyers;
-    private List<Product> products;
+    private Map<String, Product> products;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config) {
@@ -33,7 +35,10 @@ public class Olx {
         else
             this.container = rt.createAgentContainer(p);
 
-        this.products = new ArrayList<>(Arrays.asList(config.getProducts()));
+        this.products = new HashMap<>();
+        Product[] prov = config.getProducts();
+        for(int i = 0; i < prov.length; i++)
+            this.products.put(prov[i].getName(), prov[i]);
         this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
@@ -47,6 +52,14 @@ public class Olx {
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
+            // TODO: depois tirar esta javardice e pôr a importar decentemente (objetos com referência)
+            Seller s = this.sellers.get(j);
+            Map<Product, Float> newProducts = new HashMap<>();
+            for(Product product : s.getProducts())
+                newProducts.put(this.products.get(product.getName()), 0.0f);
+
+            s.setProducts(newProducts);
+            
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
@@ -55,14 +68,15 @@ public class Olx {
             }
 
             try {
-                AgentController ac = this.container.acceptNewAgent("seller_" + j, this.sellers.get(j));
-                ac.start();
+                this.container.acceptNewAgent("seller_" + j, s).start();;
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                continue;
             }
         }
+
+        // for(Seller s: this.sellers)
+            
     }
 
     private void createBuyers() {
