@@ -10,15 +10,11 @@ buyers:
 sellers:
   - credibility: 34
     products:
-      - name: pc
-        price: 15
+      - pc
   - credibility: 67
     products:
-      - name: skate
-        price: 20
-      - name: pc
-        price: 15
+      - skate
+      - pc
   - credibility: 100
     products:
-      - name: skate
-        price: 20
+      - skate

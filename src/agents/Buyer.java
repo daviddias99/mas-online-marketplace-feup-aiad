@@ -3,7 +3,6 @@ package agents;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -76,10 +75,9 @@ public class Buyer extends Agent {
     // - skate : 100 : true
     @Override
     public String toString() {
-        String result = this.getName() + ":\n";
-        for (Entry<Product, Boolean> p : this.products.entrySet())
-            result += "  - " + p.getKey().toString() + ":" + p.getValue().toString() + "\n";
-        return result;
+        if(this.getLocalName() != null)
+            return this.getLocalName() + "{" + "products=" + this.products + "}";
+        return "Buyer{" + "products=" + this.products + "}";
     }
 
 }

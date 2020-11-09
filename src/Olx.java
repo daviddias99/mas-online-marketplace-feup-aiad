@@ -2,12 +2,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
@@ -21,7 +22,7 @@ public class Olx {
     public ContainerController container;
     private List<Seller> sellers;
     private List<Buyer> buyers;
-    private List<Product> products;
+    private Map<String, Product> products;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config) {
@@ -33,7 +34,10 @@ public class Olx {
         else
             this.container = rt.createAgentContainer(p);
 
-        this.products = new ArrayList<>(Arrays.asList(config.getProducts()));
+        this.products = new HashMap<>();
+        Product[] prov = config.getProducts();
+        for(int i = 0; i < prov.length; i++)
+            this.products.put(prov[i].getName(), prov[i]);
         this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
@@ -47,6 +51,7 @@ public class Olx {
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
+            
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e1) {
@@ -55,14 +60,12 @@ public class Olx {
             }
 
             try {
-                AgentController ac = this.container.acceptNewAgent("seller_" + j, this.sellers.get(j));
-                ac.start();
+                this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
-                continue;
             }
-        }
+        }            
     }
 
     private void createBuyers() {
@@ -107,7 +110,7 @@ public class Olx {
         }
 
         // Create config object
-        Config config = Config.read("config.yaml");
+        Config config = Config.read(configPath);        
         boolean mainMode = Boolean.parseBoolean(args[1]);
 
         new Olx(mainMode, config);
