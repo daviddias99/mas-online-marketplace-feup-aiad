@@ -21,9 +21,4 @@ Both the sellers and buyers can implement different **strategies** for negotiati
 | Number of buyers of a given product | Money saved (buyers)     |  
 | Number of sellers of a given product | Money earned (sellers) |
 
-### Notes
-
-Money saved -> usar valor pessoal que o produto tenha para o agente
-Computational Trust
-Credibilidade do comprador -> não paga a totalidade do que diz que paga
 
