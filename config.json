@@ -1,0 +1,14 @@
+{
+  "products": [
+    {"name": "pc", "price": 15},
+    {"name": "skate", "price": 20}
+  ],
+  "buyers": [
+    {"products": ["pc"]}
+  ],
+  "sellers": [
+    {"credibility": 34, "products": ["pc"]},
+    {"credibility": 67, "products": ["pc", "skate"]},
+    {"credibility": 100, "products": ["skate"]}
+  ]
+}

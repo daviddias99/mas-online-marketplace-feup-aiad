@@ -9,7 +9,6 @@ import java.util.Map;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
@@ -52,13 +51,6 @@ public class Olx {
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
-            // TODO: depois tirar esta javardice e pôr a importar decentemente (objetos com referência)
-            Seller s = this.sellers.get(j);
-            Map<Product, Float> newProducts = new HashMap<>();
-            for(Product product : s.getProducts())
-                newProducts.put(this.products.get(product.getName()), 0.0f);
-
-            s.setProducts(newProducts);
             
             try {
                 Thread.sleep(1000);
@@ -68,15 +60,12 @@ public class Olx {
             }
 
             try {
-                this.container.acceptNewAgent("seller_" + j, s).start();;
+                this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
-
-        // for(Seller s: this.sellers)
-            
+        }            
     }
 
     private void createBuyers() {
@@ -121,7 +110,7 @@ public class Olx {
         }
 
         // Create config object
-        Config config = Config.read("config.yaml");
+        Config config = Config.read(configPath);        
         boolean mainMode = Boolean.parseBoolean(args[1]);
 
         new Olx(mainMode, config);

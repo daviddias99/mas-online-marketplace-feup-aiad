@@ -4,6 +4,7 @@ import behaviours.AskPriceSeller;
 import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import models.Product;
 
 import java.util.HashMap;
@@ -32,10 +33,10 @@ public class Seller extends Agent {
     private boolean firstTime = true;
 
     @JsonCreator
-    public Seller(@JsonProperty("products") String[] products, @JsonProperty("credibility") int credibility) {
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("credibility") int credibility) {
         this.credibility = credibility;
         for (int i = 0; i < products.length; i++)
-            this.products.put(new Product(products[i]), 0.0f);
+            this.products.put(products[i], 0.0f);
     }
 
     @Override
