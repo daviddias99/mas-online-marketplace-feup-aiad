@@ -8,13 +8,16 @@ buyers:
   - products:
       - pc
 sellers:
-  - credibility: 34
+  - scamFactor: 68
+    elasticity: 14
     products:
       - pc
-  - credibility: 67
+  - scamFactor: 37
+    elasticity: 9
     products:
       - skate
       - pc
-  - credibility: 100
+  - scamFactor: 0
+    elasticity: 5
     products:
       - skate

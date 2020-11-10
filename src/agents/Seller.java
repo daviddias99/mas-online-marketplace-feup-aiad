@@ -10,6 +10,7 @@ import models.Product;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import jade.core.Agent;
@@ -27,12 +28,26 @@ public class Seller extends Agent {
     // of said products (float)
     private Map<Product, Float> products = new HashMap<>();
     
-    private int credibility;
+    private int credibility; // 0 to 100
+    private final int scamFactor; // 0 to 100
+    private final int elasticity; // 0 to 100, but normally smaller than 20
     private DFAgentDescription dfd;
     
     @JsonCreator
-    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("credibility") int credibility) {
-        this.credibility = credibility;
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF, @JsonProperty("elasticity") int elasticity) {
+        if(scamF > 100 || scamF < 0)
+            throw new IllegalArgumentException("Scam Factor must be from 0 to 100 and was " + scamF);
+        if(elasticity > 100 || elasticity < 0)
+            throw new IllegalArgumentException("Elasticity must be from 0 to 100 and was " + elasticity);
+        
+        this.scamFactor = scamF;
+        this.elasticity = elasticity;
+        // TODO: brincar com isto
+        // * Std Deviation + Mean
+        do{
+            this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2) + scamF);
+        } while(this.credibility > 100);
+
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
     }
@@ -139,7 +154,7 @@ public class Seller extends Agent {
     @Override
     public String toString() {
         if(this.getLocalName() != null)
-            return this.getLocalName() + "{credibility=" + credibility + ", products=" + products + '}';    
-        return "Seller{credibility=" + credibility + ", products=" + products + '}';
+            return this.getLocalName() + "{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';    
+        return "Seller{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';
     }
 }
