@@ -48,7 +48,6 @@ public class Buyer extends Agent {
             System.out.printf(" - START: Agent %s - Product %s%n", this.getLocalName(), p.getName());
             addBehaviour(new NegotiateBuyer(p, this, 
                 new ACLMessage(ACLMessage.CFP), 
-                new NaiveFilterStrategy(), 
                 new NaiveCounterOfferStrategy()
                 ));
         }

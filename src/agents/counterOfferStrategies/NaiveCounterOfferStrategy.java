@@ -23,7 +23,7 @@ public class NaiveCounterOfferStrategy extends CounterOfferStrategy {
 	}
 
 	@Override
-	public AID finalDesicion(Map<AID, SellerOfferInfo> offers) {
+	public AID finalDecision(Map<AID, SellerOfferInfo> offers) {
 		// TODO: Complete this
 		return offers.keySet().iterator().next();
 	}

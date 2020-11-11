@@ -41,7 +41,7 @@ public class NormalCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    public AID finalDesicion(Map<AID, SellerOfferInfo> offers) {
+    public AID finalDecision(Map<AID, SellerOfferInfo> offers) {
         // Tries to get lowest offering price
         float lowestPrice = Float.POSITIVE_INFINITY;
         AID result = null;

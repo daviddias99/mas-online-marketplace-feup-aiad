@@ -11,5 +11,5 @@ public abstract class CounterOfferStrategy implements Serializable{
 
     public abstract Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers);
     
-    public abstract AID finalDesicion(Map<AID, SellerOfferInfo> offers);
+    public abstract AID finalDecision(Map<AID, SellerOfferInfo> offers);
 }

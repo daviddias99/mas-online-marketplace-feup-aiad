@@ -7,9 +7,6 @@ import java.util.Vector;
 
 import agents.Buyer;
 import agents.counterOfferStrategies.CounterOfferStrategy;
-import agents.filteringStrategies.*;
-import models.Negotiation;
-import models.NegotiationRound;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
@@ -24,18 +21,18 @@ import jade.proto.ContractNetInitiator;
 
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
-    private SellerFilteringStrategy sellerFilteringStrategy;
     private CounterOfferStrategy counterOfferStrategy;
     private int negotiationRound;
-    private Map<AID,SellerOfferInfo> previousOffers;
+    private Map<AID, SellerOfferInfo> previousOffers;
+    private ACLMessage negotiationOnWait;
 
-    public NegotiateBuyer(Product product, Buyer b, ACLMessage cfp, SellerFilteringStrategy sellerFilteringStrategy, CounterOfferStrategy counterOfferStrategy) {
+    public NegotiateBuyer(Product product, Buyer b, ACLMessage cfp, CounterOfferStrategy counterOfferStrategy) {
         super(b, cfp);
         this.product = product;
-        this.sellerFilteringStrategy = sellerFilteringStrategy;
         this.counterOfferStrategy = counterOfferStrategy;
         this.negotiationRound = 0;
         this.previousOffers = new HashMap<>();
+        this.negotiationOnWait = null;
     }
 
     @Override
@@ -52,11 +49,12 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
         try {
             DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-            
+
             // No agents are selling <product>
-            if(result.length == 0){
+            if (result.length == 0) {
                 // TODO: ver
-                System.out.printf("// TODO: There was no product for buyer %s searching for %s%n", this.getAgent().getLocalName(), this.product);
+                System.out.printf("// TODO: There was no product for buyer %s searching for %s%n",
+                        this.getAgent().getLocalName(), this.product);
                 return v;
             }
 
@@ -69,7 +67,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             fe.printStackTrace();
         }
 
-        // A "blank" offer (with -1) is sent to know the price of the product (we don't send only the <product> because of compability reasons)
+        // A "blank" offer (with -1) is sent to know the price of the product (we don't
+        // send only the <product> because of compability reasons)
         try {
             cfp.setContentObject(new OfferInfo(this.product, -1));
         } catch (IOException e) {
@@ -82,91 +81,136 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
         return v;
     }
-    
-    @Override
-    protected void handleAllResponses(Vector responses, Vector acceptances) {
-        System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(), this.negotiationRound++);
-        
-        // Seller product offers
-        Map<AID,SellerOfferInfo> offers = new HashMap<>();
-        Vector<ACLMessage> convertedResponses = responses;
 
+    private Map<AID, SellerOfferInfo> getOffers(Vector<ACLMessage> receivedMessages) {
+        Map<AID, SellerOfferInfo> offers = new HashMap<>();
         // Filter the valid offers
-        for(ACLMessage msg : convertedResponses){
-            if(msg.getPerformative() != ACLMessage.PROPOSE){
-                // TODO: confirmar se comment está certo. não é verdade. depois vai poder vir refuses
+        for (ACLMessage msg : receivedMessages) {
+            if (msg.getPerformative() != ACLMessage.PROPOSE) {
+                // TODO: confirmar se comment está certo. não é verdade. depois vai poder vir
+                // refuses
                 // Should never get here
-                System.out.printf("> Message from %s indicating a failure.%n",msg.getSender().getLocalName());
+                System.out.printf("> Message from %s indicating a failure.%n", msg.getSender().getLocalName());
                 continue;
             }
             try {
                 SellerOfferInfo sellerOffer = (SellerOfferInfo) msg.getContentObject();
                 offers.put(msg.getSender(), sellerOffer);
             } catch (UnreadableException e) {
-                System.out.printf("> Message from %s contained invalid content.",msg.getSender().getLocalName());
+                System.out.printf("> Message from %s contained invalid content.", msg.getSender().getLocalName());
             }
         }
 
-        // Update with new SellerOffers and new counterOffers
-        Map<AID, OfferInfo> counterOffers = this.counterOfferStrategy.pickOffers(offers,this.previousOffers);
-        // If counterOffers is empty it means that the lastOffer contains the lowest prices possible
-        // TODO: we should also add something for "sooner is better than waiting" (because the products can be bought by others while we wait)
-        if(counterOffers.isEmpty()){
-            // TODO: se calhar verificar se não é null
-            AID bestSeller = this.counterOfferStrategy.finalDesicion(this.previousOffers);
-            
-            // TODO: tenho quase a certeza q n basta enviar msgs para os response pq nós pusemos alguns à espera. temos de guardar replies prontas para aqui
-            for(ACLMessage msg : convertedResponses) {
-                ACLMessage rep = msg.createReply();
+        return offers;
+    }
 
-                if(msg.getSender().equals(bestSeller)){
-                    rep.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    SellerOfferInfo bestOffer = this.previousOffers.get(bestSeller);
-                    try {
-                        rep.setContentObject(new OfferInfo(bestOffer.getProduct(), bestOffer.getOfferedPrice()));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-                else{
-                    rep.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                }
 
-                acceptances.add(rep);
-            }
-        }
-        else{
-            // Do the counterOffers while the others "wait" and newIteration
-            for(ACLMessage msg : convertedResponses) {
-                ACLMessage rep = msg.createReply();
+    @Override
+    protected void handleAllResponses(Vector responses, Vector acceptances) {
+        this.negotiationRound++;
+        System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(),
+                this.negotiationRound);
 
-                // If negotiation is to continue send the chosen counter offer
-                if(counterOffers.containsKey(msg.getSender())){
-                    rep.setPerformative(ACLMessage.CFP);
-                    try {
-                        rep.setContentObject(counterOffers.get(msg.getSender()));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    acceptances.add(rep);
-                }
-                // Don't reject the others now. Keep them waiting
-                // TODO: se não é mais baixo e se sei q não é para continuar, posso já mandar embora (REFUSE)
-            }
+        // Seller product offers
+        Vector<ACLMessage> convertedResponses = responses;
+        Map<AID, SellerOfferInfo> offers = this.getOffers(convertedResponses);
+
+        // Update with new SellerOffers and new counter-offers
+        // If counterOffers is empty it means that the lastOffer contains the lowest
+        // prices possible
+        Map<AID, OfferInfo> counterOffers = this.counterOfferStrategy.pickOffers(offers, this.previousOffers);
+
+        // TODO: we should also add something for "sooner is better than waiting"
+        // (because the products can be bought by others while we wait)
+
+        if (counterOffers.isEmpty()) {
+            this.prepareFinalMessages(convertedResponses, responses);
+        } else {
+            this.prepareCounterOfferMessages(counterOffers, convertedResponses, responses);
             newIteration(acceptances);
         }
     }
 
-    // private void logRoundSummary(){
-        // System.out.printf("--- ROUND %d SUMMARY (Product: %s) ---%n", this.negotiationRound, this.product.getName());
+    private void updateWaitingList(ACLMessage msg, Vector<ACLMessage> outgoingMessages) {
+
+        AID bestSeller = this.counterOfferStrategy.finalDecision(this.previousOffers);
+
+        // If the best negotiation that is on wait is no longer a candidate, reject it
+        if (bestSeller != this.negotiationOnWait.getSender()) {
+            ACLMessage response = this.negotiationOnWait.createReply();
+            response.setPerformative(ACLMessage.REJECT_PROPOSAL);
+            outgoingMessages.add(response);
+            this.negotiationOnWait = null;
+        }
+
+        // If msg, i.e. the ended negotiation, isn't the best among the rest cancel it
+        if (bestSeller != msg.getSender()) {
+            ACLMessage response = msg.createReply();
+            response.setPerformative(ACLMessage.REJECT_PROPOSAL);
+            outgoingMessages.add(response);
+        }
+        // msg is the current best alternative, store it
+        else {
+            this.negotiationOnWait = msg;
+        }
+
+    }
+
+    private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, Vector<ACLMessage> incomingMessages,
+            Vector outgoingMessages) {
+        // Do the counterOffers while the others "wait"
+        for (ACLMessage msg : incomingMessages) {
+            ACLMessage rep = msg.createReply();
+
+            // If negotiation is to continue send the chosen counter offer
+            if (counterOffers.containsKey(msg.getSender())) {
+                rep.setPerformative(ACLMessage.CFP);
+                try {
+                    rep.setContentObject(counterOffers.get(msg.getSender()));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                outgoingMessages.add(rep);
+            }
+            // Negotiation has halted, only store if it would be the best option right now.
+            else {
+                this.updateWaitingList(msg, outgoingMessages);
+            }
+        }
+    }
+
+    private void prepareFinalMessages(Vector<ACLMessage> incomingMessages, Vector outgoingMessages) {
+        // TODO: se calhar verificar se está vazio
+        AID bestSeller = this.counterOfferStrategy.finalDecision(this.previousOffers);
+
+        // Get all messages that need answering: all from this round + the message on wait if any
+        Vector<ACLMessage> pendingMessages = new Vector<ACLMessage>();
         
-        // for (AID agent : this.negotiationHistory.keySet()) {
-            
-        // }
-    // }
-    
+        if(this.negotiationOnWait != null)
+            pendingMessages.add(this.negotiationOnWait);
+
+        for (ACLMessage msg : pendingMessages) {
+            ACLMessage rep = msg.createReply();
+
+            // Accept the proposal of the best offer and reject all others
+            if (msg.getSender().equals(bestSeller)) {
+                rep.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                SellerOfferInfo bestOffer = this.previousOffers.get(bestSeller);
+                try {
+                    rep.setContentObject(new OfferInfo(bestOffer.getProduct(), bestOffer.getOfferedPrice()));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else {
+                rep.setPerformative(ACLMessage.REJECT_PROPOSAL);
+            }
+            outgoingMessages.add(rep);
+        }
+    }
+
+
     protected void handleAllResultNotifications(Vector resultNotifications) {
         // TODO: complete
         System.out.println("got " + resultNotifications.size() + " result notifs!");

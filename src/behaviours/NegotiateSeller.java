@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import agents.Seller;
 import models.OfferInfo;
-import models.Product;
 import models.SellerOfferInfo;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
@@ -16,6 +15,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         super(s, cfp);
     }
 
+    @Override
     protected ACLMessage handleCfp(ACLMessage cfp) {
         ACLMessage reply = cfp.createReply();
 
@@ -45,11 +45,13 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         return reply;
     }
     
+    @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
         // TODO: later
         System.out.println(myAgent.getLocalName() + " got a reject...");
     }
 
+    @Override
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
         // TODO: later
         // TODO: Se ainda tiver o produto aceite enviar INFORM qq cena
