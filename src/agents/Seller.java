@@ -126,6 +126,10 @@ public class Seller extends Agent {
         this.products.put(product, marketPrice);
     }
 
+    public boolean hasProduct(Product product){
+        return this.products.containsKey(product);
+    }
+
     public Set<Product> getProducts() {
         return this.products.keySet();
     }

@@ -7,8 +7,8 @@
     {"products": ["pc"]}
   ],
   "sellers": [
-    {"credibility": 34, "products": ["pc"]},
-    {"credibility": 67, "products": ["pc", "skate"]},
-    {"credibility": 100, "products": ["skate"]}
+    {"scamFactor": 68, "elasticity": 14, "products": ["pc"]},
+    {"scamFactor": 37, "elasticity": 9, "products": ["pc", "skate"]},
+    {"scamFactor": 0, "elasticity": 5, "products": ["skate"]}
   ]
 }

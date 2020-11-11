@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jade.core.AID;
-import models.Negotiation;
 import models.OfferInfo;
 import models.SellerOfferInfo;
 
@@ -12,7 +11,7 @@ public class NaiveCounterOfferStrategy extends CounterOfferStrategy {
 
 
 	@Override
-	public Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, Negotiation> offerHistory) {
+	public Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers) {
 		Map<AID, OfferInfo> counterOffers = new HashMap<>();
 
 		for (AID agent : offers.keySet()) {
@@ -21,6 +20,12 @@ public class NaiveCounterOfferStrategy extends CounterOfferStrategy {
 		}
 
 		return null;
+	}
+
+	@Override
+	public AID finalDesicion(Map<AID, SellerOfferInfo> offers) {
+		// TODO: Complete this
+		return offers.keySet().iterator().next();
 	}
     
 }

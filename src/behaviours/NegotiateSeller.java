@@ -3,6 +3,7 @@ package behaviours;
 import java.io.IOException;
 
 import agents.Seller;
+import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
 import jade.lang.acl.ACLMessage;
@@ -19,16 +20,22 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         ACLMessage reply = cfp.createReply();
 
         try {
-            reply.setPerformative(ACLMessage.PROPOSE);
-
-            Product productRequested = (Product) cfp.getContentObject();
+            OfferInfo productRequested = (OfferInfo) cfp.getContentObject();
             Seller s = (Seller) this.getAgent();
-            // TODO: confirmar depois q é mesmo preciso 2 products
-            Product respProduct = s.getProduct(productRequested.getName());
+            
+            // If it still has the product
+            if(s.hasProduct(productRequested.getProduct())){
+                reply.setPerformative(ACLMessage.PROPOSE);
+                // TODO: fazer estratégia de contrapropostas. para já manda sempre preço original
+                SellerOfferInfo info = new SellerOfferInfo(productRequested.getProduct(), s.getProductPrice(productRequested.getProduct().getName()), s.getCredibility());
+                reply.setContentObject(info);
+                System.out.printf(" > SEND: %s with %s to %s%n", this.getAgent().getLocalName(), info, cfp.getSender().getLocalName());
 
-            SellerOfferInfo info = new SellerOfferInfo(respProduct, s.getProductPrice(respProduct.getName()), s.getCredibility());
-            System.out.printf(" > SEND: %s with %s to %s%n", this.getAgent().getLocalName(), info, cfp.getSender().getLocalName());
-            reply.setContentObject(info);
+            }
+            else{
+                reply.setPerformative(ACLMessage.REFUSE);
+                System.out.printf(" > SEND: %s with REFUSE to %s%n", this.getAgent().getLocalName(), cfp.getSender().getLocalName());
+            }
 
         } catch (UnreadableException | IOException e) {
             reply.setPerformative(ACLMessage.REFUSE);
@@ -45,6 +52,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
         // TODO: later
+        // TODO: Se ainda tiver o produto aceite enviar INFORM qq cena
+        // Else - se já não tiver (foi comprado por outro entretanto), enviar FAILURE
         System.out.println(myAgent.getLocalName() + " got an accept!");
         ACLMessage result = accept.createReply();
         result.setPerformative(ACLMessage.INFORM);
