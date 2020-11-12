@@ -31,21 +31,31 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     protected ACLMessage handleCfp(ACLMessage cfp) {
         ACLMessage reply = cfp.createReply();
 
-        System.out.printf("> %s received CFP from agent %s saying %s%n", this.getAgent().getLocalName(), cfp.getSender(), cfp.getContent());
         try {
             OfferInfo buyerOffer = (OfferInfo) cfp.getContentObject();
             Seller seller = (Seller) this.getAgent();
-
+            System.out.printf("> %s received CFP from agent %s saying %s%n", this.getAgent().getLocalName(), cfp.getSender().getLocalName(), buyerOffer);
+            
             // If it still has the product
             if (seller.hasProduct(buyerOffer.getProduct())) {
 
-                reply.setPerformative(ACLMessage.PROPOSE);
-                float offeredPrice = this.offerStrategy.chooseOffer(buyerOffer,
-                        this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()));
+                // Create the products record if it doesn't exist
+                this.previousOffers.putIfAbsent(buyerOffer.getProduct(), new ConcurrentHashMap<>());
+
+                // Calculate price to propose
+                OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
+                float originalPrice = seller.getProductPrice(buyerOffer.getProduct().getName());
+                float offeredPrice = this.offerStrategy.chooseOffer(buyerOffer, previousOffer, originalPrice);
+                
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
-                        seller.getCredibility());
+                seller.getCredibility());
+                
+                // Update previous offer record
+                this.previousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), buyerOffer);
+
+                reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContentObject(sellerOffer);
-                System.out.printf("< %s sending PROPOSE to agent %s saying: %s%n", this.getAgent().getLocalName(), cfp.getSender(), sellerOffer);
+                System.out.printf("< %s sending PROPOSE to agent %s saying: %s%n", this.getAgent().getLocalName(), cfp.getSender().getLocalName(), sellerOffer);
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
                 System.out.printf("< %s sending REFUSE to agent %s%n", this.getAgent().getLocalName(), cfp.getSender());
@@ -92,7 +102,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                  // Cancel the sale, better offer still at play.
                 if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
                     result.setPerformative(ACLMessage.FAILURE);
-                    result.setContent("Sorry, a better deal came up, already sold it...");
+                    result.setContent("Sorry, a better deal came up...");
                 }
                 // The product will be sold.
                 else{

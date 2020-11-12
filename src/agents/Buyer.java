@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
-import agents.counterOfferStrategies.NaiveCounterOfferStrategy;
+import agents.counterOfferStrategies.NormalCounterOfferStrategy;
 import behaviours.NegotiateBuyer;
 import models.Product;
 
@@ -50,7 +50,7 @@ public class Buyer extends Agent {
             
             negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, 
                 new ACLMessage(ACLMessage.CFP), 
-                new NaiveCounterOfferStrategy()
+                new NormalCounterOfferStrategy()
                 ));
         }
         this.addBehaviour(negotiationsBehaviour);

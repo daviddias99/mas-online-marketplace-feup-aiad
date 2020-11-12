@@ -6,9 +6,8 @@ import models.OfferInfo;
 public class NaiveOfferStrategy extends OfferStrategy {
 
 	@Override
-	public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer) {
-		
-		return currentOffer.getOfferedPrice() + 1;
+	public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, float initialPrice) {
+		return previousOffer == null ? initialPrice : currentOffer.getOfferedPrice() + 1;
 	}
 
 

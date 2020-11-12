@@ -2,12 +2,14 @@ package behaviours;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
 import models.Product;
 import models.SellerOfferInfo;
 import agents.Seller;
+import jade.core.AID;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -55,6 +57,14 @@ public class AskPriceSeller extends AchieveREInitiator {
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
+
+            System.out.printf("> %s asked the price of %s to the following sellers:%n", this.getAgent().getLocalName(), this.getProduct().getName());
+
+            Iterator<AID> it = msg.getAllReceiver();
+            
+            while(it.hasNext()){
+                System.out.printf(" - %s%n", it.next().getLocalName());
+            }
 
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block

@@ -108,6 +108,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected void handleAllResponses(Vector responses, Vector acceptances) {
         this.negotiationRound++;
+
+        if(this.negotiationRound == 5)
+            System.exit(-1);
+
         System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(),
                 this.negotiationRound);
 
@@ -119,14 +123,18 @@ public class NegotiateBuyer extends ContractNetInitiator {
         // If counterOffers is empty it means that the lastOffer contains the lowest
         // prices possible
         Map<AID, OfferInfo> counterOffers = this.counterOfferStrategy.pickOffers(offers, this.previousOffers);
-
+        
+        System.out.printf("> %s counter-offers:%n", this.getAgent().getLocalName());
+        for (AID agent: counterOffers.keySet()){
+            System.out.printf(" - %s : %s%n", agent.getLocalName(), counterOffers.get(agent));  
+} 
         // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
 
         if (counterOffers.isEmpty()) {
-            this.prepareFinalMessages(responses);
+            this.prepareFinalMessages(acceptances);
         } else {
-            this.prepareCounterOfferMessages(counterOffers, convertedResponses, responses);
+            this.prepareCounterOfferMessages(counterOffers, convertedResponses, acceptances);
             newIteration(acceptances);
         }
     }
@@ -175,7 +183,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                System.out.printf("< %s sending CFP to agent %s%n", this.getAgent().getLocalName(), msg.getSender());
+                System.out.printf("< %s sending CFP to agent %s saying: %s %n", this.getAgent().getLocalName(), msg.getSender().getLocalName(), counterOffers.get(msg.getSender()));
                 outgoingMessages.add(rep);
             }
             // Negotiation has halted, only store if it would be the best option right now.

@@ -22,7 +22,7 @@ public class OfferInfo implements Serializable, Comparable<OfferInfo>{
 
     @Override
     public String toString() {
-        return String.format("%s at %f$%n",product.toString(),offeredPrice);
+        return String.format("%s at %f$",product.toString(),offeredPrice);
     }
 
     @Override

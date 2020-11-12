@@ -5,5 +5,5 @@ import models.OfferInfo;
 
 public abstract class OfferStrategy implements Serializable{
 
-    public abstract float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer);
+    public abstract float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, float initialPrice);
 }

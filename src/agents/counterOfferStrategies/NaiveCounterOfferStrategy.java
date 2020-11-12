@@ -19,7 +19,7 @@ public class NaiveCounterOfferStrategy extends CounterOfferStrategy {
 			counterOffers.put(agent, new OfferInfo(offer.getProduct(),Math.max(0, offer.getOfferedPrice() - 1)));
 		}
 
-		return null;
+		return counterOffers;
 	}
 
 	@Override
