@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import agents.Buyer;
 import agents.counterOfferStrategies.CounterOfferStrategy;
@@ -31,7 +32,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.product = product;
         this.counterOfferStrategy = counterOfferStrategy;
         this.negotiationRound = 0;
-        this.previousOffers = new HashMap<>();
+        this.previousOffers = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
     }
 
@@ -90,20 +91,19 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 // TODO: confirmar se comment está certo. não é verdade. depois vai poder vir
                 // refuses
                 // Should never get here
-                System.out.printf("> Message from %s indicating a failure.%n", msg.getSender().getLocalName());
+                System.out.printf("> %s get message from %s indicating a failure.%n",this.getAgent().getLocalName(), msg.getSender().getLocalName());
                 continue;
             }
             try {
                 SellerOfferInfo sellerOffer = (SellerOfferInfo) msg.getContentObject();
                 offers.put(msg.getSender(), sellerOffer);
             } catch (UnreadableException e) {
-                System.out.printf("> Message from %s contained invalid content.", msg.getSender().getLocalName());
+                System.out.printf("> %s get message from %s containing invalid content.%n",this.getAgent().getLocalName(), msg.getSender().getLocalName());
             }
         }
 
         return offers;
     }
-
 
     @Override
     protected void handleAllResponses(Vector responses, Vector acceptances) {
@@ -124,7 +124,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         // (because the products can be bought by others while we wait)
 
         if (counterOffers.isEmpty()) {
-            this.prepareFinalMessages(convertedResponses, responses);
+            this.prepareFinalMessages(responses);
         } else {
             this.prepareCounterOfferMessages(counterOffers, convertedResponses, responses);
             newIteration(acceptances);
@@ -140,6 +140,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             ACLMessage response = this.negotiationOnWait.createReply();
             response.setPerformative(ACLMessage.REJECT_PROPOSAL);
             outgoingMessages.add(response);
+            System.out.printf("< %s sending REJECT_PROPOSAL to agent %s%n", this.getAgent().getLocalName(),
+                    negotiationOnWait.getSender());
             this.negotiationOnWait = null;
         }
 
@@ -148,6 +150,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             ACLMessage response = msg.createReply();
             response.setPerformative(ACLMessage.REJECT_PROPOSAL);
             outgoingMessages.add(response);
+            System.out.printf("< %s sending REJECT_PROPOSAL to agent %s%n", this.getAgent().getLocalName(),
+                    negotiationOnWait.getSender());
         }
         // msg is the current best alternative, store it
         else {
@@ -171,6 +175,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+                System.out.printf("< %s sending CFP to agent %s%n", this.getAgent().getLocalName(), msg.getSender());
                 outgoingMessages.add(rep);
             }
             // Negotiation has halted, only store if it would be the best option right now.
@@ -180,14 +185,15 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
     }
 
-    private void prepareFinalMessages(Vector<ACLMessage> incomingMessages, Vector outgoingMessages) {
+    private void prepareFinalMessages(Vector outgoingMessages) {
         // TODO: se calhar verificar se está vazio
         AID bestSeller = this.counterOfferStrategy.finalDecision(this.previousOffers);
 
-        // Get all messages that need answering: all from this round + the message on wait if any
+        // Get all messages that need answering: all from this round + the message on
+        // wait if any
         Vector<ACLMessage> pendingMessages = new Vector<ACLMessage>();
-        
-        if(this.negotiationOnWait != null)
+
+        if (this.negotiationOnWait != null)
             pendingMessages.add(this.negotiationOnWait);
 
         for (ACLMessage msg : pendingMessages) {
@@ -203,16 +209,28 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+
+                System.out.printf("< %s sending ACCEPT_PROPOSAL to agent %s%n", this.getAgent().getLocalName(),
+                        msg.getSender());
             } else {
                 rep.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                System.out.printf("< %s sending REJECT_PROPOSAL to agent %s%n", this.getAgent().getLocalName(),
+                        msg.getSender());
             }
             outgoingMessages.add(rep);
         }
     }
 
-
-    protected void handleAllResultNotifications(Vector resultNotifications) {
-        // TODO: complete
-        System.out.println("got " + resultNotifications.size() + " result notifs!");
+    @Override
+    protected void handleInform(ACLMessage inform) {
+        System.out.printf("> %s received INFORM from agent %s saying: %s%n", this.getAgent().getLocalName(),
+                inform.getSender().getLocalName(), inform.getContent());
     }
+
+    @Override
+    protected void handleFailure(ACLMessage failure) {
+        System.out.printf("> %s received FAILURE from agent %s saying: %s%n", this.getAgent().getLocalName(),
+                failure.getSender().getLocalName(), failure.getContent());
+    }
+
 }

@@ -80,11 +80,11 @@ public class AskPriceSeller extends AchieveREInitiator {
 
         // No other sellers are currenttly selling <product>
         // set selling price accordingly
-        System.out.println(" - NONE FOUND: no seller found for " + this.getProduct().getName() + ",  " + this.getAgent().getLocalName());
+        System.out.printf("! %s found no sellers selling product %s%n", this.getAgent().getLocalName(), this.getProduct().getName());
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
         s.addProduct(p, this.calculateInitialPrice(s, p));
-        
+        System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
@@ -109,7 +109,7 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
         }
 
-        System.out.printf("Product %s has %d sellers with these prices:%n", this.getProduct().getName(), marketPrices.size());
+        System.out.printf("> %s found that product %s has %d sellers with these prices:%n",this.getAgent().getLocalName(), this.getProduct().getName(), marketPrices.size());
         for(SellerOfferInfo p: marketPrices)
             System.out.printf(" - %f%n", p.getOfferedPrice());
             
@@ -117,11 +117,11 @@ public class AskPriceSeller extends AchieveREInitiator {
         // TODO: refactor pq é igual a cima para já (??)
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
-        System.out.println("Calculating price of " + p.getName() + " for " + s.getLocalName());
-
+        
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
         s.addProduct(p, this.calculateInitialPrice(s, p));
+        System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
         s.register(p);
     }
     // TODO: ver se vale a pena handlers da 1st part

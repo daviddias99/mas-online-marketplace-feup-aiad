@@ -2,10 +2,10 @@ package models;
 
 import java.io.Serializable;
 
-public class OfferInfo implements Serializable {
+public class OfferInfo implements Serializable, Comparable<OfferInfo>{
 
-    private Product product;
-    private float offeredPrice;
+    protected Product product;
+    protected Float offeredPrice;
 
     public OfferInfo(Product product, float offeredPrice){
         this.product = product;
@@ -16,7 +16,7 @@ public class OfferInfo implements Serializable {
         return product;
     }
 
-    public float getOfferedPrice(){
+    public Float getOfferedPrice(){
         return offeredPrice;
     }
 
@@ -35,4 +35,13 @@ public class OfferInfo implements Serializable {
         // TODO: confirmar == em não objetos
         return this.product.equals(oi.getProduct()) && this.offeredPrice == oi.getOfferedPrice();
     }
+
+
+    @Override
+    public int compareTo(OfferInfo arg0) {
+        // TODO Auto-generated method stub
+        return this.offeredPrice.compareTo(arg0.offeredPrice);
+    }
+
+
 }

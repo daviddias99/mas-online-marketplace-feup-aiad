@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
 import agents.counterOfferStrategies.NaiveCounterOfferStrategy;
-import agents.filteringStrategies.NaiveFilterStrategy;
 import behaviours.NegotiateBuyer;
 import models.Product;
 
@@ -35,7 +35,7 @@ public class Buyer extends Agent {
 
         // Buyers sleep to allow for seller setup
         try {
-            Thread.sleep(5000);
+            Thread.sleep(2500);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -44,14 +44,16 @@ public class Buyer extends Agent {
 
         // Ask prices of each product to sellers. The ask price behaviour choses the seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
+        ParallelBehaviour negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
         for (Product p : this.products.keySet()) {
             System.out.printf(" - START: Agent %s - Product %s%n", this.getLocalName(), p.getName());
-            addBehaviour(new NegotiateBuyer(p, this, 
+            
+            negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, 
                 new ACLMessage(ACLMessage.CFP), 
                 new NaiveCounterOfferStrategy()
                 ));
         }
-
+        this.addBehaviour(negotiationsBehaviour);
     }
 
     //

@@ -6,14 +6,16 @@ import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import agents.offerStrategies.NaiveOfferStrategy;
 import models.Product;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jade.core.Agent;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -26,7 +28,7 @@ public class Seller extends Agent {
 
     // List of products which the seller is currently offering and the price
     // of said products (float)
-    private Map<Product, Float> products = new HashMap<>();
+    private Map<Product, Float> products = new ConcurrentHashMap<>();
     
     private int credibility; // 0 to 100
     private final int scamFactor; // 0 to 100
@@ -68,13 +70,16 @@ public class Seller extends Agent {
 
         // Query at what prices the other agents are selling the producs in order to decide
         // selling price.
-        for (Product p : this.products.keySet())
-            addBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
 
+        ParallelBehaviour askPricesToSellersBehavior = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+        for (Product p : this.products.keySet())
+            askPricesToSellersBehavior.addSubBehaviour(new AskPriceSeller(p, this, new ACLMessage(ACLMessage.REQUEST)));
+
+        addBehaviour(askPricesToSellersBehavior);
         // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
         // Listen for buyer queries about selling price and negotiating
-        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
+        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP), new NaiveOfferStrategy()));
     }
 
     @Override

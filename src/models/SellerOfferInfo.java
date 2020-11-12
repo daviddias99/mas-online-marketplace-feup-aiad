@@ -15,6 +15,6 @@ public class SellerOfferInfo extends OfferInfo {
 
     @Override
     public String toString() {
-        return super.toString() + "(with " + sellerCredibility + " credibility)";
+        return String.format("%s at %f$ (with %d credibility)", product.toString(), offeredPrice, this.sellerCredibility);
     }
 }
