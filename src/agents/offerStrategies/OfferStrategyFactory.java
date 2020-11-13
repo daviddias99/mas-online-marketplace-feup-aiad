@@ -1,10 +1,5 @@
 package agents.offerStrategies;
 
-import agents.pricePickingStrategies.MinPickingStrategy;
-import agents.pricePickingStrategies.PickingStrategyFactory;
-import agents.pricePickingStrategies.PricePickingStrategy;
-import agents.pricePickingStrategies.TestPickingStrategy;
-
 public class OfferStrategyFactory {
     enum Type {
         TEST

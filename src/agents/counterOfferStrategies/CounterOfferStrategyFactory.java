@@ -1,9 +1,5 @@
 package agents.counterOfferStrategies;
 
-import agents.offerStrategies.OfferStrategy;
-import agents.offerStrategies.OfferStrategyFactory;
-import agents.offerStrategies.TestOfferStrategy;
-
 public class CounterOfferStrategyFactory {
     enum Type {
         TEST

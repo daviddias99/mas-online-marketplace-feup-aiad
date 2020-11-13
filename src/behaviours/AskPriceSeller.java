@@ -66,7 +66,7 @@ public class AskPriceSeller extends AchieveREInitiator {
                 msg.addReceiver(result[i].getName());
 
             // Logging
-            StringBuilder sb = new StringBuilder(String.format("> %s asked the price of *%s* to the following sellers: [", this.getAgent().getLocalName(), this.getProduct().getName()));
+            StringBuilder sb = new StringBuilder(String.format("< %s asked the price of *%s* to the following sellers: [", this.getAgent().getLocalName(), this.getProduct().getName()));
             Iterator<AID> it = msg.getAllReceiver();
             boolean first = true;
             while(it.hasNext())
@@ -130,7 +130,7 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
         }
 
-        StringBuilder sb = new StringBuilder(String.format("< %s found that product %s has %d sellers with these prices: [", s.getLocalName(), p.getName(), marketPrices.size()));
+        StringBuilder sb = new StringBuilder(String.format("> %s found that product %s has %d sellers with these prices: [", s.getLocalName(), p.getName(), marketPrices.size()));
         boolean first = true;
         for(SellerOfferInfo soInfo: marketPrices)
             if(first){
