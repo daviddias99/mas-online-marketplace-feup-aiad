@@ -159,11 +159,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             sb.append(String.format("%n - %s", negotiationOnWait.getSender()));
         }
         // msg is the current best alternative, store it
-        else {
-            System.out.printf("! %s is now on wait.%n", msg.getSender());
+        else 
             this.negotiationOnWait = msg;
-        }
-
     }
 
     private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, Vector<ACLMessage> incomingMessages, Vector outgoingMessages) {
@@ -195,6 +192,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
         if(reject)
             sbCFP.append(sbReject.toString());
+        if(this.negotiationOnWait != null)
+            sbCFP.append(String.format("%n! %s is now on wait.%n", this.negotiationOnWait.getSender()));
         this.getAgent().logger.info(sbCFP.toString());
     }
 
