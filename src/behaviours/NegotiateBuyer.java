@@ -166,7 +166,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, Vector<ACLMessage> incomingMessages, Vector outgoingMessages) {
         // Do the counterOffers while the others "wait"
         StringBuilder sbCFP = new StringBuilder(String.format("< %s sent CFP on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
-        StringBuilder sbReject = new StringBuilder(String.format("%n> %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
+        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
         boolean reject = false;
         for (ACLMessage msg : incomingMessages) {
             ACLMessage rep = msg.createReply();
@@ -199,7 +199,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     private void prepareFinalMessages(Vector<ACLMessage> lastMessages, Vector outgoingMessages) {
         StringBuilder sbAccept = new StringBuilder(String.format("< %s sent ACCEPT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
-        StringBuilder sbReject = new StringBuilder(String.format("%n> %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));        
+        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));        
 
         // TODO: se calhar verificar se está vazio
         AID bestSeller = this.buyer.getCounterOfferStrategy().finalDecision(this.previousOffers);
@@ -229,15 +229,18 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     e.printStackTrace();
                 }
 
-                sbAccept.append(String.format("%n - %s : %s", msg.getSender(), bestOffer));
+                sbAccept.append(String.format("%n - %s : %s", msg.getSender().getLocalName(), bestOffer));
             } else {
                 if(!reject)
                     reject = true;
                 rep.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                sbReject.append(String.format("%n - %s", msg.getSender()));
+                sbReject.append(String.format("%n - %s", msg.getSender().getLocalName()));
             }
             outgoingMessages.add(rep);
         }
+        if(reject)
+            sbAccept.append(sbReject.toString());
+        this.getAgent().logger.info(sbAccept.toString());
     }
 
     @Override
