@@ -34,7 +34,7 @@ public class NormalCounterOfferStrategy extends CounterOfferStrategy {
         return counterOffers;
     }
 
-    private float counterPrice(SellerOfferInfo offer){
+    protected float counterPrice(SellerOfferInfo offer){
         // TODO: improve price function neste momento acho q n faz muito sentido
         float decrease = (float) Math.abs(offer.getOfferedPrice() - ((new Random()).nextGaussian() * offer.getSellerCredibility() + offer.getOfferedPrice()));
         return offer.getOfferedPrice() - decrease;

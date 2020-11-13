@@ -27,5 +27,11 @@ public class NaiveCounterOfferStrategy extends CounterOfferStrategy {
 		// TODO: Complete this
 		return offers.keySet().iterator().next();
 	}
+
+	@Override
+	protected float counterPrice(SellerOfferInfo offer) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
     
 }

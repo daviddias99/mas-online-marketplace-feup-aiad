@@ -21,6 +21,7 @@ import jade.proto.AchieveREInitiator;
 public class AskPriceSeller extends AchieveREInitiator {
 
     private Product product;
+    private Seller seller;
 
     /**
      * Seller <agent> is asking the selling price of <product>
@@ -28,6 +29,7 @@ public class AskPriceSeller extends AchieveREInitiator {
     public AskPriceSeller(Product product, Seller agent, ACLMessage msg) {
         super(agent, msg);
         this.product = product;
+        this.seller = agent;
     }
 
     protected Product getProduct(){
@@ -93,16 +95,13 @@ public class AskPriceSeller extends AchieveREInitiator {
         System.out.printf("! %s found no sellers selling product %s%n", this.getAgent().getLocalName(), this.getProduct().getName());
         Seller s = (Seller) this.getAgent();
         Product p = this.getProduct();
-        s.addProduct(p, this.calculateInitialPrice(s, p));
+        s.addProduct(p,this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
         System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
 
-    private float calculateInitialPrice(Seller s, Product p) {
-        // TODO: improve this function
-        return (float) (s.getCredibility() / 100.0 * p.getOriginalPrice());
-    }
+
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
@@ -130,7 +129,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
-        s.addProduct(p, this.calculateInitialPrice(s, p));
+        s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
         System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
         s.register(p);
     }

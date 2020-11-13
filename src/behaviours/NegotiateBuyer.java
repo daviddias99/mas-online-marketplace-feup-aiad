@@ -7,7 +7,6 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import agents.Buyer;
-import agents.counterOfferStrategies.CounterOfferStrategy;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
@@ -22,18 +21,18 @@ import jade.proto.ContractNetInitiator;
 
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
-    private CounterOfferStrategy counterOfferStrategy;
     private int negotiationRound;
     private Map<AID, SellerOfferInfo> previousOffers;
     private ACLMessage negotiationOnWait;
+    private Buyer buyer;
 
-    public NegotiateBuyer(Product product, Buyer b, ACLMessage cfp, CounterOfferStrategy counterOfferStrategy) {
+    public NegotiateBuyer(Product product, Buyer b, ACLMessage cfp) {
         super(b, cfp);
         this.product = product;
-        this.counterOfferStrategy = counterOfferStrategy;
         this.negotiationRound = 0;
         this.previousOffers = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
+        this.buyer = b;
     }
 
     @Override
@@ -109,8 +108,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
     protected void handleAllResponses(Vector responses, Vector acceptances) {
         this.negotiationRound++;
 
-        if(this.negotiationRound == 5)
-            System.exit(-1);
+        // if(this.negotiationRound == 5)
+        //     System.exit(-1);
 
         System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(),
                 this.negotiationRound);
@@ -122,11 +121,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         // Update with new SellerOffers and new counter-offers
         // If counterOffers is empty it means that the lastOffer contains the lowest
         // prices possible
-        Map<AID, OfferInfo> counterOffers = this.counterOfferStrategy.pickOffers(offers, this.previousOffers);
+        Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers, this.previousOffers);
         
         System.out.printf("> %s counter-offers:%n", this.getAgent().getLocalName());
         for (AID agent: counterOffers.keySet()){
-            System.out.printf(" - %s : %s%n", agent.getLocalName(), counterOffers.get(agent));  
+            System.out.printf(" - %s : %s%n", agent.getLocalName(), counterOffers.get(agent)); 
+            
+        if(counterOffers.isEmpty())
+            System.out.printf(" - NO COUNTER OFFERS%n"); 
 } 
         // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
@@ -141,7 +143,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     private void updateWaitingList(ACLMessage msg, Vector<ACLMessage> outgoingMessages) {
 
-        AID bestSeller = this.counterOfferStrategy.finalDecision(this.previousOffers);
+        AID bestSeller = this.buyer.getCounterOfferStrategy().finalDecision(this.previousOffers);
 
         // If the best negotiation that is on wait is no longer a candidate, reject it
         if (bestSeller != this.negotiationOnWait.getSender()) {
@@ -195,7 +197,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     private void prepareFinalMessages(Vector outgoingMessages) {
         // TODO: se calhar verificar se está vazio
-        AID bestSeller = this.counterOfferStrategy.finalDecision(this.previousOffers);
+        AID bestSeller = this.buyer.getCounterOfferStrategy().finalDecision(this.previousOffers);
 
         // Get all messages that need answering: all from this round + the message on
         // wait if any

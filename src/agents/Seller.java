@@ -6,7 +6,8 @@ import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import agents.offerStrategies.NaiveOfferStrategy;
+import agents.offerStrategies.*;
+import agents.pricePickingStrategies.*;
 import models.Product;
 
 import java.util.Map;
@@ -29,30 +30,44 @@ public class Seller extends Agent {
     // List of products which the seller is currently offering and the price
     // of said products (float)
     private Map<Product, Float> products = new ConcurrentHashMap<>();
-    
+
     private int credibility; // 0 to 100
     private final int scamFactor; // 0 to 100
     private final int elasticity; // 0 to 100, but normally smaller than 20
     private DFAgentDescription dfd;
-    
+    private OfferStrategy offerStrategy;
+    private PricePickingStrategy pricePickingStrategy;
+
     @JsonCreator
-    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF, @JsonProperty("elasticity") int elasticity) {
-        if(scamF > 100 || scamF < 0)
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
+            @JsonProperty("elasticity") int elasticity) {
+        if (scamF > 100 || scamF < 0)
             throw new IllegalArgumentException("Scam Factor must be from 0 to 100 and was " + scamF);
-        if(elasticity > 100 || elasticity < 0)
+        if (elasticity > 100 || elasticity < 0)
             throw new IllegalArgumentException("Elasticity must be from 0 to 100 and was " + elasticity);
-        
+
         this.scamFactor = scamF;
         this.elasticity = elasticity;
         // TODO: brincar com isto
         // * Std Deviation + Mean
         // TODO: no futuro nao começar com credibility ja afetada
-        do{
+        do {
             this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2) + scamF);
-        } while(this.credibility > 100);
+        } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
+
+        this.offerStrategy = new TestOfferStrategy();
+        this.pricePickingStrategy = new TestPickingStrategy();
+    }
+
+    public PricePickingStrategy getPricePickingStrategy() {
+        return pricePickingStrategy;
+    }
+
+    public OfferStrategy getOfferStrategy() {
+        return offerStrategy;
     }
 
     @Override
@@ -79,7 +94,7 @@ public class Seller extends Agent {
         // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
         // Listen for buyer queries about selling price and negotiating
-        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP), new NaiveOfferStrategy()));
+        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP), new TestOfferStrategy()));
     }
 
     @Override
