@@ -42,7 +42,7 @@ public class ResponsePrice extends AchieveREResponder {
             Product respProduct = s.getProduct(productRequested.getName());
 
             SellerOfferInfo info = new SellerOfferInfo(respProduct,s.getProductPrice(respProduct.getName()),s.getCredibility());
-            System.out.printf("> %s sent to %s price %s%n", s.getLocalName(), request.getSender().getLocalName(), info);
+            s.logger.info(String.format("> %s sent to %s price %s", s.getLocalName(), request.getSender().getLocalName(), info));
             result.setContentObject(info);
 
         } catch ( UnreadableException | IOException e) {

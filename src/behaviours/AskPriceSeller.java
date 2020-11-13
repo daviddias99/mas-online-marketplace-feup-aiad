@@ -64,11 +64,17 @@ public class AskPriceSeller extends AchieveREInitiator {
                 msg.addReceiver(result[i].getName());
 
             // Logging
-            StringBuilder sb = new StringBuilder(String.format("> %s asked the price of *%s* to the following sellers:", this.getAgent().getLocalName(), this.getProduct().getName()));
+            StringBuilder sb = new StringBuilder(String.format("> %s asked the price of *%s* to the following sellers: [", this.getAgent().getLocalName(), this.getProduct().getName()));
             Iterator<AID> it = msg.getAllReceiver();
+            boolean first = true;
             while(it.hasNext())
-                sb.append(String.format("%n - %s", it.next().getLocalName()));
-            this.getAgent().logger.info(sb.toString());
+                if(first){
+                    sb.append(String.format("%s", it.next().getLocalName()));
+                    first = false;
+                }
+                else
+                    sb.append(String.format(", %s", it.next().getLocalName()));
+            this.getAgent().logger.info(sb.append("]").toString());
 
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block
@@ -125,10 +131,16 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
         }
 
-        StringBuilder sb = new StringBuilder(String.format("< %s found that product %s has %d sellers with these prices:", s.getLocalName(), p.getName(), marketPrices.size()));
+        StringBuilder sb = new StringBuilder(String.format("< %s found that product %s has %d sellers with these prices: [", s.getLocalName(), p.getName(), marketPrices.size()));
+        boolean first = true;
         for(SellerOfferInfo soInfo: marketPrices)
-            sb.append(String.format("%n - %.2f", soInfo.getOfferedPrice()));
-        s.logger.info(sb.toString());
+            if(first){
+                sb.append(String.format("%.2f", soInfo.getOfferedPrice()));
+                first = false;
+            }
+            else
+                sb.append(String.format(", %.2f", soInfo.getOfferedPrice()));
+        s.logger.info(sb.append("]").toString());
             
         // TODO: implement one function
         // TODO: refactor pq é igual a cima para já (??)        
