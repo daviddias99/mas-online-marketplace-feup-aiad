@@ -7,8 +7,6 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import agents.Buyer;
-import agents.Seller;
-import agents.counterOfferStrategies.CounterOfferStrategy;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
@@ -119,9 +117,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
     protected void handleAllResponses(Vector responses, Vector acceptances) {
         this.negotiationRound++;
 
-        System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(),
-                this.negotiationRound);
-
         // Seller product offers
         Vector<ACLMessage> convertedResponses = responses;
         Map<AID, SellerOfferInfo> offers = this.getOffers(convertedResponses);
@@ -132,13 +127,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers,
                 this.previousOffers);
 
-        System.out.printf("> %s counter-offers:%n", this.getAgent().getLocalName());
-        for (AID agent : counterOffers.keySet()) {
-            System.out.printf(" - %s : %s%n", agent.getLocalName(), counterOffers.get(agent));
-
-            if (counterOffers.isEmpty())
-                System.out.printf(" - NO COUNTER OFFERS%n");
-        }
         // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
 
@@ -259,8 +247,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         OfferInfo info;
         try {
             info = (OfferInfo) inform.getContentObject();
-            System.out.printf("> %s received INFORM from agent %s saying: %s%n", this.getAgent().getLocalName(),
-                    inform.getSender().getLocalName(), info);
+            this.getAgent().logger.info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), info));
             this.buyer.changeWealth(-info.getOfferedPrice());
         } catch (UnreadableException e) {
             // TODO Auto-generated catch block
@@ -272,8 +259,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected void handleFailure(ACLMessage failure) {
         // TODO: Manel
-        System.out.printf("> %s received FAILURE from agent %s saying: %s%n", this.getAgent().getLocalName(),
-                failure.getSender().getLocalName(), failure.getContent());
+        this.getAgent().logger.info(String.format("< %s received FAILURE from agent %s with %s", this.getAgent().getLocalName(), failure.getSender().getLocalName(), failure.getContent()));
     }
 
 }
