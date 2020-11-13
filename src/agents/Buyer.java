@@ -31,12 +31,13 @@ public class Buyer extends Agent {
     public static Logger logger;
 
     @JsonCreator
-    public Buyer(@JsonProperty("products") String[] products) {
+    public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
         for (int i = 0; i < products.length; i++)
             this.products.put(new Product(products[i]), false);
 
-        this.counterOfferStrategy = new TestCounterOfferStrategy();
+
         this.wealth = 0;
+        this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
     }
 
     public CounterOfferStrategy getCounterOfferStrategy() {

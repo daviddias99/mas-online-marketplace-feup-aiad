@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.List;
 import java.util.Random;
 
 public abstract class Util {
@@ -35,5 +36,34 @@ public abstract class Util {
     public static float getNormalRandom(float avg, float std){
 
         return (float) Util.getInstance().nextGaussian() * std + avg;
+    }
+
+
+    public static float average(List<Float> values) {
+        if (values.isEmpty())
+            return  -1.0f;
+
+        float acc = 0;
+
+        for (Float value : values){
+            acc += value;
+        }
+
+        return acc / values.size();
+    }
+
+    public static float min(List<Float> values) {
+        if (values.isEmpty())
+            return -1.0f;
+
+        float min = values.get(0);
+
+        for (Float f : values) {
+            if (f < min) {
+                min = f;
+            }
+        }
+
+        return min;
     }
 }
