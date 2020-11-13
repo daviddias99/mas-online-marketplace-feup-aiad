@@ -19,7 +19,7 @@ public class TestPickingStrategy extends PricePickingStrategy {
 
     @Override
     public float calculateInitialPrice(Seller s, Product p) {
-        return  Util.round(p.getOriginalPrice()  * Float.min(0.9f, Util.getNormalRandom(0.7f, 0.3f)),2);
+        return  Util.round(p.getOriginalPrice()  * Util.randomBetween(70,90)/100.0f,2);
     }
 
 }
