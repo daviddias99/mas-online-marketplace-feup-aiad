@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.FileHandler;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class Buyer extends Agent {
     private Map<Product, Boolean> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float wealth;
-    public static Logger logger;
+    public transient Logger logger;
 
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
@@ -45,14 +46,14 @@ public class Buyer extends Agent {
     }
 
     private void setupLogger() {
-        this.logger = Logger.getLogger(this.getClass().getName());
+        this.logger = Logger.getLogger(this.getLocalName());
         this.logger.setUseParentHandlers(false);
         File dir = new File("logs/");
         if (!dir.exists())
             dir.mkdir();
 
         try {
-            FileHandler fh = new FileHandler("logs/" + this.getClass().getName() + ".log");
+            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
             this.logger.addHandler(fh);
             fh.setFormatter(new CoolFormatter());
         } catch (SecurityException | IOException e) {
