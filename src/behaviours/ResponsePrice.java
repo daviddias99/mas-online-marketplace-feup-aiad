@@ -18,6 +18,11 @@ public class ResponsePrice extends AchieveREResponder {
     }
 
     @Override
+    public Seller getAgent(){
+        return (Seller) super.getAgent();
+    }
+
+    @Override
     protected ACLMessage handleRequest(ACLMessage request) {
         ACLMessage reply = request.createReply();
         reply.setPerformative(ACLMessage.AGREE);
@@ -33,11 +38,11 @@ public class ResponsePrice extends AchieveREResponder {
             result.setPerformative(ACLMessage.INFORM);
 
             Product productRequested = (Product)request.getContentObject();
-            Seller s = (Seller) this.getAgent();
+            Seller s = this.getAgent();
             Product respProduct = s.getProduct(productRequested.getName());
 
             SellerOfferInfo info = new SellerOfferInfo(respProduct,s.getProductPrice(respProduct.getName()),s.getCredibility());
-            System.out.printf("> %s sent to %s price %s%n", this.getAgent().getLocalName(), request.getSender().getLocalName(), info);
+            System.out.printf("> %s sent to %s price %s%n", s.getLocalName(), request.getSender().getLocalName(), info);
             result.setContentObject(info);
 
         } catch ( UnreadableException | IOException e) {

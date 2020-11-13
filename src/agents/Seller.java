@@ -8,7 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import agents.offerStrategies.NaiveOfferStrategy;
 import models.Product;
+import utils.CoolFormatter;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -23,40 +26,64 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+
 public class Seller extends Agent {
     // TODO: assim ou String to Product pra acesso mais rápido
 
     // List of products which the seller is currently offering and the price
     // of said products (float)
     private Map<Product, Float> products = new ConcurrentHashMap<>();
-    
+
     private int credibility; // 0 to 100
     private final int scamFactor; // 0 to 100
     private final int elasticity; // 0 to 100, but normally smaller than 20
     private DFAgentDescription dfd;
-    
+    public static Logger logger;
+
     @JsonCreator
-    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF, @JsonProperty("elasticity") int elasticity) {
-        if(scamF > 100 || scamF < 0)
+    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
+            @JsonProperty("elasticity") int elasticity) {
+        if (scamF > 100 || scamF < 0)
             throw new IllegalArgumentException("Scam Factor must be from 0 to 100 and was " + scamF);
-        if(elasticity > 100 || elasticity < 0)
+        if (elasticity > 100 || elasticity < 0)
             throw new IllegalArgumentException("Elasticity must be from 0 to 100 and was " + elasticity);
-        
+
         this.scamFactor = scamF;
         this.elasticity = elasticity;
         // TODO: brincar com isto
         // * Std Deviation + Mean
         // TODO: no futuro nao começar com credibility ja afetada
-        do{
+        do {
             this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2) + scamF);
-        } while(this.credibility > 100);
+        } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
     }
 
+    private void setupLogger() {
+        this.logger = Logger.getLogger(this.getLocalName());
+        this.logger.setUseParentHandlers(false);
+        File dir = new File("logs/");
+        if (!dir.exists())
+            dir.mkdir();
+
+        try {
+            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
+            this.logger.addHandler(fh);
+            fh.setFormatter(new CoolFormatter());
+        } catch (SecurityException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }        
+    }
+
     @Override
     protected void setup() {
+        this.setupLogger();
+        this.logger.info("- START: " + this);
         // Agent registration object inside the DF registry. An agent provides one service
         // for each object he his selling.
         this.dfd = new DFAgentDescription();

@@ -30,6 +30,11 @@ public class AskPriceSeller extends AchieveREInitiator {
         this.product = product;
     }
 
+    @Override
+    public Seller getAgent(){
+        return (Seller) super.getAgent();
+    }
+
     protected Product getProduct(){
         return this.product;
     }
@@ -58,13 +63,12 @@ public class AskPriceSeller extends AchieveREInitiator {
             for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
 
-            System.out.printf("> %s asked the price of %s to the following sellers:%n", this.getAgent().getLocalName(), this.getProduct().getName());
-
+            // Logging
+            StringBuilder sb = new StringBuilder(String.format("> %s asked the price of *%s* to the following sellers:", this.getAgent().getLocalName(), this.getProduct().getName()));
             Iterator<AID> it = msg.getAllReceiver();
-            
-            while(it.hasNext()){
-                System.out.printf(" - %s%n", it.next().getLocalName());
-            }
+            while(it.hasNext())
+                sb.append(String.format("%n - %s", it.next().getLocalName()));
+            this.getAgent().logger.info(sb.toString());
 
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block
@@ -90,11 +94,10 @@ public class AskPriceSeller extends AchieveREInitiator {
 
         // No other sellers are currenttly selling <product>
         // set selling price accordingly
-        System.out.printf("! %s found no sellers selling product %s%n", this.getAgent().getLocalName(), this.getProduct().getName());
-        Seller s = (Seller) this.getAgent();
+        Seller s = this.getAgent();
         Product p = this.getProduct();
         s.addProduct(p, this.calculateInitialPrice(s, p));
-        System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
+        s.logger.info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(this.getProduct().getName())));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
@@ -106,6 +109,9 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
+        Seller s = this.getAgent();
+        Product p = this.getProduct();
+
         List<SellerOfferInfo> marketPrices = new ArrayList<>();
 
         // Collect current market prices
@@ -119,19 +125,17 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
         }
 
-        System.out.printf("> %s found that product %s has %d sellers with these prices:%n",this.getAgent().getLocalName(), this.getProduct().getName(), marketPrices.size());
-        for(SellerOfferInfo p: marketPrices)
-            System.out.printf(" - %f%n", p.getOfferedPrice());
+        StringBuilder sb = new StringBuilder(String.format("< %s found that product %s has %d sellers with these prices:", s.getLocalName(), p.getName(), marketPrices.size()));
+        for(SellerOfferInfo soInfo: marketPrices)
+            sb.append(String.format("%n - %.2f", soInfo.getOfferedPrice()));
+        s.logger.info(sb.toString());
             
         // TODO: implement one function
-        // TODO: refactor pq é igual a cima para já (??)
-        Seller s = (Seller) this.getAgent();
-        Product p = this.getProduct();
-        
+        // TODO: refactor pq é igual a cima para já (??)        
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
         s.addProduct(p, this.calculateInitialPrice(s, p));
-        System.out.printf("! %s set product %s price at %f%n", this.getAgent().getLocalName(), this.getProduct().getName(), s.getProductPrice(this.getProduct().getName()));
+        s.logger.info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(p.getName())));
         s.register(p);
     }
     // TODO: ver se vale a pena handlers da 1st part

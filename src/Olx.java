@@ -112,7 +112,7 @@ public class Olx {
         // Create config object
         Config config = Config.read(configPath);        
         boolean mainMode = Boolean.parseBoolean(args[1]);
-
+        
         new Olx(mainMode, config);
 
         // TODO: kill plaform
