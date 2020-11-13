@@ -1,8 +1,8 @@
 package agents;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -19,8 +19,9 @@ public class Buyer extends Agent {
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
-    private Map<Product, Boolean> products = new HashMap<>();
+    private Map<Product, Boolean> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
+    private float wealth;
 
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products) {
@@ -28,6 +29,7 @@ public class Buyer extends Agent {
             this.products.put(new Product(products[i]), false);
 
         this.counterOfferStrategy = new TestCounterOfferStrategy();
+        this.wealth = 0;
     }
 
     public CounterOfferStrategy getCounterOfferStrategy() {
@@ -87,4 +89,7 @@ public class Buyer extends Agent {
         return "Buyer{" + "products=" + this.products + "}";
     }
 
+    public synchronized void changeWealth(float variance){
+        this.wealth += variance;
+    }
 }

@@ -37,6 +37,7 @@ public class Seller extends Agent {
     private DFAgentDescription dfd;
     private OfferStrategy offerStrategy;
     private PricePickingStrategy pricePickingStrategy;
+    private float wealth;
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
@@ -60,6 +61,7 @@ public class Seller extends Agent {
 
         this.offerStrategy = new TestOfferStrategy();
         this.pricePickingStrategy = new TestPickingStrategy();
+        this.wealth = 0;
     }
 
     public PricePickingStrategy getPricePickingStrategy() {
@@ -159,7 +161,7 @@ public class Seller extends Agent {
         this.products = newP;
     }
 
-    public float removeProduct(Product product) {
+    public synchronized Float removeProduct(Product product) {
         return this.products.remove(product);
     }
 
@@ -181,5 +183,9 @@ public class Seller extends Agent {
         if(this.getLocalName() != null)
             return this.getLocalName() + "{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';    
         return "Seller{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';
+    }
+
+    public synchronized void changeWealth(float variance){
+        this.wealth += variance;
     }
 }
