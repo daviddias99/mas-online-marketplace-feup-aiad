@@ -7,17 +7,25 @@ products:
 buyers:
   - products:
       - pc
+    counterOfferStrategy: test
 sellers:
   - scamFactor: 68
     elasticity: 14
+    offerStrategy: test
+    pickingStrategy: test
     products:
       - pc
+
   - scamFactor: 37
     elasticity: 9
+    offerStrategy: test
+    pickingStrategy: test
     products:
       - skate
       - pc
   - scamFactor: 0
     elasticity: 5
+    offerStrategy: test
+    pickingStrategy: test
     products:
       - skate

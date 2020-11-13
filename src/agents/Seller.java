@@ -40,11 +40,16 @@ public class Seller extends Agent {
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
-            @JsonProperty("elasticity") int elasticity) {
+            @JsonProperty("elasticity") int elasticity, @JsonProperty("pickingStrategy") String pickingStrategy,
+            @JsonProperty("offerStrategy") String offerStrategy) {
         if (scamF > 100 || scamF < 0)
             throw new IllegalArgumentException("Scam Factor must be from 0 to 100 and was " + scamF);
         if (elasticity > 100 || elasticity < 0)
             throw new IllegalArgumentException("Elasticity must be from 0 to 100 and was " + elasticity);
+
+        this.pricePickingStrategy = PickingStrategyFactory.get(pickingStrategy);
+        this.offerStrategy = OfferStrategyFactory.get(offerStrategy);
+
 
         this.scamFactor = scamF;
         this.elasticity = elasticity;
@@ -57,9 +62,6 @@ public class Seller extends Agent {
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
-
-        this.offerStrategy = new TestOfferStrategy();
-        this.pricePickingStrategy = new TestPickingStrategy();
     }
 
     public PricePickingStrategy getPricePickingStrategy() {
