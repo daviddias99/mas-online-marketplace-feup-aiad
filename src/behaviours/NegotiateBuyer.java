@@ -97,15 +97,15 @@ public class NegotiateBuyer extends ContractNetInitiator {
             if (msg.getPerformative() != ACLMessage.PROPOSE) {
                 // TODO: confirmar se comment está certo. não é verdade. depois vai poder vir refuses
                 // Should never get here
-                sb.append(String.format("%n - %s indicating a failure.", s.getLocalName(), msg.getSender().getLocalName()));
+                sb.append(String.format("%n - %s indicating a failure.", msg.getSender().getLocalName()));
                 continue;
             }
             try {
                 SellerOfferInfo sellerOffer = (SellerOfferInfo) msg.getContentObject();
                 offers.put(msg.getSender(), sellerOffer);
-                sb.append(String.format("%n - %s with seller offer %s.", s.getLocalName(), sellerOffer));
+                sb.append(String.format("%n - %s with seller offer %s.", msg.getSender().getLocalName(), sellerOffer));
             } catch (UnreadableException e) {
-                sb.append(String.format("%n - %s containing invalid content.", s.getLocalName(), msg.getSender().getLocalName()));
+                sb.append(String.format("%n - %s containing invalid content.", msg.getSender().getLocalName()));
             }
         }
         s.logger.info(sb.toString());

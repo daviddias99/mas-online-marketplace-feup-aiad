@@ -44,7 +44,7 @@ public class Seller extends Agent {
     private OfferStrategy offerStrategy;
     private PricePickingStrategy pricePickingStrategy;
     private float wealth;
-    public static Logger logger;
+    public transient Logger logger;
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
@@ -84,14 +84,14 @@ public class Seller extends Agent {
     }
 
     private void setupLogger() {
-        this.logger = Logger.getLogger(this.getClass().getName());
+        this.logger = Logger.getLogger(this.getLocalName());
         this.logger.setUseParentHandlers(false);
         File dir = new File("logs/");
         if (!dir.exists())
             dir.mkdir();
 
         try {
-            FileHandler fh = new FileHandler("logs/" + this.getClass().getName() + ".log");
+            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
             this.logger.addHandler(fh);
             fh.setFormatter(new CoolFormatter());
         } catch (SecurityException | IOException e) {
