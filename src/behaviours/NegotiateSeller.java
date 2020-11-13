@@ -10,7 +10,6 @@ import agents.Seller;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
-import utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
