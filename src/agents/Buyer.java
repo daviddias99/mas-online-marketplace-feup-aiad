@@ -43,23 +43,6 @@ public class Buyer extends Agent {
         return counterOfferStrategy;
     }
 
-    private void setupLogger() {
-        this.logger = Logger.getLogger(this.getLocalName());
-        this.logger.setUseParentHandlers(false);
-        File dir = new File("logs/");
-        if (!dir.exists())
-            dir.mkdir();
-
-        try {
-            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
-            this.logger.addHandler(fh);
-            fh.setFormatter(new CoolFormatter());
-        } catch (SecurityException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
     // The buyer currently
     @Override
     protected void setup() {
@@ -90,6 +73,23 @@ public class Buyer extends Agent {
     //
     // Helpers
     //
+
+    private void setupLogger() {
+        this.logger = Logger.getLogger(this.getLocalName());
+        this.logger.setUseParentHandlers(false);
+        File dir = new File("logs/");
+        if (!dir.exists())
+            dir.mkdir();
+
+        try {
+            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
+            this.logger.addHandler(fh);
+            fh.setFormatter(new CoolFormatter());
+        } catch (SecurityException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
     public Set<Product> getProducts() {
         return this.products.keySet();
