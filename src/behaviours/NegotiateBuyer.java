@@ -216,6 +216,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
         for (ACLMessage msg : pendingMessages) {
             ACLMessage rep = msg.createReply();
 
+            if(msg.getPerformative() != ACLMessage.PROPOSE) {
+                continue;
+            }
+
             // Accept the proposal of the best offer and reject all others
             if (msg.getSender().equals(bestSeller)) {
                 rep.setPerformative(ACLMessage.ACCEPT_PROPOSAL);

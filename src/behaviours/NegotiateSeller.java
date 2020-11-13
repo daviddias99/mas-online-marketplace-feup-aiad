@@ -95,7 +95,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         ACLMessage result = accept.createReply();
 
         try {
-            buyerOffer = (OfferInfo) cfp.getContentObject();
+            buyerOffer = (OfferInfo) accept.getContentObject();
             seller.logger.info(String.format("> %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
             if (seller.removeProduct(buyerOffer.getProduct()) != null) {
@@ -112,7 +112,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 else{
                     result.setPerformative(ACLMessage.INFORM);
                     result.setContentObject(buyerOffer);
-                    seller.changeWealth(maxProposal.getOfferedPrice());
+                    seller.changeWealth(buyerOffer.getOfferedPrice());
                     content = buyerOffer.toString();
                 }
             } 
