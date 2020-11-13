@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import agents.Seller;
-import agents.offerStrategies.OfferStrategy;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
@@ -19,12 +18,10 @@ import jade.proto.SSIteratedContractNetResponder;
 public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
-    private OfferStrategy offerStrategy;
 
-    public NegotiateSeller(Seller s, ACLMessage cfp, OfferStrategy offerStrategy) {
+    public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
         this.previousOffers = new ConcurrentHashMap<>();
-        this.offerStrategy = offerStrategy;
     }
 
     @Override
@@ -45,7 +42,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Calculate price to propose
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
                 float originalPrice = seller.getProductPrice(buyerOffer.getProduct().getName());
-                float offeredPrice = this.offerStrategy.chooseOffer(buyerOffer, previousOffer, originalPrice);
+                float offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer, originalPrice);
                 
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
                 seller.getCredibility());
@@ -103,21 +100,23 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
                     result.setPerformative(ACLMessage.FAILURE);
                     result.setContent("Sorry, a better deal came up...");
+                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
                 }
                 // The product will be sold.
                 else{
                     result.setPerformative(ACLMessage.INFORM);
                     result.setContentObject(buyerOffer);
                     seller.changeWealth(maxProposal.getOfferedPrice());
+                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), buyerOffer);
                 }
             } 
             // Cancel the sale, already was sold.
             else {
                 result.setPerformative(ACLMessage.FAILURE);
                 result.setContent("Sorry, a better deal came up, already sold it...");
+                System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
             }
 
-            System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
 
             // Clear offer history from agent
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());

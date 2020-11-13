@@ -96,7 +96,7 @@ public class Seller extends Agent {
         // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
         // Listen for buyer queries about selling price and negotiating
-        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP), new TestOfferStrategy()));
+        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
     }
 
     @Override

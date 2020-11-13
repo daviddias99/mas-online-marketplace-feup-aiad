@@ -110,9 +110,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
     protected void handleAllResponses(Vector responses, Vector acceptances) {
         this.negotiationRound++;
 
-        // if(this.negotiationRound == 5)
-        // System.exit(-1);
-
         System.out.printf("> %s got %d responses on round %d!%n", this.getAgent().getLocalName(), responses.size(),
                 this.negotiationRound);
 
