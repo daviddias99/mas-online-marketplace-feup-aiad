@@ -116,4 +116,8 @@ public class Buyer extends Agent {
     public synchronized void changeWealth(float variance){
         this.wealth += variance;
     }
+
+    public void receivedProduct(Product product) {
+        this.products.put(product, true);
+    }
 }

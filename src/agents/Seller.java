@@ -218,4 +218,9 @@ public class Seller extends Agent {
     public synchronized void changeWealth(float variance){
         this.wealth += variance;
     }
+
+    public boolean doScam() {
+        // TODO
+        return true;
+    }
 }

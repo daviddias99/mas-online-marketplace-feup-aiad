@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import agents.Buyer;
 import models.OfferInfo;
 import models.Product;
+import models.Scam;
 import models.SellerOfferInfo;
 import jade.core.AID;
 import jade.domain.DFService;
@@ -244,11 +245,21 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected void handleInform(ACLMessage inform) {
 
-        OfferInfo info;
+        Object response;
         try {
-            info = (OfferInfo) inform.getContentObject();
+            response = inform.getContentObject();
             this.getAgent().logger.info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), info));
-            this.buyer.changeWealth(-info.getOfferedPrice());
+
+            if (response instanceof Scam) {
+                Scam scam = (Scam) response;
+                this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
+                // TODO devo meter p começar de novo?
+            } else if (response instanceof OfferInfo) {
+                OfferInfo offerInfo = (OfferInfo) response;
+                this.buyer.receivedProduct(offerInfo.getProduct());
+                this.buyer.changeWealth(-offerInfo.getOfferedPrice());
+            }
+
         } catch (UnreadableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

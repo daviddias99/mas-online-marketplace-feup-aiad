@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import agents.Seller;
 import models.OfferInfo;
 import models.Product;
+import models.Scam;
 import models.SellerOfferInfo;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -94,13 +95,25 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
 
+
         try {
             buyerOffer = (OfferInfo) cfp.getContentObject();
             seller.logger.info(String.format("< %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender(), buyerOffer));
 
+            OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
+
+            boolean scam = this.getAgent().doScam();
+            if (scam) {
+                result.setPerformative(ACLMessage.INFORM);
+                result.setContentObject(new Scam(buyerOffer));
+                seller.changeWealth(maxProposal.getOfferedPrice());
+                System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), buyerOffer);
+
+                return result;
+            }
+
+
             if (seller.removeProduct(buyerOffer.getProduct()) != null) {
-                
-                OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
                  // Cancel the sale, better offer still at play.
                 if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
@@ -109,7 +122,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                     System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
                 }
                 // The product will be sold.
-                else{
+                else {
                     result.setPerformative(ACLMessage.INFORM);
                     result.setContentObject(buyerOffer);
                     seller.changeWealth(maxProposal.getOfferedPrice());
