@@ -4,11 +4,15 @@
     {"name": "skate", "price": 20}
   ],
   "buyers": [
+    {"products": ["pc"]},
+    {"products": ["pc"]},
+    {"products": ["pc"]},
     {"products": ["pc"]}
   ],
   "sellers": [
     {"scamFactor": 68, "elasticity": 14, "products": ["pc"]},
     {"scamFactor": 37, "elasticity": 9, "products": ["pc", "skate"]},
+    {"scamFactor": 58, "elasticity": 13, "products": ["pc", "skate"]},
     {"scamFactor": 0, "elasticity": 5, "products": ["skate"]}
   ]
 }

@@ -6,7 +6,8 @@ import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import agents.offerStrategies.NaiveOfferStrategy;
+import agents.offerStrategies.*;
+import agents.pricePickingStrategies.*;
 import models.Product;
 import utils.CoolFormatter;
 
@@ -40,6 +41,9 @@ public class Seller extends Agent {
     private final int scamFactor; // 0 to 100
     private final int elasticity; // 0 to 100, but normally smaller than 20
     private DFAgentDescription dfd;
+    private OfferStrategy offerStrategy;
+    private PricePickingStrategy pricePickingStrategy;
+    private float wealth;
     public static Logger logger;
 
     @JsonCreator
@@ -61,6 +65,18 @@ public class Seller extends Agent {
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
+
+        this.offerStrategy = new TestOfferStrategy();
+        this.pricePickingStrategy = new TestPickingStrategy();
+        this.wealth = 0;
+    }
+
+    public PricePickingStrategy getPricePickingStrategy() {
+        return pricePickingStrategy;
+    }
+
+    public OfferStrategy getOfferStrategy() {
+        return offerStrategy;
     }
 
     private void setupLogger() {
@@ -106,7 +122,7 @@ public class Seller extends Agent {
         // Listen for other seller queries about selling price
         addBehaviour(new ResponsePrice(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
         // Listen for buyer queries about selling price and negotiating
-        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP), new NaiveOfferStrategy()));
+        addBehaviour(new NegotiationDispatcher(this, MessageTemplate.MatchPerformative(ACLMessage.CFP)));
     }
 
     @Override
@@ -171,7 +187,7 @@ public class Seller extends Agent {
         this.products = newP;
     }
 
-    public float removeProduct(Product product) {
+    public synchronized Float removeProduct(Product product) {
         return this.products.remove(product);
     }
 
@@ -193,5 +209,9 @@ public class Seller extends Agent {
         if(this.getLocalName() != null)
             return this.getLocalName() + "{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';    
         return "Seller{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';
+    }
+
+    public synchronized void changeWealth(float variance){
+        this.wealth += variance;
     }
 }

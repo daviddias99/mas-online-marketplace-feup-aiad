@@ -21,6 +21,7 @@ import jade.proto.AchieveREInitiator;
 public class AskPriceSeller extends AchieveREInitiator {
 
     private Product product;
+    private Seller seller;
 
     /**
      * Seller <agent> is asking the selling price of <product>
@@ -28,6 +29,7 @@ public class AskPriceSeller extends AchieveREInitiator {
     public AskPriceSeller(Product product, Seller agent, ACLMessage msg) {
         super(agent, msg);
         this.product = product;
+        this.seller = agent;
     }
 
     @Override
@@ -102,16 +104,13 @@ public class AskPriceSeller extends AchieveREInitiator {
         // set selling price accordingly
         Seller s = this.getAgent();
         Product p = this.getProduct();
-        s.addProduct(p, this.calculateInitialPrice(s, p));
+        s.addProduct(p,this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
         s.logger.info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(this.getProduct().getName())));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
 
-    private float calculateInitialPrice(Seller s, Product p) {
-        // TODO: improve this function
-        return (float) (s.getCredibility() / 100.0 * p.getOriginalPrice());
-    }
+
 
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
@@ -146,7 +145,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         // TODO: refactor pq é igual a cima para já (??)        
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
-        s.addProduct(p, this.calculateInitialPrice(s, p));
+        s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
         s.logger.info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(p.getName())));
         s.register(p);
     }

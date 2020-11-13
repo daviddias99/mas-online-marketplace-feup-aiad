@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
-import agents.counterOfferStrategies.NormalCounterOfferStrategy;
+import agents.counterOfferStrategies.*;
 import behaviours.NegotiateBuyer;
 import models.Product;
 import utils.CoolFormatter;
@@ -24,13 +25,22 @@ public class Buyer extends Agent {
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
-    private Map<Product, Boolean> products = new HashMap<>();
+    private Map<Product, Boolean> products = new ConcurrentHashMap<>();
+    private CounterOfferStrategy counterOfferStrategy;
+    private float wealth;
     public static Logger logger;
 
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products) {
         for (int i = 0; i < products.length; i++)
             this.products.put(new Product(products[i]), false);
+
+        this.counterOfferStrategy = new TestCounterOfferStrategy();
+        this.wealth = 0;
+    }
+
+    public CounterOfferStrategy getCounterOfferStrategy() {
+        return counterOfferStrategy;
     }
 
     private void setupLogger() {
@@ -67,15 +77,13 @@ public class Buyer extends Agent {
             return;
         }
 
-        // Ask prices of each product to sellers. The ask price behaviour choses the seller with which to negotiate
+        // Ask prices of each product to sellers. The ask price behaviour choses the
+        // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
         ParallelBehaviour negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-        for (Product p : this.products.keySet()) {            
-            negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, 
-                new ACLMessage(ACLMessage.CFP), 
-                new NormalCounterOfferStrategy()
-                ));
-        }
+        for (Product p : this.products.keySet())        
+            negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
+
         this.addBehaviour(negotiationsBehaviour);
     }
 
@@ -99,9 +107,12 @@ public class Buyer extends Agent {
     // - skate : 100 : true
     @Override
     public String toString() {
-        if(this.getLocalName() != null)
+        if (this.getLocalName() != null)
             return this.getLocalName() + "{" + "products=" + this.products + "}";
         return "Buyer{" + "products=" + this.products + "}";
     }
 
+    public synchronized void changeWealth(float variance){
+        this.wealth += variance;
+    }
 }

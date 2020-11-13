@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import agents.Seller;
-import agents.offerStrategies.OfferStrategy;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
@@ -19,12 +18,10 @@ import jade.proto.SSIteratedContractNetResponder;
 public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
-    private OfferStrategy offerStrategy;
 
-    public NegotiateSeller(Seller s, ACLMessage cfp, OfferStrategy offerStrategy) {
+    public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
         this.previousOffers = new ConcurrentHashMap<>();
-        this.offerStrategy = offerStrategy;
     }
 
     @Override
@@ -50,7 +47,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Calculate price to propose
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
                 float originalPrice = seller.getProductPrice(buyerOffer.getProduct().getName());
-                float offeredPrice = this.offerStrategy.chooseOffer(buyerOffer, previousOffer, originalPrice);
+                float offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer, originalPrice);
                 
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
                 seller.getCredibility());
@@ -93,7 +90,6 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     @Override
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
 
-        
         OfferInfo buyerOffer;
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
@@ -101,26 +97,30 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         try {
             buyerOffer = (OfferInfo) cfp.getContentObject();
             seller.logger.info(String.format("< %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender(), buyerOffer));
-            
-            if (seller.hasProduct(buyerOffer.getProduct())) {
 
+            if (seller.removeProduct(buyerOffer.getProduct()) != null) {
+                
                 OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
                  // Cancel the sale, better offer still at play.
                 if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
                     result.setPerformative(ACLMessage.FAILURE);
                     result.setContent("Sorry, a better deal came up...");
+                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
                 }
                 // The product will be sold.
                 else{
                     result.setPerformative(ACLMessage.INFORM);
-                    result.setContent("We are done");
+                    result.setContentObject(buyerOffer);
+                    seller.changeWealth(maxProposal.getOfferedPrice());
+                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), buyerOffer);
                 }
             } 
             // Cancel the sale, already was sold.
             else {
                 result.setPerformative(ACLMessage.FAILURE);
                 result.setContent("Sorry, a better deal came up, already sold it...");
+                System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
             }
 
             seller.logger.info(String.format("> %s sent %s to agent %s saying %s", seller.getLocalName(), result.getPerformative(), cfp.getSender(), result.getContent()));
@@ -129,6 +129,9 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());
 
         } catch (UnreadableException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
