@@ -84,7 +84,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
         // TODO: later
-        this.getAgent().logger.info(String.format("< %s received REJECT from agent %s", this.getAgent().getLocalName(), reject.getSender()));
+        this.getAgent().logger.info(String.format("< %s received REJECT from agent %s", this.getAgent().getLocalName(), reject.getSender().getLocalName()));
     }
 
     @Override
@@ -96,8 +96,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
         try {
             buyerOffer = (OfferInfo) cfp.getContentObject();
-            seller.logger.info(String.format("< %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender(), buyerOffer));
-
+            seller.logger.info(String.format("< %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
+            String content;
             if (seller.removeProduct(buyerOffer.getProduct()) != null) {
                 
                 OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
@@ -105,25 +105,25 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                  // Cancel the sale, better offer still at play.
                 if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
                     result.setPerformative(ACLMessage.FAILURE);
-                    result.setContent("Sorry, a better deal came up...");
-                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
+                    content = "Sorry, a better deal came up...";
+                    result.setContent(content);
                 }
                 // The product will be sold.
                 else{
                     result.setPerformative(ACLMessage.INFORM);
                     result.setContentObject(buyerOffer);
                     seller.changeWealth(maxProposal.getOfferedPrice());
-                    System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), buyerOffer);
+                    content = buyerOffer.toString();
                 }
             } 
             // Cancel the sale, already was sold.
             else {
                 result.setPerformative(ACLMessage.FAILURE);
-                result.setContent("Sorry, a better deal came up, already sold it...");
-                System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), result.getContent());
+                content = "Sorry, a better deal came up, already sold it...";
+                result.setContent(content);
             }
 
-            seller.logger.info(String.format("> %s sent %s to agent %s saying %s", seller.getLocalName(), result.getPerformative(), cfp.getSender(), result.getContent()));
+            seller.logger.info(String.format("> %s sent %s to agent %s saying %s", seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
 
             // Clear offer history from agent
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());
