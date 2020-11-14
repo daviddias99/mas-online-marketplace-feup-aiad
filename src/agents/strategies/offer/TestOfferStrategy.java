@@ -18,7 +18,7 @@ public class TestOfferStrategy extends OfferStrategy {
 		}
 		else {
 			float variance = this.getVariance(currentOffer.getProduct(), (ownPreviousOffer.getOfferedPrice() - currentOffer.getOfferedPrice())/3);
-			return Math.max(currentOffer.getOfferedPrice() ,Math.max(Util.round(ownPreviousOffer.getOfferedPrice() - variance, 2), minPrice));
+			return Math.max(currentOffer.getOfferedPrice() ,Math.max(Util.round(ownPreviousOffer.getOfferedPrice() - variance, 1), minPrice));
 		}
 	}
 

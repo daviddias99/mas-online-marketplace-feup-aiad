@@ -19,7 +19,7 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
             SellerOfferInfo offer = entry.getValue();
             
             // The larger the credibility the smaller the value
-            float perceivedOfferValue = offer.getOfferedPrice() * 1/offer.getSellerCredibility();
+            float perceivedOfferValue = offer.getOfferedPrice() / offer.getSellerCredibility();
 
             if(perceivedOfferValue < bestValue){
                 bestValue = perceivedOfferValue;
@@ -34,7 +34,7 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
         
         if(ownPreviousOffer == null){
-            return Util.round(0.5f * offer.getOfferedPrice(), 2);
+            return Util.round(0.5f * offer.getOfferedPrice(), 1);
         }
         else{
             float variance =  this.getVariance(offer.getProduct(),  (offer.getOfferedPrice() - ownPreviousOffer.getOfferedPrice())/4);

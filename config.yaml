@@ -6,7 +6,10 @@ products:
     price: 20
 buyers:
   - products:
-      - skate
+      - pc
+    counterOfferStrategy: test
+  - products:
+      - pc
     counterOfferStrategy: test
 
 sellers:
