@@ -10,7 +10,7 @@ buyers:
     counterOfferStrategy: test
 
 sellers:
-  - scamFactor: 0
+  - scamFactor: 50
     elasticity: 14
     offerStrategy: test
     pickingStrategy: test
@@ -22,9 +22,9 @@ sellers:
     offerStrategy: test
     pickingStrategy: test
     products:
-      - skate
       - pc
-  - scamFactor: 50
+
+  - scamFactor: 100
     elasticity: 5
     offerStrategy: test
     pickingStrategy: test

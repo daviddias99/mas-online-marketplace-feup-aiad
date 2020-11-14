@@ -165,7 +165,7 @@ public class Buyer extends Agent {
         System.out.println(this.getLocalName() + " exited the chat.");
     }
 
-    public boolean hasProduct(Product product) {
-        return this.products.get(product);
+    public boolean isBuying(Product product) {
+        return this.products.get(product) == ProductStatus.TRYING;
     }
 }

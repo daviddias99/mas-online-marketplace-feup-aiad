@@ -86,6 +86,11 @@ public class NegotiateBuyer extends ContractNetInitiator {
             if(!cfp.getAllReceiver().hasNext()){
                 System.out.printf("// TODO: There are no good sellers left for buyer %s searching for %s%n",
                         this.getAgent().getLocalName(), this.product);
+                this.buyer.noSellerForProduct(this.product);
+                if (this.buyer.finished()) {
+                    System.out.printf("No sellers for product %n", this.product);
+                    this.buyer.doDelete();
+                }
                 return v;
             }
 
@@ -322,7 +327,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     public int onEnd() {
         System.out.println("On End: " + this.getAgent().getLocalName());
-        if(!this.getAgent().hasProduct(this.product)) {
+        if (this.getAgent().isBuying(this.product)) {
             this.reinitiate();
             this.getAgent().getBehaviour().addSubBehaviour(this);
         }

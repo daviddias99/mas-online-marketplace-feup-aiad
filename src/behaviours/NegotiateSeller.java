@@ -174,4 +174,12 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     public Seller getAgent() {
         return (Seller) super.getAgent();
     }
+
+    @Override
+    public int onEnd() {
+        if (this.getAgent().finished())
+            this.getAgent().doDelete();
+
+        return super.onEnd();
+    }
 }
