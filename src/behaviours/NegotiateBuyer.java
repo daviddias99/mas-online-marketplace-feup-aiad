@@ -248,12 +248,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Object response;
         try {
             response = inform.getContentObject();
-            this.getAgent().logger.info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), info));
+            this.getAgent().logger.info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
 
             if (response instanceof Scam) {
                 Scam scam = (Scam) response;
                 this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
+                System.out.println("Received scam");
                 // TODO devo meter p começar de novo?
+                // this.reset();
             } else if (response instanceof OfferInfo) {
                 OfferInfo offerInfo = (OfferInfo) response;
                 this.buyer.receivedProduct(offerInfo.getProduct());
@@ -273,4 +275,11 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.getAgent().logger.info(String.format("< %s received FAILURE from agent %s with %s", this.getAgent().getLocalName(), failure.getSender().getLocalName(), failure.getContent()));
     }
 
+    @Override
+    public void reset() {
+        this.negotiationRound = 0;
+        this.previousOffers = new ConcurrentHashMap<>();
+        this.negotiationOnWait = null;
+        super.reset();
+    }
 }

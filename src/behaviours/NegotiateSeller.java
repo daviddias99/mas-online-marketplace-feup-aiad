@@ -103,12 +103,13 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
             boolean scam = this.getAgent().doScam();
+            System.out.println("Scam " + scam);
             if (scam) {
                 result.setPerformative(ACLMessage.INFORM);
                 result.setContentObject(new Scam(buyerOffer));
                 seller.changeWealth(maxProposal.getOfferedPrice());
                 System.out.printf("< %s sending %s to agent %s saying: %s%n", this.getAgent().getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), buyerOffer);
-
+                System.out.println("SELLER Do scam");
                 return result;
             }
 
