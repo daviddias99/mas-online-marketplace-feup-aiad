@@ -26,6 +26,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import utils.Util;
 
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -216,5 +217,9 @@ public class Seller extends Agent {
 
     public synchronized void changeWealth(float variance){
         this.wealth += variance;
+    }
+
+    public boolean doScam() {
+        return Util.randomBetween(0, 100) < scamFactor;
     }
 }
