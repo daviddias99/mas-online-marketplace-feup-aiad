@@ -13,6 +13,7 @@ import utils.CoolFormatter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -59,11 +60,11 @@ public class Seller extends Agent {
 
         this.scamFactor = scamF;
         this.elasticity = elasticity;
-
+        this.credibility = 100;
         // TODO: no futuro nao começar com credibility ja afetada
-        do {
-            this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2.0) + scamF);
-        } while (this.credibility > 100);
+        // do {
+        //     this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2.0) + scamF);
+        // } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
@@ -125,6 +126,28 @@ public class Seller extends Agent {
         }
 
     }
+    public void deregister(Product product) {
+
+
+        Iterator<ServiceDescription> it = this.dfd.getAllServices();
+
+        while(it.hasNext()){
+            ServiceDescription sd = it.next();
+
+            if(sd.getType().equals(product.getName())){
+                this.dfd.removeServices(sd);
+                break;
+            }
+        }
+
+        try {
+            DFService.modify(this, this.dfd);
+        } catch (FIPAException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+    }
 
     private void deregister() {
         try {
@@ -132,6 +155,18 @@ public class Seller extends Agent {
         } catch (FIPAException e) {
             e.printStackTrace();
         }
+    }
+
+    public int reduceCredibility(){
+        int reduceFactor = Util.randomBetween(70, 90);
+        this.credibility = reduceFactor * this.credibility / 100;
+        return this.credibility;
+    }
+
+    public int increaseCredibility(){
+        int increaseFactor = Util.randomBetween(110, 140);
+        this.credibility = Math.min(100, increaseFactor * this.credibility / 100);
+        return this.credibility;
     }
 
     //
