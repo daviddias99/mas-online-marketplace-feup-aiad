@@ -3,8 +3,10 @@ package behaviours;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +30,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;
     private Map<AID, SellerOfferInfo> previousOffers;
+    private Set<AID> blackList;
     private ACLMessage negotiationOnWait;
     private Buyer buyer;
 
@@ -35,6 +38,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         super(b, cfp);
         this.product = product;
         this.negotiationRound = 0;
+        this.blackList = new HashSet<>();
         this.previousOffers = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
         this.buyer = b;
@@ -75,8 +79,17 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
-                cfp.addReceiver(result[i].getName());
+                if(!this.blackList.contains(result[i].getName()))
+                    cfp.addReceiver(result[i].getName());
 
+            // TODO: igual a cima ambos têm de ter condição de saída no onEnd
+            if(!cfp.getAllReceiver().hasNext()){
+                System.out.printf("// TODO: There are no good sellers left for buyer %s searching for %s%n",
+                        this.getAgent().getLocalName(), this.product);
+                return v;
+            }
+
+        
             // A "blank" offer (with -1) is sent to know the price of the product (we don't
             // send only the <product> because of compability reasons)
             cfp.setContentObject(new OfferInfo(this.product, -1));
@@ -126,7 +139,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     @Override
     protected void handleAllResponses(Vector responses, Vector acceptances) {
-        this.negotiationRound = this.negotiationRound + 1;
+        this.negotiationRound++;
 
         // Seller product offers
         List<ACLMessage> convertedResponses = responses;
@@ -266,8 +279,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 Scam scam = (Scam) response;
                 this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
                 this.getAgent().logger().info(String.format("< %s was SCAMMED by agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
-                // TODO devo meter p começar de novo?
-                // this.reset();
+                this.blackList.add(inform.getSender());
             } else if (response instanceof OfferInfo) {
                 OfferInfo offerInfo = (OfferInfo) response;
                 this.buyer.receivedProduct(offerInfo.getProduct());
@@ -300,11 +312,20 @@ public class NegotiateBuyer extends ContractNetInitiator {
         return response;
     }
 
-    // @Override
-    // public void reset() {
-    //     this.negotiationRound = 0;
-    //     this.previousOffers = new ConcurrentHashMap<>();
-    //     this.negotiationOnWait = null;
-    //     super.reset();
-    // }
+    private void reinitiate() {
+        this.negotiationRound = 0;
+        this.previousOffers = new ConcurrentHashMap<>();
+        this.negotiationOnWait = null;
+        reset(new ACLMessage(ACLMessage.CFP));
+    }
+
+    @Override
+    public int onEnd() {
+        System.out.println("On End: " + this.getAgent().getLocalName());
+        if(!this.getAgent().hasProduct(this.product)) {
+            this.reinitiate();
+            this.getAgent().getBehaviour().addSubBehaviour(this);
+        }
+        return super.onEnd();
+    }
 }
