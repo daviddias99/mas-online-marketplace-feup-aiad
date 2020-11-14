@@ -28,6 +28,7 @@ public class Buyer extends Agent {
     private CounterOfferStrategy counterOfferStrategy;
     private float wealth;
     private transient Logger logger;
+    private ParallelBehaviour negotiationsBehaviour;
 
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
@@ -67,7 +68,7 @@ public class Buyer extends Agent {
         // Ask prices of each product to sellers. The ask price behaviour choses the
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
-        ParallelBehaviour negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+        negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
         for (Product p : this.products.keySet())        
             negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
 
@@ -99,6 +100,10 @@ public class Buyer extends Agent {
         return this.products.keySet();
     }
 
+    public ParallelBehaviour getBehaviour(){
+        return this.negotiationsBehaviour;
+    }
+
     // Get proiducts that have yet to be bough by the buyer
     public Set<Product> getMissingProducts() {
         return (this.products.entrySet().stream().filter(map -> !map.getValue())
@@ -122,5 +127,9 @@ public class Buyer extends Agent {
 
     public void receivedProduct(Product product) {
         this.products.put(product, true);
+    }
+
+    public boolean hasProduct(Product product) {
+        return this.products.get(product);
     }
 }
