@@ -26,6 +26,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;
     private Map<AID, SellerOfferInfo> previousOffers;
+    private Map<AID, OfferInfo> ownPreviousOffer;
     private ACLMessage negotiationOnWait;
     private Buyer buyer;
 
@@ -34,6 +35,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.product = product;
         this.negotiationRound = 0;
         this.previousOffers = new ConcurrentHashMap<>();
+        this.ownPreviousOffer = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
         this.buyer = b;
     }
@@ -148,7 +150,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         // If counterOffers is empty it means that the lastOffer contains the lowest
         // prices possible
         Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers,
-                this.previousOffers);
+                this.previousOffers, this.ownPreviousOffer);
 
         // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
@@ -195,6 +197,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             // If negotiation is to continue send the chosen counter offer
             if (counterOffers.containsKey(msg.getSender())) {
                 rep.setPerformative(ACLMessage.CFP);
+
+                this.ownPreviousOffer.put(msg.getSender(), counterOffers.get(msg.getSender()));
                 try {
                     rep.setContentObject(counterOffers.get(msg.getSender()));
                 } catch (IOException e) {

@@ -3,6 +3,7 @@ package agents.strategies.counter_offer;
 import java.util.Map;
 
 import jade.core.AID;
+import models.OfferInfo;
 import models.SellerOfferInfo;
 import utils.Util;
 
@@ -30,9 +31,15 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    protected float counterPrice(SellerOfferInfo offer) {
+    protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
         
-        return Util.round(0.5f * offer.getOfferedPrice(), 2);
+        if(ownPreviousOffer == null){
+            return Util.round(0.5f * offer.getOfferedPrice(), 2);
+        }
+        else{
+            float variance =  this.getVariance(offer.getProduct(),  (offer.getOfferedPrice() - ownPreviousOffer.getOfferedPrice())/4);
+            return Math.min(ownPreviousOffer.getOfferedPrice() + variance, offer.getOfferedPrice());
+        }
     }
     
 }

@@ -20,11 +20,13 @@ import jade.proto.SSIteratedContractNetResponder;
 public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
+    private Map<Product, ConcurrentHashMap<AID, SellerOfferInfo>> ownPreviousOffers;
 
     public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
 
         this.previousOffers = new ConcurrentHashMap<>();
+        this.ownPreviousOffers = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -42,11 +44,19 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 // Create the products record if it doesn't exist
                 this.previousOffers.putIfAbsent(buyerOffer.getProduct(), new ConcurrentHashMap<>());
+                this.ownPreviousOffers.putIfAbsent(buyerOffer.getProduct(), new ConcurrentHashMap<>());
 
                 // Calculate price to propose
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
-                float originalPrice = seller.getProductPrice(buyerOffer.getProduct().getName());
-                float offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer, originalPrice);
+                float offeredPrice = 0;
+                
+                if(previousOffer != null && Math.abs(buyerOffer.getOfferedPrice()- previousOffer.getOfferedPrice())  < 0.01 ){
+                    offeredPrice = previousOffer.getOfferedPrice();
+                }
+                else{
+                    offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer,
+                    this.ownPreviousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()), seller);
+                }
 
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
                         seller.getCredibility());
@@ -56,6 +66,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContentObject(sellerOffer);
+                this.ownPreviousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), sellerOffer);
                 seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(),
                         cfp.getSender().getLocalName(), sellerOffer));
             } else {
@@ -103,8 +114,10 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 content = "Sorry, a better deal came up...";
                 result.setContent(content);
 
-                seller.logger().info(String.format("< %s sent %s to agent %s saying %s, credibility", seller.getLocalName(),
-                ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
+                seller.logger()
+                        .info(String.format("< %s sent %s to agent %s saying %s, credibility", seller.getLocalName(),
+                                ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(),
+                                content));
             }
             // Has product and will scam the buyer
             else if (scam && seller.hasProduct(buyerOffer.getProduct())) {
@@ -117,7 +130,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 seller.logger()
                         .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
                                 seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
-                                cfp.getSender().getLocalName(), scamObj, oldCredibility, newCredibility));                   
+                                cfp.getSender().getLocalName(), scamObj, oldCredibility, newCredibility));
             }
             // The product will be sold.
             else if (seller.removeProduct(buyerOffer.getProduct()) != null) {
@@ -132,11 +145,13 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Increase credibility
                 int oldCredibility = seller.getCredibility();
                 int newCredibility = seller.increaseCredibility();
-                
+
                 seller.deregister(buyerOffer.getProduct());
 
-                seller.logger().info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d", seller.getLocalName(),
-                ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content, oldCredibility, newCredibility));
+                seller.logger()
+                        .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
+                                seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
+                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility));
             }
             // Cancel the sale, already was sold.
             else {
@@ -145,7 +160,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 result.setContent(content);
 
                 seller.logger().info(String.format("< %s sent %s to agent %s saying %s", seller.getLocalName(),
-                ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
+                        ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
             }
 
             // Clear offer history from agent

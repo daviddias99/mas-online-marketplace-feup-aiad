@@ -96,13 +96,13 @@ public class AskPriceSeller extends AchieveREInitiator {
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
         Product p = this.getProduct();
-        List<SellerOfferInfo> marketPrices = this.collectPrices(resultNotifications);
+        List<Float> marketPrices = this.collectPrices(resultNotifications);
         this.logPriceString(marketPrices, p);
 
         // TODO: refactor pq é igual a cima para já (??)
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
-        this.seller.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(seller, p));
+        this.seller.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(seller, p, marketPrices));
         this.seller.logger().info(String.format("! %s set product %s price at %.2f", seller.getLocalName(), p.getName(),
                 seller.getProductPrice(p.getName())));
         this.seller.register(p);
@@ -110,14 +110,14 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     // HELPERS
 
-    private List<SellerOfferInfo> collectPrices(Vector resultNotifications) {
+    private List<Float> collectPrices(Vector resultNotifications) {
 
-        List<SellerOfferInfo> marketPrices = new ArrayList<>();
+        List<Float> marketPrices = new ArrayList<>();
         // Collect current market prices
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
             try {
-                marketPrices.add((SellerOfferInfo) message.getContentObject());
+                marketPrices.add( ((SellerOfferInfo) message.getContentObject()).getOfferedPrice());
             } catch (UnreadableException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -143,18 +143,18 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     }
 
-    private void logPriceString(List<SellerOfferInfo> marketPrices, Product p) {
+    private void logPriceString(List<Float> marketPrices, Product p) {
         boolean first = true;
 
         StringBuilder sb = new StringBuilder(
                 String.format("> %s found that product %s has %d sellers with these prices: [", seller.getLocalName(),
                         p.getName(), marketPrices.size()));
-        for (SellerOfferInfo soInfo : marketPrices)
+        for (Float soInfo : marketPrices)
             if (first) {
-                sb.append(String.format("%.2f", soInfo.getOfferedPrice()));
+                sb.append(String.format("%.2f", soInfo));
                 first = false;
             } else
-                sb.append(String.format(", %.2f", soInfo.getOfferedPrice()));
+                sb.append(String.format(", %.2f", soInfo));
         this.seller.logger().info(sb.append("]").toString());
 
     }

@@ -11,21 +11,20 @@ buyers:
 
 sellers:
   - scamFactor: 50
-    elasticity: 14
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
       - pc
 
   - scamFactor: 50
-    elasticity: 9
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
       - pc
-
-  - scamFactor: 100
-    elasticity: 5
+  - scamFactor: 50
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
