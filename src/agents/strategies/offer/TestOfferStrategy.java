@@ -1,17 +1,25 @@
 package agents.strategies.offer;
 
+import agents.Seller;
 import models.OfferInfo;
+import models.SellerOfferInfo;
 import utils.Util;
-
 
 public class TestOfferStrategy extends OfferStrategy {
 
 	@Override
-	public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, float initialPrice) {
+	public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer, Seller seller) {
 
-		if(currentOffer.getOfferedPrice() < initialPrice)
-			return initialPrice;
+        float sellerProductPrice = seller.getProductPrice(currentOffer.getProduct().getName());
+        float minPrice = sellerProductPrice * (100 -  seller.getElasticity())/100.0f;
 
-		return previousOffer == null ? initialPrice : Util.round(currentOffer.getOfferedPrice() * 1.1f, 2);
+		if(previousOffer == null) {
+			return sellerProductPrice;
+		}
+		else {
+			float variance = this.getVariance(currentOffer.getProduct(), (ownPreviousOffer.getOfferedPrice() - currentOffer.getOfferedPrice())/3);
+			return Math.max(currentOffer.getOfferedPrice() ,Math.max(Util.round(ownPreviousOffer.getOfferedPrice() - variance, 2), minPrice));
+		}
 	}
+
 }

@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -198,6 +197,10 @@ public class Seller extends Agent {
         }        
     }
 
+    public int getElasticity(){
+        return this.elasticity;
+    }
+    
     public int getCredibility() {
         return this.credibility;
     }

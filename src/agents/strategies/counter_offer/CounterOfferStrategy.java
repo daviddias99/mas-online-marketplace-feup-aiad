@@ -7,11 +7,12 @@ import java.util.Map.Entry;
 import jade.core.AID;
 import jade.util.leap.Serializable;
 import models.OfferInfo;
+import models.Product;
 import models.SellerOfferInfo;
 
 public abstract class CounterOfferStrategy implements Serializable {
 
-    public Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers) {
+    public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers, Map<AID, OfferInfo> ownPreviousOffers) {
         Map<AID, OfferInfo> counterOffers = new HashMap<>();
 
         for(Entry<AID, SellerOfferInfo> offer : offers.entrySet()) {
@@ -21,7 +22,7 @@ public abstract class CounterOfferStrategy implements Serializable {
 
             if(!previousOffers.containsKey(offer.getKey()) || ( Math.abs(offer.getValue().getOfferedPrice() - previousOffers.get(offer.getKey()).getOfferedPrice()) >= 0.01 )){
                 // Update with the newOffer
-                float counterPrice =  this.counterPrice(offer.getValue());
+                float counterPrice =  this.counterPrice(offer.getValue(),ownPreviousOffers.get(offer.getKey()));
                 counterOffers.put(offer.getKey(), new OfferInfo(offer.getValue().getProduct(), counterPrice));
                 previousOffers.put(offer.getKey(), offer.getValue());
             }
@@ -32,7 +33,11 @@ public abstract class CounterOfferStrategy implements Serializable {
         return counterOffers;
     }
 
-    protected abstract float counterPrice(SellerOfferInfo offer);
+    protected final float getVariance(Product p ,float proposed){
+        return Math.max(Math.max(0.05f * p.getOriginalPrice(),0.5f), proposed);
+    }
+
+    protected abstract float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer);
 
     public abstract AID finalDecision(Map<AID, SellerOfferInfo> offers);
 }

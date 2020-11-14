@@ -1,6 +1,5 @@
 package agents.strategies.counter_offer;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
@@ -11,28 +10,7 @@ import models.SellerOfferInfo;
 
 public class NormalCounterOfferStrategy extends CounterOfferStrategy {
 
-    @Override
-    public Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers) {
-        Map<AID, OfferInfo> counterOffers = new HashMap<>();
-
-        for(Entry<AID, SellerOfferInfo> offer : offers.entrySet()) {
-            // If ther is no lastOffer (aka first round) always do a counter
-            // Or there was a previous offer
-            // & the offer is different (it is lower) and we can still try to negotiate it and update the previousOffers
-            if(!previousOffers.containsKey(offer.getKey()) || !previousOffers.get(offer.getKey()).equals(offer.getValue())){
-                // Update with the newOffer
-                previousOffers.put(offer.getKey(), offer.getValue());
-                counterOffers.put(offer.getKey(), new OfferInfo(offer.getValue().getProduct(), this.counterPrice(offer.getValue())));
-            }
-            // Else the New Offer price is the same as before, we know that he won't lower the price
-            // We won't add it to the counterOffers because it's not worth it
-            
-        }
-        
-        return counterOffers;
-    }
-
-    protected float counterPrice(SellerOfferInfo offer){
+    protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
         // TODO: improve price function neste momento acho q n faz muito sentido
         float decrease = (float) Math.abs(offer.getOfferedPrice() - ((new Random()).nextGaussian() * offer.getSellerCredibility() + offer.getOfferedPrice()));
         return offer.getOfferedPrice() - decrease;

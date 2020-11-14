@@ -22,21 +22,21 @@ buyers:
     counterOfferStrategy: test
 sellers:
   - scamFactor: 50
-    elasticity: 14
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
       - pc
 
   - scamFactor: 50
-    elasticity: 9
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
       - skate
       - pc
   - scamFactor: 50
-    elasticity: 5
+    elasticity: 50
     offerStrategy: test
     pickingStrategy: test
     products:
