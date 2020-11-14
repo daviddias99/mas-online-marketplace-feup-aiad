@@ -14,9 +14,18 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
+import jade.domain.AMSService;
+import jade.domain.FIPAAgentManagement.AMSAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
@@ -33,6 +42,11 @@ public class Buyer extends Agent {
     private Set<AID> blackList;
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
+    private boolean kill;
+
+    public void setKillIfLast(boolean kill) {
+        this.kill = kill;
+    }
 
     enum ProductStatus {
         TRYING,
@@ -45,7 +59,7 @@ public class Buyer extends Agent {
         for (int i = 0; i < products.length; i++)
             this.products.put(new Product(products[i]), ProductStatus.TRYING);
 
-
+        this.kill = false;
         this.wealth = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
         this.blackList = new HashSet<>();
@@ -161,9 +175,43 @@ public class Buyer extends Agent {
     
     @Override
     public void takeDown() {
-        System.out.println(this.getLocalName() + " exited the chat.");
-        for(Handler h: this.logger.getHandlers())
+        System.out.println(this.getLocalName() + " is the impostor.");
+        for (Handler h: this.logger.getHandlers())
             h.close();
+
+        if (this.kill) {
+            AMSAgentDescription[] agents = null;
+            try {
+                SearchConstraints c = new SearchConstraints();
+                agents = AMSService.search(this, new AMSAgentDescription());
+            } catch (Exception e) {
+                // TODO
+            }
+
+            int numBuyers = 0;
+            for (AMSAgentDescription agentDescription : agents) {
+                if (agentDescription.getName().toString().contains("buyer") && !agentDescription.getName().equals(this.getAID())) {
+                    numBuyers++;
+                }
+            }
+
+            if (numBuyers == 0) {
+                Codec codec = new SLCodec();
+                Ontology jmo = JADEManagementOntology.getInstance();
+                getContentManager().registerLanguage(codec);
+                getContentManager().registerOntology(jmo);
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.addReceiver(getAMS());
+                msg.setLanguage(codec.getName());
+                msg.setOntology(jmo.getName());
+                try {
+                    getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
+                    send(msg);
+                } catch (Exception e) {
+                    // todo
+                }
+            }
+        }
     }
 
     public boolean isBuying(Product product) {

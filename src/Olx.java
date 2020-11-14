@@ -9,14 +9,17 @@ import java.util.Map;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.domain.AMSService;
-import jade.domain.FIPAAgentManagement.AMSAgentDescription;
-import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
 import agents.Seller;
 import models.Product;
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.helper.HelpScreenException;
+import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 import utils.Config;
 
 public class Olx {
@@ -28,7 +31,7 @@ public class Olx {
     private Map<String, Product> products;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config) {
+    public Olx(boolean mainMode, Config config, boolean kill) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
 
@@ -45,7 +48,7 @@ public class Olx {
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
         createSellers();
-        createBuyers();
+        createBuyers(kill);
     }
 
     private void createSellers() {
@@ -71,8 +74,9 @@ public class Olx {
         }            
     }
 
-    private void createBuyers() {
+    private void createBuyers(boolean kill) {
         for (int j = 0; j < this.buyers.size(); j++) {
+            this.buyers.get(j).setKillIfLast(kill);
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
             } catch (StaleProxyException e) {
@@ -87,14 +91,38 @@ public class Olx {
      * @param args <configPath> <createHasMainContainer>
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.out.println("Expected 2 arguments.");
+    public static void main(String[] args) {
+        ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
+                .description("Modeling a second hand market place using agents.");
+        parser.addArgument("--main")
+                .action(Arguments.storeTrue())
+                .help("start agents in new main container");
+        parser.addArgument("--kill")
+                .action(Arguments.storeTrue())
+                .help("last buyer agent shuts down the platforms");
+        parser.addArgument("--config")
+                .help("file (YAML or JSON) with buyers and sellers configuration");
+
+
+        Namespace parsedArgs = null;
+        try {
+            parsedArgs = parser.parseArgs(args);
+        } catch (HelpScreenException e) {
+            System.exit(0);
+        } catch (ArgumentParserException e) {
             System.exit(-1);
         }
 
-        // Get config path
-        String configPath = args[0];
+
+        boolean mainMode = parsedArgs.get("main");
+        boolean kill = parsedArgs.get("kill");
+        String configPath = parsedArgs.get("config");
+        if (configPath == null) {
+            parser.printHelp();
+            System.out.println("\nConfig file is required.");
+            System.exit(-1);
+        }
+
         String configExtension;
         if (configPath.contains(".")) {
             configExtension = configPath.substring(configPath.lastIndexOf('.') + 1);
@@ -103,9 +131,11 @@ public class Olx {
         }
 
         if (!(configExtension.equals("json") || configExtension.equals("yaml") || configExtension.equals("yml"))) {
-            System.out.println("The configuration file format should be either JSON (.json) or YAML (.yaml, .yml).");
+            parser.printHelp();
+            System.out.println("\nThe configuration file format should be either JSON (.json) or YAML (.yaml, .yml).");
             System.exit(-1);
         }
+
 
         if (!new File(configPath).exists()) {
             System.out.println("Configuration file not found.");
@@ -113,24 +143,14 @@ public class Olx {
         }
 
         // Create config object
-        Config config = Config.read(configPath);        
-        boolean mainMode = Boolean.parseBoolean(args[1]);
-        
-        Olx olx = new Olx(mainMode, config);
+        Config config = null;
+        try {
+            config = Config.read(configPath);
+        } catch (IOException e) {
+            System.out.println("Error while reading configuration file.");
+            System.exit(-1);
+        }
 
-        olx.stop();
-    }
-
-    private void stop() {
-
-
-        // TODO: kill plaform
-       /* try {
-            this.container.kill();
-            this.rt.shutDown();
-        } catch (StaleProxyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
+        new Olx(mainMode, config, kill);
     }
 }
