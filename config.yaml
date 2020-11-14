@@ -6,38 +6,14 @@ products:
     price: 20
 buyers:
   - products:
-      - pc
+      - skate
     counterOfferStrategy: test
 
-  - products:
-      - pc
-    counterOfferStrategy: test
-
-  - products:
-      - pc
-    counterOfferStrategy: test
-
-  - products:
-      - pc
-    counterOfferStrategy: test
 sellers:
-  - scamFactor: 100
+  - scamFactor: 0
     elasticity: 14
     offerStrategy: test
     pickingStrategy: test
     products:
-      - pc
+      - skate
 
-  - scamFactor: 100
-    elasticity: 9
-    offerStrategy: test
-    pickingStrategy: test
-    products:
-      - skate
-      - pc
-  - scamFactor: 100
-    elasticity: 5
-    offerStrategy: test
-    pickingStrategy: test
-    products:
-      - skate

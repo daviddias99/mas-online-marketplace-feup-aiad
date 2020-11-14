@@ -9,6 +9,9 @@ import java.util.Map;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
+import jade.domain.AMSService;
+import jade.domain.FIPAAgentManagement.AMSAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
@@ -113,8 +116,21 @@ public class Olx {
         Config config = Config.read(configPath);        
         boolean mainMode = Boolean.parseBoolean(args[1]);
         
-        new Olx(mainMode, config);
+        Olx olx = new Olx(mainMode, config);
+
+        olx.stop();
+    }
+
+    private void stop() {
+
 
         // TODO: kill plaform
+       /* try {
+            this.container.kill();
+            this.rt.shutDown();
+        } catch (StaleProxyException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
     }
 }

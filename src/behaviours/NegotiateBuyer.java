@@ -22,6 +22,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 
+import javax.sound.midi.Soundbank;
+
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;
@@ -63,6 +65,11 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 // TODO: ver
                 System.out.printf("// TODO: There was no product for buyer %s searching for %s%n",
                         this.getAgent().getLocalName(), this.product);
+                this.buyer.noSellerForProduct(this.product);
+                if (this.buyer.finished()) {
+                    System.out.println("Buyer bought all stuffs");
+                    this.buyer.doDelete();
+                }
                 return v;
             }
 
@@ -265,6 +272,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 OfferInfo offerInfo = (OfferInfo) response;
                 this.buyer.receivedProduct(offerInfo.getProduct());
                 this.buyer.changeWealth(-offerInfo.getOfferedPrice());
+                if (this.buyer.finished()) {
+                    System.out.println("Buyer bought all stuffs");
+                    this.buyer.doDelete();
+                }
             }
 
         } catch (UnreadableException e) {

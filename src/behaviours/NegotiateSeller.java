@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import agents.Buyer;
 import agents.Seller;
 import models.OfferInfo;
 import models.Product;
@@ -22,6 +23,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
+
         this.previousOffers = new ConcurrentHashMap<>();
     }
 
@@ -114,6 +116,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Increase weaalth
                 seller.changeWealth(buyerOffer.getOfferedPrice());
                 seller.deregister(buyerOffer.getProduct());
+
             } 
             // Cancel the sale, already was sold.
             else {
@@ -150,5 +153,4 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     public Seller getAgent(){
         return (Seller) super.getAgent();
     }
-
 }

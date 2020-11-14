@@ -12,8 +12,18 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.basic.Action;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
+import jade.domain.AMSService;
+import jade.domain.FIPAAgentManagement.AMSAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
@@ -24,15 +34,21 @@ public class Buyer extends Agent {
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
-    private Map<Product, Boolean> products = new ConcurrentHashMap<>();
+    private Map<Product, ProductStatus> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float wealth;
     private transient Logger logger;
 
+    enum ProductStatus {
+        TRYING,
+        BOUGHT,
+        NO_SELLER,
+    }
+
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
         for (int i = 0; i < products.length; i++)
-            this.products.put(new Product(products[i]), false);
+            this.products.put(new Product(products[i]), ProductStatus.TRYING);
 
 
         this.wealth = 0;
@@ -101,7 +117,7 @@ public class Buyer extends Agent {
 
     // Get proiducts that have yet to be bough by the buyer
     public Set<Product> getMissingProducts() {
-        return (this.products.entrySet().stream().filter(map -> !map.getValue())
+        return (this.products.entrySet().stream().filter(map -> map.getValue() == ProductStatus.TRYING)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
     }
 
@@ -121,6 +137,26 @@ public class Buyer extends Agent {
     }
 
     public void receivedProduct(Product product) {
-        this.products.put(product, true);
+        this.products.put(product, ProductStatus.BOUGHT);
+    }
+
+    public void noSellerForProduct(Product product) {
+        this.products.put(product, ProductStatus.NO_SELLER);
+    }
+
+    public boolean finished() {
+
+        for (Map.Entry<Product, ProductStatus> p : this.products.entrySet()) {
+            if (p.getValue() == ProductStatus.TRYING) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
+    @Override
+    public void takeDown() {
+        System.out.println(this.getLocalName() + " exited the chat.");
     }
 }

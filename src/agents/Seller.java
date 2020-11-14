@@ -48,8 +48,8 @@ public class Seller extends Agent {
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
-            @JsonProperty("elasticity") int elasticity, @JsonProperty("pickingStrategy") String pickingStrategy,
-            @JsonProperty("offerStrategy") String offerStrategy) {
+                  @JsonProperty("elasticity") int elasticity, @JsonProperty("pickingStrategy") String pickingStrategy,
+                  @JsonProperty("offerStrategy") String offerStrategy) {
         if (scamF > 100 || scamF < 0)
             throw new IllegalArgumentException("Scam Factor must be from 0 to 100 and was " + scamF);
         if (elasticity > 100 || elasticity < 0)
@@ -72,7 +72,7 @@ public class Seller extends Agent {
         this.wealth = 0;
     }
 
-    public Logger logger(){
+    public Logger logger() {
         return this.logger;
     }
 
@@ -108,6 +108,7 @@ public class Seller extends Agent {
     @Override
     protected void takeDown() {
         deregister();
+        System.out.println(this.getLocalName() + " exited the chat.");
     }
 
     public void register(Product product) {
@@ -126,15 +127,16 @@ public class Seller extends Agent {
         }
 
     }
+
     public void deregister(Product product) {
 
 
         Iterator<ServiceDescription> it = this.dfd.getAllServices();
 
-        while(it.hasNext()){
+        while (it.hasNext()) {
             ServiceDescription sd = it.next();
 
-            if(sd.getType().equals(product.getName())){
+            if (sd.getType().equals(product.getName())) {
                 this.dfd.removeServices(sd);
                 break;
             }
@@ -183,7 +185,7 @@ public class Seller extends Agent {
         } catch (SecurityException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }        
+        }
     }
 
     public int getCredibility() {
@@ -202,7 +204,7 @@ public class Seller extends Agent {
         this.products.put(product, marketPrice);
     }
 
-    public boolean hasProduct(Product product){
+    public boolean hasProduct(Product product) {
         return this.products.containsKey(product);
     }
 
@@ -210,7 +212,7 @@ public class Seller extends Agent {
         return this.products.keySet();
     }
 
-    public void setProducts(Map<Product, Float> newP){
+    public void setProducts(Map<Product, Float> newP) {
         this.products = newP;
     }
 
@@ -233,16 +235,20 @@ public class Seller extends Agent {
 
     @Override
     public String toString() {
-        if(this.getLocalName() != null)
-            return this.getLocalName() + "{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';    
+        if (this.getLocalName() != null)
+            return this.getLocalName() + "{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';
         return "Seller{credibility:scamF=" + credibility + ":" + this.scamFactor + ", elasticity=" + this.elasticity + ", products=" + products + '}';
     }
 
-    public synchronized void changeWealth(float variance){
+    public synchronized void changeWealth(float variance) {
         this.wealth += variance;
     }
 
     public boolean doScam() {
         return Util.randomBetween(0, 100) < scamFactor;
+    }
+
+    public boolean finished() {
+        return this.products.isEmpty();
     }
 }

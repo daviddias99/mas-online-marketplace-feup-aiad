@@ -16,6 +16,7 @@ public class NegotiationDispatcher extends SSResponderDispatcher {
 
     @Override
     protected Behaviour createResponder(ACLMessage arg0) {
-        return new NegotiateSeller((Seller)this.getAgent(), arg0);
+        Seller seller = (Seller) this.getAgent();
+        return new NegotiateSeller(seller, arg0);
     }    
 }
