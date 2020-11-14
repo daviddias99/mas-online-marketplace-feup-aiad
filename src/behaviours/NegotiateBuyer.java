@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import agents.Buyer;
 import models.OfferInfo;
 import models.Product;
+import models.Scam;
 import models.SellerOfferInfo;
 import jade.core.AID;
 import jade.domain.DFService;
@@ -116,7 +117,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     @Override
     protected void handleAllResponses(Vector responses, Vector acceptances) {
-        this.negotiationRound++;
+        this.negotiationRound = this.negotiationRound + 1;
 
         // Seller product offers
         Vector<ACLMessage> convertedResponses = responses;
@@ -247,12 +248,23 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected void handleInform(ACLMessage inform) {
 
-        OfferInfo info;
+        Object response;
         try {
-            info = (OfferInfo) inform.getContentObject();
-            this.getAgent().logger.info(String.format("> %s received INFORM from agent %s with %s",
-                    this.getAgent().getLocalName(), inform.getSender().getLocalName(), info));
-            this.buyer.changeWealth(-info.getOfferedPrice());
+            response = inform.getContentObject();
+            this.getAgent().logger.info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
+
+            if (response instanceof Scam) {
+                Scam scam = (Scam) response;
+                this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
+                this.getAgent().logger.info(String.format("< %s was SCAMMED by agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
+                // TODO devo meter p começar de novo?
+                // this.reset();
+            } else if (response instanceof OfferInfo) {
+                OfferInfo offerInfo = (OfferInfo) response;
+                this.buyer.receivedProduct(offerInfo.getProduct());
+                this.buyer.changeWealth(-offerInfo.getOfferedPrice());
+            }
+
         } catch (UnreadableException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -275,4 +287,11 @@ public class NegotiateBuyer extends ContractNetInitiator {
         return response;
     }
 
+    // @Override
+    // public void reset() {
+    //     this.negotiationRound = 0;
+    //     this.previousOffers = new ConcurrentHashMap<>();
+    //     this.negotiationOnWait = null;
+    //     super.reset();
+    // }
 }

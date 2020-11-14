@@ -24,13 +24,15 @@ public abstract class Util {
         return Math.round(value * scale) / scale;
     }
 
+
     public static int randomBetween(int min, int max) {
 
-        if (min >= max) {
+        if (min > max) {
             throw new IllegalArgumentException("max must be greater than min");
         }
 
-        return Util.getInstance().nextInt((max - min) + 1) + min;
+
+        return Util.getInstance().nextInt(max - min) + min;
     }
 
     public static float getNormalRandom(float avg, float std){

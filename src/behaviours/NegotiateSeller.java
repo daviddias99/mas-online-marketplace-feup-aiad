@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import agents.Seller;
 import models.OfferInfo;
 import models.Product;
+import models.Scam;
 import models.SellerOfferInfo;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -86,11 +87,22 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             String content;
             OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
+            boolean scam = this.getAgent().doScam();
+
             // Cancel the sale, better offer still at play.
             if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
                 result.setPerformative(ACLMessage.FAILURE);
                 content = "Sorry, a better deal came up...";
                 result.setContent(content);
+            }
+            // Has product and will scam the buyer
+            else if (scam && seller.hasProduct(buyerOffer.getProduct())) {
+                Scam scamObj = new Scam(buyerOffer);
+                result.setPerformative(ACLMessage.INFORM);
+                result.setContentObject(scamObj);
+                seller.changeWealth(maxProposal.getOfferedPrice());
+                seller.logger.info(String.format("< %s sent %s to agent %s saying %s", seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), scamObj));
+                return result;
             }
             // The product will be sold.
             else if (seller.removeProduct(buyerOffer.getProduct()) != null) {
