@@ -30,6 +30,7 @@ import jade.lang.acl.MessageTemplate;
 import utils.Util;
 
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public class Seller extends Agent {
@@ -109,6 +110,8 @@ public class Seller extends Agent {
     protected void takeDown() {
         deregister();
         System.out.println(this.getLocalName() + " exited the chat.");
+        for(Handler h: this.logger.getHandlers())
+            h.close();
     }
 
     public void register(Product product) {

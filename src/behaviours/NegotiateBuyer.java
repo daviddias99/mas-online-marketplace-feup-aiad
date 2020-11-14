@@ -3,10 +3,8 @@ package behaviours;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,13 +22,10 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 
-import javax.sound.midi.Soundbank;
-
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;
     private Map<AID, SellerOfferInfo> previousOffers;
-    private Set<AID> blackList;
     private ACLMessage negotiationOnWait;
     private Buyer buyer;
 
@@ -38,7 +33,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
         super(b, cfp);
         this.product = product;
         this.negotiationRound = 0;
-        this.blackList = new HashSet<>();
         this.previousOffers = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
         this.buyer = b;
@@ -79,7 +73,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
-                if(!this.blackList.contains(result[i].getName()))
+                if(!this.getAgent().isScammer(result[i].getName()))
                     cfp.addReceiver(result[i].getName());
 
             // TODO: igual a cima ambos têm de ter condição de saída no onEnd
@@ -284,7 +278,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 Scam scam = (Scam) response;
                 this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
                 this.getAgent().logger().info(String.format("< %s was SCAMMED by agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
-                this.blackList.add(inform.getSender());
+                this.getAgent().addScammer(inform.getSender());
             } else if (response instanceof OfferInfo) {
                 OfferInfo offerInfo = (OfferInfo) response;
                 this.buyer.receivedProduct(offerInfo.getProduct());
