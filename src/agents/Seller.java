@@ -13,6 +13,7 @@ import utils.CoolFormatter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -116,6 +117,28 @@ public class Seller extends Agent {
         sd.setName(getLocalName());
         sd.setType(product.getName());
         this.dfd.addServices(sd);
+
+        try {
+            DFService.modify(this, this.dfd);
+        } catch (FIPAException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+    }
+    public void deregister(Product product) {
+
+
+        Iterator<ServiceDescription> it = this.dfd.getAllServices();
+
+        while(it.hasNext()){
+            ServiceDescription sd = it.next();
+
+            if(sd.getType().equals(product.getName())){
+                this.dfd.removeServices(sd);
+                break;
+            }
+        }
 
         try {
             DFService.modify(this, this.dfd);

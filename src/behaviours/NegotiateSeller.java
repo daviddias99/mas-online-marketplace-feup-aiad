@@ -82,7 +82,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         ACLMessage result = accept.createReply();
 
         try {
-            buyerOffer = (OfferInfo) cfp.getContentObject();
+            buyerOffer = (OfferInfo) accept.getContentObject();
             seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
             OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
@@ -109,8 +109,11 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 
                 result.setPerformative(ACLMessage.INFORM);
                 result.setContentObject(buyerOffer);
-                seller.changeWealth(buyerOffer.getOfferedPrice());
                 content = buyerOffer.toString();
+
+                // Increase weaalth
+                seller.changeWealth(buyerOffer.getOfferedPrice());
+                seller.deregister(buyerOffer.getProduct());
             } 
             // Cancel the sale, already was sold.
             else {
