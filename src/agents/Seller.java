@@ -56,11 +56,9 @@ public class Seller extends Agent {
         this.pricePickingStrategy = PickingStrategyFactory.get(pickingStrategy);
         this.offerStrategy = OfferStrategyFactory.get(offerStrategy);
 
-
         this.scamFactor = scamF;
         this.elasticity = elasticity;
-        // TODO: brincar com isto
-        // * Std Deviation + Mean
+
         // TODO: no futuro nao começar com credibility ja afetada
         do {
             this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2.0) + scamF);
@@ -69,37 +67,11 @@ public class Seller extends Agent {
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);
 
-
         this.wealth = 0;
     }
 
     public Logger logger(){
         return this.logger;
-    }
-
-    public PricePickingStrategy getPricePickingStrategy() {
-        return pricePickingStrategy;
-    }
-
-    public OfferStrategy getOfferStrategy() {
-        return offerStrategy;
-    }
-
-    private void setupLogger() {
-        this.logger = Logger.getLogger(this.getLocalName());
-        this.logger.setUseParentHandlers(false);
-        File dir = new File("logs/");
-        if (!dir.exists())
-            dir.mkdir();
-
-        try {
-            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
-            this.logger.addHandler(fh);
-            fh.setFormatter(new CoolFormatter());
-        } catch (SecurityException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }        
     }
 
     @Override
@@ -164,6 +136,31 @@ public class Seller extends Agent {
     //
     // Helper
     //
+
+    public PricePickingStrategy getPricePickingStrategy() {
+        return pricePickingStrategy;
+    }
+
+    public OfferStrategy getOfferStrategy() {
+        return offerStrategy;
+    }
+
+    private void setupLogger() {
+        this.logger = Logger.getLogger(this.getLocalName());
+        this.logger.setUseParentHandlers(false);
+        File dir = new File("logs/");
+        if (!dir.exists())
+            dir.mkdir();
+
+        try {
+            FileHandler fh = new FileHandler("logs/" + this.getLocalName() + ".log");
+            this.logger.addHandler(fh);
+            fh.setFormatter(new CoolFormatter());
+        } catch (SecurityException | IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }        
+    }
 
     public int getCredibility() {
         return this.credibility;

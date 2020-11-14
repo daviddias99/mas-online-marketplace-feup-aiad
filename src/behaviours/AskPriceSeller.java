@@ -33,14 +33,14 @@ public class AskPriceSeller extends AchieveREInitiator {
     }
 
     @Override
-    public Seller getAgent(){
+    public Seller getAgent() {
         return (Seller) super.getAgent();
     }
 
-    protected Product getProduct(){
+    protected Product getProduct() {
         return this.product;
     }
-    
+
     @Override
     protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
         Vector<ACLMessage> v = new Vector<>();
@@ -54,9 +54,9 @@ public class AskPriceSeller extends AchieveREInitiator {
 
         try {
             DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-            
+
             // No agents are selling <product>
-            if(result.length == 0){
+            if (result.length == 0) {
                 this.handleNoResults();
                 return v;
             }
@@ -65,38 +65,19 @@ public class AskPriceSeller extends AchieveREInitiator {
             for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
 
-            // Logging
-            StringBuilder sb = new StringBuilder(String.format("< %s asked the price of *%s* to the following sellers: [", this.getAgent().getLocalName(), this.getProduct().getName()));
-            Iterator<?> it = msg.getAllReceiver();
-            boolean first = true;
-            while(it.hasNext()){
-                AID next = (AID) it.next();
-                if(first){
-                    sb.append(String.format("%s", next.getLocalName()));
-                    first = false;
-                }
-                else
-                    sb.append(String.format(", %s", next.getLocalName()));
-            }
-            this.getAgent().logger().info(sb.append("]").toString());
 
-        } catch (FIPAException fe) {
+            // The <product> is sent as the content so that the
+            // seller knows to which product the request pertains to
+            msg.setContentObject(this.product);
+            v.add(msg);
+            // Logging
+            this.logSellerList(msg);
+
+        } catch (FIPAException | IOException fe) {
             // TODO Auto-generated catch block
             fe.printStackTrace();
         }
-
-        // The <product> is sent as the content so that the 
-        // seller knows to which product the request pertains to
-        try {
-            msg.setContentObject(this.product);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return v;
-        }
-
-        v.add(msg);
-
+        
         return v;
     }
 
@@ -112,15 +93,26 @@ public class AskPriceSeller extends AchieveREInitiator {
         s.register(p);
     }
 
-
-
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
-        Seller s = this.getAgent();
         Product p = this.getProduct();
+        List<SellerOfferInfo> marketPrices = this.collectPrices(resultNotifications);
+        this.logPriceString(marketPrices, p);
+
+        // TODO: refactor pq é igual a cima para já (??)
+        // Other sellers are currenttly selling <product>
+        // set selling price accordingly
+        this.seller.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(seller, p));
+        this.seller.logger().info(String.format("! %s set product %s price at %.2f", seller.getLocalName(), p.getName(),
+                seller.getProductPrice(p.getName())));
+        this.seller.register(p);
+    }
+
+    // HELPERS
+
+    private List<SellerOfferInfo> collectPrices(Vector resultNotifications) {
 
         List<SellerOfferInfo> marketPrices = new ArrayList<>();
-
         // Collect current market prices
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
@@ -132,22 +124,38 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
         }
 
-        StringBuilder sb = new StringBuilder(String.format("> %s found that product %s has %d sellers with these prices: [", s.getLocalName(), p.getName(), marketPrices.size()));
+        return marketPrices;
+    }
+
+    private void logSellerList(ACLMessage msg) {
+        // Logging
+        StringBuilder sb = new StringBuilder(String.format("< %s asked the price of *%s* to the following sellers: [",
+                this.getAgent().getLocalName(), this.getProduct().getName()));
+        Iterator<AID> it = msg.getAllReceiver();
         boolean first = true;
-        for(SellerOfferInfo soInfo: marketPrices)
-            if(first){
+        while (it.hasNext())
+            if (first) {
+                sb.append(String.format("%s", it.next().getLocalName()));
+                first = false;
+            } else
+                sb.append(String.format(", %s", it.next().getLocalName()));
+        this.getAgent().logger().info(sb.append("]").toString());
+
+    }
+
+    private void logPriceString(List<SellerOfferInfo> marketPrices, Product p) {
+        boolean first = true;
+
+        StringBuilder sb = new StringBuilder(
+                String.format("> %s found that product %s has %d sellers with these prices: [", seller.getLocalName(),
+                        p.getName(), marketPrices.size()));
+        for (SellerOfferInfo soInfo : marketPrices)
+            if (first) {
                 sb.append(String.format("%.2f", soInfo.getOfferedPrice()));
                 first = false;
-            }
-            else
+            } else
                 sb.append(String.format(", %.2f", soInfo.getOfferedPrice()));
-        s.logger().info(sb.append("]").toString());
-            
-        // TODO: refactor pq é igual a cima para já (??)        
-        // Other sellers are currenttly selling <product>
-        // set selling price accordingly
-        s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
-        s.logger().info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(p.getName())));
-        s.register(p);
+        this.seller.logger().info(sb.append("]").toString());
+
     }
 }

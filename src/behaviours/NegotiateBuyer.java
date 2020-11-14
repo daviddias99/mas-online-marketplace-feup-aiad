@@ -148,14 +148,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         // If the best negotiation that is on wait is no longer a candidate, reject it
         if (this.negotiationOnWait != null && bestSeller != this.negotiationOnWait.getSender()) {
             outgoingMessages.add(this.prepareRejectProposal(this.negotiationOnWait));
-            sb.append(String.format(format, negotiationOnWait.getSender()));
+            sb.append(String.format(format, negotiationOnWait.getSender().getLocalName()));
             this.negotiationOnWait = null;
         }
 
         // If msg, i.e. the ended negotiation, isn't the best among the rest cancel it
         if (bestSeller != incomingMessage.getSender()) {
             outgoingMessages.add(this.prepareRejectProposal(incomingMessage));
-            sb.append(String.format(format, negotiationOnWait.getSender()));
+            sb.append(String.format(format, incomingMessage.getSender().getLocalName()));
         }
         // msg is the current best alternative, store it
         else
@@ -217,6 +217,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
         boolean reject = false;
         for (ACLMessage msg : pendingMessages) {
             ACLMessage rep = msg.createReply();
+
+            if(msg.getPerformative() != ACLMessage.PROPOSE) {
+                continue;
+            }
 
             // Accept the proposal of the best offer and reject all others
             if (msg.getSender().equals(bestSeller)) {

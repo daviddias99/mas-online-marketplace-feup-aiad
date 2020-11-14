@@ -25,11 +25,6 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     }
 
     @Override
-    public Seller getAgent(){
-        return (Seller) super.getAgent();
-    }
-
-    @Override
     protected ACLMessage handleCfp(ACLMessage cfp) {
         ACLMessage reply = cfp.createReply();
 
@@ -72,15 +67,6 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         return reply;
     }
 
-    private OfferInfo bestCurrentOfferFor(Product product) {
-
-        Map<AID, OfferInfo> offers = this.previousOffers.get(product);
-        Entry<AID, OfferInfo> maxEntry = Collections.max(offers.entrySet(), (e1, e2) -> e1.getValue().compareTo(e2.getValue()));
-
-        return maxEntry.getValue();
-    }
-
-
     @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
         // TODO: later
@@ -98,23 +84,21 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             buyerOffer = (OfferInfo) cfp.getContentObject();
             seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
-            if (seller.removeProduct(buyerOffer.getProduct()) != null) {
-                
-                OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
+            OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
-                 // Cancel the sale, better offer still at play.
-                if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
-                    result.setPerformative(ACLMessage.FAILURE);
-                    content = "Sorry, a better deal came up...";
-                    result.setContent(content);
-                }
-                // The product will be sold.
-                else{
-                    result.setPerformative(ACLMessage.INFORM);
-                    result.setContentObject(buyerOffer);
-                    seller.changeWealth(maxProposal.getOfferedPrice());
-                    content = buyerOffer.toString();
-                }
+            // Cancel the sale, better offer still at play.
+            if(maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()){
+                result.setPerformative(ACLMessage.FAILURE);
+                content = "Sorry, a better deal came up...";
+                result.setContent(content);
+            }
+            // The product will be sold.
+            else if (seller.removeProduct(buyerOffer.getProduct()) != null) {
+                
+                result.setPerformative(ACLMessage.INFORM);
+                result.setContentObject(buyerOffer);
+                seller.changeWealth(buyerOffer.getOfferedPrice());
+                content = buyerOffer.toString();
             } 
             // Cancel the sale, already was sold.
             else {
@@ -134,6 +118,22 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         }
 
         return result;
+    }
+
+
+    // HELPER
+
+    private OfferInfo bestCurrentOfferFor(Product product) {
+
+        Map<AID, OfferInfo> offers = this.previousOffers.get(product);
+        Entry<AID, OfferInfo> maxEntry = Collections.max(offers.entrySet(), (e1, e2) -> e1.getValue().compareTo(e2.getValue()));
+
+        return maxEntry.getValue();
+    }
+
+    @Override
+    public Seller getAgent(){
+        return (Seller) super.getAgent();
     }
 
 }
