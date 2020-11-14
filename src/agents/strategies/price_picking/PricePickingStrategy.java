@@ -1,4 +1,4 @@
-package agents.pricePickingStrategies;
+package agents.strategies.price_picking;
 
 import java.io.Serializable;
 import java.util.List;

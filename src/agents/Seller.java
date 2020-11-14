@@ -6,8 +6,8 @@ import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import agents.offerStrategies.*;
-import agents.pricePickingStrategies.*;
+import agents.strategies.offer.*;
+import agents.strategies.price_picking.*;
 import models.Product;
 import utils.CoolFormatter;
 
@@ -31,8 +31,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 public class Seller extends Agent {
-    // TODO: assim ou String to Product pra acesso mais rápido
-
     // List of products which the seller is currently offering and the price
     // of said products (float)
     private Map<Product, Float> products = new ConcurrentHashMap<>();
@@ -44,7 +42,7 @@ public class Seller extends Agent {
     private OfferStrategy offerStrategy;
     private PricePickingStrategy pricePickingStrategy;
     private float wealth;
-    public transient Logger logger;
+    private transient Logger logger;
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
@@ -65,7 +63,7 @@ public class Seller extends Agent {
         // * Std Deviation + Mean
         // TODO: no futuro nao começar com credibility ja afetada
         do {
-            this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2) + scamF);
+            this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2.0) + scamF);
         } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
@@ -73,6 +71,10 @@ public class Seller extends Agent {
 
 
         this.wealth = 0;
+    }
+
+    public Logger logger(){
+        return this.logger;
     }
 
     public PricePickingStrategy getPricePickingStrategy() {

@@ -1,4 +1,4 @@
-package agents.counterOfferStrategies;
+package agents.strategies.counter_offer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,6 @@ import models.SellerOfferInfo;
 public class NormalCounterOfferStrategy extends CounterOfferStrategy {
 
     @Override
-    // TODO: ver se ao passar para aqui os Maps isto atualiza (referência mesmo)
     public Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers) {
         Map<AID, OfferInfo> counterOffers = new HashMap<>();
 
@@ -20,7 +19,6 @@ public class NormalCounterOfferStrategy extends CounterOfferStrategy {
             // If ther is no lastOffer (aka first round) always do a counter
             // Or there was a previous offer
             // & the offer is different (it is lower) and we can still try to negotiate it and update the previousOffers
-            // TODO: ver se equals do OfferInfo dá overload ao do SellerOfferInfo
             if(!previousOffers.containsKey(offer.getKey()) || !previousOffers.get(offer.getKey()).equals(offer.getValue())){
                 // Update with the newOffer
                 previousOffers.put(offer.getKey(), offer.getValue());

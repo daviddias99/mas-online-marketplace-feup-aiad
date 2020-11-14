@@ -1,7 +1,9 @@
 package behaviours;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +45,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected Vector<ACLMessage> prepareCfps(ACLMessage cfp) {
 
-        Vector<ACLMessage> v = new Vector<ACLMessage>();
+        Vector<ACLMessage> v = new Vector<>();
 
         // Query df service for agents who are selling <product>
         DFAgentDescription template = new DFAgentDescription();
@@ -81,7 +83,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         return v;
     }
 
-    private Map<AID, SellerOfferInfo> getOffers(Vector<ACLMessage> receivedMessages) {
+    private Map<AID, SellerOfferInfo> getOffers(List<ACLMessage> receivedMessages) {
         Map<AID, SellerOfferInfo> offers = new HashMap<>();
         StringBuilder sb = new StringBuilder(String.format("> %s got %d responses on round %d:",
                 this.buyer.getLocalName(), receivedMessages.size(), this.negotiationRound));
@@ -109,7 +111,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             }
 
         }
-        this.buyer.logger.info(sb.toString());
+        this.buyer.logger().info(sb.toString());
 
         return offers;
     }
@@ -119,7 +121,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.negotiationRound++;
 
         // Seller product offers
-        Vector<ACLMessage> convertedResponses = responses;
+        List<ACLMessage> convertedResponses = responses;
         Map<AID, SellerOfferInfo> offers = this.getOffers(convertedResponses);
 
         // Update with new SellerOffers and new counter-offers
@@ -139,7 +141,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
     }
 
-    private void updateWaitingList(ACLMessage incomingMessage, Vector<ACLMessage> outgoingMessages, StringBuilder sb) {
+    private void updateWaitingList(ACLMessage incomingMessage, List<ACLMessage> outgoingMessages, StringBuilder sb) {
 
         AID bestSeller = this.buyer.getCounterOfferStrategy().finalDecision(this.previousOffers);
         String format = "%n - %s";
@@ -160,7 +162,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             this.negotiationOnWait = incomingMessage;
     }
 
-    private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, Vector<ACLMessage> incomingMessages, Vector outgoingMessages) {
+    private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, List<ACLMessage> incomingMessages, List<ACLMessage> outgoingMessages) {
         // Do the counterOffers while the others "wait"
         StringBuilder sbCFP = new StringBuilder(String.format("< %s sent CFP on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
         StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
@@ -193,10 +195,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
             sbCFP.append(sbReject.toString());
         if (this.negotiationOnWait != null)
             sbCFP.append(String.format("%n! %s is now on wait.%n", this.negotiationOnWait.getSender()));
-        this.getAgent().logger.info(sbCFP.toString());
+        this.getAgent().logger().info(sbCFP.toString());
     }
 
-    private void prepareFinalMessages(Vector<ACLMessage> lastMessages, Vector outgoingMessages) {
+    private void prepareFinalMessages(List<ACLMessage> lastMessages, List<ACLMessage> outgoingMessages) {
         StringBuilder sbAccept = new StringBuilder(String.format("< %s sent ACCEPT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
         StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));        
 
@@ -205,7 +207,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
         // Get all messages that need answering: all from this round + the message on
         // wait if any
-        Vector<ACLMessage> pendingMessages = new Vector<ACLMessage>();
+        List<ACLMessage> pendingMessages = new ArrayList<>();
 
         pendingMessages.addAll(lastMessages);
 
@@ -237,7 +239,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
         if(reject)
             sbAccept.append(sbReject.toString());
-        this.getAgent().logger.info(sbAccept.toString());
+        this.getAgent().logger().info(sbAccept.toString());
     }
 
     @Override
@@ -246,7 +248,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         OfferInfo info;
         try {
             info = (OfferInfo) inform.getContentObject();
-            this.getAgent().logger.info(String.format("> %s received INFORM from agent %s with %s",
+            this.getAgent().logger().info(String.format("> %s received INFORM from agent %s with %s",
                     this.getAgent().getLocalName(), inform.getSender().getLocalName(), info));
             this.buyer.changeWealth(-info.getOfferedPrice());
         } catch (UnreadableException e) {
@@ -259,7 +261,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     @Override
     protected void handleFailure(ACLMessage failure) {
         // TODO: Manel
-        this.getAgent().logger.info(String.format("> %s received FAILURE from agent %s with %s",
+        this.getAgent().logger().info(String.format("> %s received FAILURE from agent %s with %s",
                 this.getAgent().getLocalName(), failure.getSender().getLocalName(), failure.getContent()));
     }
 

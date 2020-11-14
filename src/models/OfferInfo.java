@@ -1,6 +1,7 @@
 package models;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class OfferInfo implements Serializable, Comparable<OfferInfo>{
 
@@ -32,14 +33,17 @@ public class OfferInfo implements Serializable, Comparable<OfferInfo>{
         if (getClass() != o.getClass()) return false;
 
         OfferInfo oi = (OfferInfo) o;
-        // TODO: confirmar == em não objetos
         return this.product.equals(oi.getProduct()) && this.offeredPrice == oi.getOfferedPrice();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.product, this.offeredPrice);
     }
 
 
     @Override
     public int compareTo(OfferInfo arg0) {
-        // TODO Auto-generated method stub
         return this.offeredPrice.compareTo(arg0.offeredPrice);
     }
 

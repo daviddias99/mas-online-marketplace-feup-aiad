@@ -1,4 +1,4 @@
-package agents.offerStrategies;
+package agents.strategies.offer;
 
 import jade.util.leap.Serializable;
 import models.OfferInfo;

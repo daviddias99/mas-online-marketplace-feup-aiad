@@ -1,4 +1,4 @@
-package agents.offerStrategies;
+package agents.strategies.offer;
 
 public class OfferStrategyFactory {
     enum Type {

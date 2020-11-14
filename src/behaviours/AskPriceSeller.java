@@ -43,7 +43,7 @@ public class AskPriceSeller extends AchieveREInitiator {
     
     @Override
     protected Vector<ACLMessage> prepareRequests(ACLMessage msg) {
-        Vector<ACLMessage> v = new Vector<ACLMessage>();
+        Vector<ACLMessage> v = new Vector<>();
 
         // Query df service for agents who are selling <product>
         DFAgentDescription template = new DFAgentDescription();
@@ -67,16 +67,18 @@ public class AskPriceSeller extends AchieveREInitiator {
 
             // Logging
             StringBuilder sb = new StringBuilder(String.format("< %s asked the price of *%s* to the following sellers: [", this.getAgent().getLocalName(), this.getProduct().getName()));
-            Iterator<AID> it = msg.getAllReceiver();
+            Iterator<?> it = msg.getAllReceiver();
             boolean first = true;
-            while(it.hasNext())
+            while(it.hasNext()){
+                AID next = (AID) it.next();
                 if(first){
-                    sb.append(String.format("%s", it.next().getLocalName()));
+                    sb.append(String.format("%s", next.getLocalName()));
                     first = false;
                 }
                 else
-                    sb.append(String.format(", %s", it.next().getLocalName()));
-            this.getAgent().logger.info(sb.append("]").toString());
+                    sb.append(String.format(", %s", next.getLocalName()));
+            }
+            this.getAgent().logger().info(sb.append("]").toString());
 
         } catch (FIPAException fe) {
             // TODO Auto-generated catch block
@@ -105,7 +107,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         Seller s = this.getAgent();
         Product p = this.getProduct();
         s.addProduct(p,this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
-        s.logger.info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(this.getProduct().getName())));
+        s.logger().info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(this.getProduct().getName())));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
@@ -139,15 +141,13 @@ public class AskPriceSeller extends AchieveREInitiator {
             }
             else
                 sb.append(String.format(", %.2f", soInfo.getOfferedPrice()));
-        s.logger.info(sb.append("]").toString());
+        s.logger().info(sb.append("]").toString());
             
-        // TODO: implement one function
         // TODO: refactor pq é igual a cima para já (??)        
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
         s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
-        s.logger.info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(p.getName())));
+        s.logger().info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(p.getName())));
         s.register(p);
     }
-    // TODO: ver se vale a pena handlers da 1st part
 }

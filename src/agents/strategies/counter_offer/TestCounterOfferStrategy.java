@@ -1,4 +1,4 @@
-package agents.counterOfferStrategies;
+package agents.strategies.counter_offer;
 
 import java.util.Map;
 

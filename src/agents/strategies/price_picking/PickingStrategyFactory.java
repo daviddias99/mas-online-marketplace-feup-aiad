@@ -1,4 +1,4 @@
-package agents.pricePickingStrategies;
+package agents.strategies.price_picking;
 
 public class PickingStrategyFactory {
     enum Type {

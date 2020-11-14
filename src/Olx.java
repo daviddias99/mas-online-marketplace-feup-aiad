@@ -17,9 +17,9 @@ import models.Product;
 import utils.Config;
 
 public class Olx {
-    public Runtime rt;
+    private Runtime rt;
     private Profile p;
-    public ContainerController container;
+    private ContainerController container;
     private List<Seller> sellers;
     private List<Buyer> buyers;
     private Map<String, Product> products;

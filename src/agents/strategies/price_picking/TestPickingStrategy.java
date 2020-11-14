@@ -1,4 +1,4 @@
-package agents.pricePickingStrategies;
+package agents.strategies.price_picking;
 
 import java.util.List;
 import java.util.Random;

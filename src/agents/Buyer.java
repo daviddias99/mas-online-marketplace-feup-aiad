@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,20 +15,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
-import agents.counterOfferStrategies.*;
+import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
 import models.Product;
 import utils.CoolFormatter;
 
 public class Buyer extends Agent {
-    // TODO: depois por lista de produtos (??)/received
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
     private Map<Product, Boolean> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float wealth;
-    public transient Logger logger;
+    private transient Logger logger;
 
     @JsonCreator
     public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
@@ -41,6 +41,10 @@ public class Buyer extends Agent {
 
     public CounterOfferStrategy getCounterOfferStrategy() {
         return counterOfferStrategy;
+    }
+
+    public Logger logger(){
+        return this.logger;
     }
 
     private void setupLogger() {
@@ -98,7 +102,7 @@ public class Buyer extends Agent {
     // Get proiducts that have yet to be bough by the buyer
     public Set<Product> getMissingProducts() {
         return (this.products.entrySet().stream().filter(map -> !map.getValue())
-                .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()))).keySet();
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
     }
 
     // Example:

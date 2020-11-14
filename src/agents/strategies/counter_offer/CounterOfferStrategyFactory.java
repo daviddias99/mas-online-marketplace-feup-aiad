@@ -1,4 +1,4 @@
-package agents.counterOfferStrategies;
+package agents.strategies.counter_offer;
 
 public class CounterOfferStrategyFactory {
     enum Type {

@@ -36,7 +36,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         Seller seller = this.getAgent();
         try {
             OfferInfo buyerOffer = (OfferInfo) cfp.getContentObject();
-            seller.logger.info(String.format("> %s received CFP from agent %s with %s", seller.getLocalName(), cfp.getSender().getLocalName(), buyerOffer));
+            seller.logger().info(String.format("> %s received CFP from agent %s with %s", seller.getLocalName(), cfp.getSender().getLocalName(), buyerOffer));
             
             // If it still has the product
             if (seller.hasProduct(buyerOffer.getProduct())) {
@@ -57,16 +57,16 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContentObject(sellerOffer);
-                seller.logger.info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(), cfp.getSender().getLocalName(), sellerOffer));
+                seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(), cfp.getSender().getLocalName(), sellerOffer));
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
-                seller.logger.info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(), cfp.getSender().getLocalName()));
+                seller.logger().info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(), cfp.getSender().getLocalName()));
             }
 
         } catch (UnreadableException | IOException e) {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent(e.getMessage());
-            seller.logger.warning(String.format("< %s sending REFUSE to agent %s with error %s", seller.getLocalName(), cfp.getSender().getLocalName(), e.getMessage()));
+            seller.logger().warning(String.format("< %s sending REFUSE to agent %s with error %s", seller.getLocalName(), cfp.getSender().getLocalName(), e.getMessage()));
         }
 
         return reply;
@@ -84,7 +84,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
         // TODO: later
-        this.getAgent().logger.info(String.format("> %s received REJECT from agent %s", this.getAgent().getLocalName(), reject.getSender().getLocalName()));
+        this.getAgent().logger().info(String.format("> %s received REJECT from agent %s", this.getAgent().getLocalName(), reject.getSender().getLocalName()));
     }
 
     @Override
@@ -96,7 +96,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
         try {
             buyerOffer = (OfferInfo) cfp.getContentObject();
-            seller.logger.info(String.format("> %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
+            seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s", seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
             if (seller.removeProduct(buyerOffer.getProduct()) != null) {
                 
@@ -123,19 +123,15 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 result.setContent(content);
             }
 
-            seller.logger.info(String.format("< %s sent %s to agent %s saying %s", seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
+            seller.logger().info(String.format("< %s sent %s to agent %s saying %s", seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
 
             // Clear offer history from agent
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());
 
-        } catch (UnreadableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (UnreadableException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
 
         return result;
     }

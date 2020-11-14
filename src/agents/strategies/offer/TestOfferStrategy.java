@@ -1,4 +1,4 @@
-package agents.offerStrategies;
+package agents.strategies.offer;
 
 import models.OfferInfo;
 import utils.Util;
