@@ -9,9 +9,6 @@ import java.util.Map;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.domain.AMSService;
-import jade.domain.FIPAAgentManagement.AMSAgentDescription;
-import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import agents.Buyer;
@@ -39,36 +36,32 @@ public class Olx {
 
         this.products = new HashMap<>();
         Product[] prov = config.getProducts();
-        for(int i = 0; i < prov.length; i++)
+        for (int i = 0; i < prov.length; i++)
             this.products.put(prov[i].getName(), prov[i]);
         this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
+    }
+
+    public void start() {
         createSellers();
         createBuyers();
     }
 
     private void createSellers() {
 
-        // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are identified
+        // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are
+        // identified
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
-            
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
 
             try {
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                System.out.println("/!\\ Could not setup seller_" + j);
             }
-        }            
+        }
     }
 
     private void createBuyers() {
@@ -76,14 +69,14 @@ public class Olx {
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
             } catch (StaleProxyException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
     }
 
     /**
      * Create the OLX platform.
+     * 
      * @param args <configPath> <createHasMainContainer>
      * @throws IOException
      */
@@ -113,24 +106,16 @@ public class Olx {
         }
 
         // Create config object
-        Config config = Config.read(configPath);        
+        Config config = Config.read(configPath);
         boolean mainMode = Boolean.parseBoolean(args[1]);
-        
-        Olx olx = new Olx(mainMode, config);
 
+        Olx olx = new Olx(mainMode, config);
+        olx.start();
         olx.stop();
+
     }
 
     private void stop() {
-
-
         // TODO: kill plaform
-       /* try {
-            this.container.kill();
-            this.rt.shutDown();
-        } catch (StaleProxyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
     }
 }

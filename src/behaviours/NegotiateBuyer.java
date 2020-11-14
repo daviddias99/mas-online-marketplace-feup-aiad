@@ -45,6 +45,17 @@ public class NegotiateBuyer extends ContractNetInitiator {
         return (Buyer) super.getAgent();
     }
 
+    void leaveDueToNoAvailableSellers(boolean dueToLackOfHonesty) {
+        this.buyer.logger().info(String.format("! %s did not find any %s seller for %s%n", this.buyer.getLocalName(),
+                dueToLackOfHonesty ? "honest" : "", this.product));
+        this.buyer.noSellerForProduct(this.product);
+        if (this.buyer.finished()) {
+            this.buyer.logger().info(String.format("! %s is leaving %n", this.buyer));
+            this.buyer.doDelete();
+        }
+
+    }
+
     @Override
     protected Vector<ACLMessage> prepareCfps(ACLMessage cfp) {
 
@@ -62,42 +73,29 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
             // No agents are selling <product>
             if (result.length == 0) {
-                // TODO: ver
-                System.out.printf("// TODO: There was no product for buyer %s searching for %s%n",
-                        this.getAgent().getLocalName(), this.product);
-                this.buyer.noSellerForProduct(this.product);
-                if (this.buyer.finished()) {
-                    System.out.println("Buyer bought all stuffs");
-                    this.buyer.doDelete();
-                }
+                this.leaveDueToNoAvailableSellers(false);
                 return v;
             }
 
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
-                if(!this.getAgent().isScammer(result[i].getName()))
+                if (!this.getAgent().isScammer(result[i].getName()))
                     cfp.addReceiver(result[i].getName());
 
-            // TODO: igual a cima ambos têm de ter condição de saída no onEnd
-            if(!cfp.getAllReceiver().hasNext()){
-                System.out.printf("// TODO: There are no good sellers left for buyer %s searching for %s%n",
-                        this.getAgent().getLocalName(), this.product);
-                this.buyer.noSellerForProduct(this.product);
-                if (this.buyer.finished()) {
-                    System.out.printf("No sellers for product %n", this.product);
-                    this.buyer.doDelete();
-                }
+            // No valid receivers found
+            if (!cfp.getAllReceiver().hasNext()) {
+                this.leaveDueToNoAvailableSellers(true);
                 return v;
             }
 
-        
             // A "blank" offer (with -1) is sent to know the price of the product (we don't
             // send only the <product> because of compability reasons)
             cfp.setContentObject(new OfferInfo(this.product, -1));
 
-        } catch (FIPAException | IOException fe) {
-            // TODO Auto-generated catch block
-            fe.printStackTrace();
+        } catch (IOException | FIPAException fe) {
+            this.buyer.logger()
+                    .warning(String.format("/!\\ %s could not send initial offer for product %s%n", this.buyer.getLocalName(), this.product));
+            return v;
         }
 
         v.add(cfp);
@@ -129,7 +127,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     sb.append(String.format("%n - %s containing invalid content.", msg.getSender().getLocalName()));
                 }
             } else {
-                sb.append(String.format("%n - %s sent a %s.", msg.getSender().getLocalName(), ACLMessage.getPerformative(msg.getPerformative())));
+                sb.append(String.format("%n - %s sent a %s.", msg.getSender().getLocalName(),
+                        ACLMessage.getPerformative(msg.getPerformative())));
             }
 
         }
@@ -144,21 +143,22 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
         // Seller product offers
         List<ACLMessage> convertedResponses = responses;
+        List<ACLMessage> convertedAcceptances = acceptances;
         Map<AID, SellerOfferInfo> offers = this.getOffers(convertedResponses);
 
         // Update with new SellerOffers and new counter-offers
         // If counterOffers is empty it means that the lastOffer contains the lowest
         // prices possible
-        Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers,
-                this.previousOffers, this.ownPreviousOffer);
+        Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers, this.previousOffers,
+                this.ownPreviousOffer);
 
         // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
 
         if (counterOffers.isEmpty()) {
-            this.prepareFinalMessages(convertedResponses, acceptances);
+            this.prepareFinalMessages(convertedResponses, convertedAcceptances);
         } else {
-            this.prepareCounterOfferMessages(counterOffers, convertedResponses, acceptances);
+            this.prepareCounterOfferMessages(counterOffers, convertedResponses, convertedAcceptances);
             newIteration(acceptances);
         }
     }
@@ -184,10 +184,13 @@ public class NegotiateBuyer extends ContractNetInitiator {
             this.negotiationOnWait = incomingMessage;
     }
 
-    private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, List<ACLMessage> incomingMessages, List<ACLMessage> outgoingMessages) {
+    private void prepareCounterOfferMessages(Map<AID, OfferInfo> counterOffers, List<ACLMessage> incomingMessages,
+            List<ACLMessage> outgoingMessages) {
         // Do the counterOffers while the others "wait"
-        StringBuilder sbCFP = new StringBuilder(String.format("< %s sent CFP on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
-        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
+        StringBuilder sbCFP = new StringBuilder(
+                String.format("< %s sent CFP on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
+        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:",
+                this.getAgent().getLocalName(), this.negotiationRound));
         boolean reject = false;
 
         // For each incoming message, check if a counter offer has been made
@@ -202,8 +205,9 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 try {
                     rep.setContentObject(counterOffers.get(msg.getSender()));
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    this.buyer.logger()
+                    .warning(String.format("/!\\ %s could not send counter offer object %n", this.buyer.getLocalName()));
+                    continue;
                 }
                 sbCFP.append(String.format("%n - %s : %s", msg.getSender().getLocalName(),
                         counterOffers.get(msg.getSender())));
@@ -223,8 +227,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
     }
 
     private void prepareFinalMessages(List<ACLMessage> lastMessages, List<ACLMessage> outgoingMessages) {
-        StringBuilder sbAccept = new StringBuilder(String.format("< %s sent ACCEPT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));
-        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:", this.getAgent().getLocalName(), this.negotiationRound));        
+        StringBuilder sbAccept = new StringBuilder(String.format("< %s sent ACCEPT_PROPOSAL on round %d:",
+                this.getAgent().getLocalName(), this.negotiationRound));
+        StringBuilder sbReject = new StringBuilder(String.format("%n< %s sent REJECT_PROPOSAL on round %d:",
+                this.getAgent().getLocalName(), this.negotiationRound));
 
         // Choose the best seller among the possibilities
         AID bestSeller = this.buyer.getCounterOfferStrategy().finalDecision(this.previousOffers);
@@ -242,7 +248,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         for (ACLMessage msg : pendingMessages) {
             ACLMessage rep = msg.createReply();
 
-            if(msg.getPerformative() != ACLMessage.PROPOSE) {
+            if (msg.getPerformative() != ACLMessage.PROPOSE) {
                 continue;
             }
 
@@ -255,8 +261,9 @@ public class NegotiateBuyer extends ContractNetInitiator {
                     rep.setContentObject(new OfferInfo(bestOffer.getProduct(), bestOffer.getOfferedPrice()));
                     sbAccept.append(String.format("%n - %s : %s", msg.getSender().getLocalName(), bestOffer));
                 } catch (UnreadableException | IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                    this.buyer.logger()
+                    .warning(String.format("/!\\ %s could not send accept proposal %n", this.buyer.getLocalName()));
+                    continue;
                 }
             } else {
                 reject = true;
@@ -265,7 +272,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             }
             outgoingMessages.add(rep);
         }
-        if(reject)
+        if (reject)
             sbAccept.append(sbReject.toString());
         this.getAgent().logger().info(sbAccept.toString());
     }
@@ -276,12 +283,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Object response;
         try {
             response = inform.getContentObject();
-            this.getAgent().logger().info(String.format("< %s received INFORM from agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
+            this.getAgent().logger().info(String.format("< %s received INFORM from agent %s with %s",
+                    this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
 
             if (response instanceof Scam) {
                 Scam scam = (Scam) response;
                 this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
-                this.getAgent().logger().info(String.format("< %s was SCAMMED by agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
+                this.getAgent().logger().info(String.format("< %s was SCAMMED by agent %s with %s",
+                        this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
                 this.getAgent().addScammer(inform.getSender());
             } else if (response instanceof OfferInfo) {
                 OfferInfo offerInfo = (OfferInfo) response;
@@ -294,8 +303,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
             }
 
         } catch (UnreadableException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.getAgent().logger().info(String.format("/!\\ %s could not read object sent by %s",
+                    this.getAgent().getLocalName(), inform.getSender().getLocalName()));
         }
 
     }

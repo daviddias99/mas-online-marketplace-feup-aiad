@@ -54,7 +54,6 @@ public class AskPriceSeller extends AchieveREInitiator {
 
         try {
             DFAgentDescription[] result = DFService.search(this.getAgent(), template);
-
             // No agents are selling <product>
             if (result.length == 0) {
                 this.handleNoResults();
@@ -65,19 +64,20 @@ public class AskPriceSeller extends AchieveREInitiator {
             for (int i = 0; i < result.length; ++i)
                 msg.addReceiver(result[i].getName());
 
-
             // The <product> is sent as the content so that the
             // seller knows to which product the request pertains to
             msg.setContentObject(this.product);
-            v.add(msg);
-            // Logging
-            this.logSellerList(msg);
-
+            
         } catch (FIPAException | IOException fe) {
-            // TODO Auto-generated catch block
-            fe.printStackTrace();
+            this.seller.logger().warning("/!\\ %s encounterd an error searching for sellers.%n");
+            this.handleNoResults();
+            return v;
         }
         
+        v.add(msg);
+        // Logging
+        this.logSellerList(msg);
+
         return v;
     }
 
@@ -87,8 +87,9 @@ public class AskPriceSeller extends AchieveREInitiator {
         // set selling price accordingly
         Seller s = this.getAgent();
         Product p = this.getProduct();
-        s.addProduct(p,this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
-        s.logger().info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(), p.getName(), s.getProductPrice(this.getProduct().getName())));
+        s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
+        s.logger().info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(),
+                p.getName(), s.getProductPrice(this.getProduct().getName())));
         // Register that agent is selling <product> in the DF registry
         s.register(p);
     }
@@ -99,7 +100,6 @@ public class AskPriceSeller extends AchieveREInitiator {
         List<Float> marketPrices = this.collectPrices(resultNotifications);
         this.logPriceString(marketPrices, p);
 
-        // TODO: refactor pq é igual a cima para já (??)
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
         this.seller.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(seller, p, marketPrices));
@@ -117,10 +117,10 @@ public class AskPriceSeller extends AchieveREInitiator {
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
             try {
-                marketPrices.add( ((SellerOfferInfo) message.getContentObject()).getOfferedPrice());
+                marketPrices.add(((SellerOfferInfo) message.getContentObject()).getOfferedPrice());
             } catch (UnreadableException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                this.getAgent().logger().info(String.format("/!\\ %s could not read object sent by %s",
+                        this.getAgent().getLocalName(), message.getSender().getLocalName()));
             }
         }
 

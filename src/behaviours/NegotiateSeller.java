@@ -96,12 +96,22 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     @Override
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
 
-        OfferInfo buyerOffer;
+        OfferInfo buyerOffer = null;
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
 
-        try {
+        try{
             buyerOffer = (OfferInfo) accept.getContentObject();
+        } catch (UnreadableException e) {
+            result.setPerformative(ACLMessage.FAILURE);
+            result.setContent("Could not understand content");
+            seller.logger().warning(String.format("/!\\ %s could not read content sent by %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            seller.logger().warning(String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            return result;
+        }
+
+        try {
+            
             seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s",
                     seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
@@ -167,9 +177,12 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             // Clear offer history from agent
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());
 
-        } catch (UnreadableException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (IOException e) {
+            result.setPerformative(ACLMessage.FAILURE);
+            result.setContent("Could not send proper content");
+            seller.logger().warning(String.format("/!\\ %s could not send content to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            seller.logger().warning(String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            return result;
         }
 
         return result;

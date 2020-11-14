@@ -72,16 +72,13 @@ public class Buyer extends Agent {
     protected void setup() {
         this.setupLogger();
         this.logger.info("- START: " + this);
-        // TODO: depois ver se dá para mudar para um que repita ciclicamente até success true. 
-        // Se calhar dá para chegar ao final e por reset se success false
 
         // Buyers sleep to allow for seller setup
         try {
             Thread.sleep(2500);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return;
+            this.logger.warning(String.format("> %s was interrupted while sleeping, ending.%n", this.getLocalName()));
+            Thread.currentThread().interrupt();
         }
 
         // Ask prices of each product to sellers. The ask price behaviour choses the
@@ -110,7 +107,7 @@ public class Buyer extends Agent {
             this.logger.addHandler(fh);
             fh.setFormatter(new CoolFormatter());
         } catch (SecurityException | IOException e) {
-            // TODO Auto-generated catch block
+            System.out.printf("</!\\ %s experienced an error while creating a logger%n", this.getLocalName());
             e.printStackTrace();
         }
     }
