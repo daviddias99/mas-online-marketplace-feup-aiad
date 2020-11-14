@@ -9,6 +9,7 @@ import jade.util.leap.Serializable;
 import models.OfferInfo;
 import models.Product;
 import models.SellerOfferInfo;
+import utils.Util;
 
 public abstract class CounterOfferStrategy implements Serializable {
 
@@ -16,17 +17,21 @@ public abstract class CounterOfferStrategy implements Serializable {
         Map<AID, OfferInfo> counterOffers = new HashMap<>();
 
         for(Entry<AID, SellerOfferInfo> offer : offers.entrySet()) {
-            // If there is no lastOffer (aka first round) always do a counter 
-            // Or there was a previous offer and the offer is different (it is lower) 
-            //and we can still try to negotiate it and update the previousOffers
+            // If there is no lastOffer (aka first round)  
+            // Or (the sellers offer is different from it's previous offer AND it's different from buyer previous offer
+            // AND it's different from the offer I'd give now) do a counter
+            float counterPrice =  this.counterPrice(offer.getValue(),ownPreviousOffers.get(offer.getKey()));
 
-            if(!previousOffers.containsKey(offer.getKey()) || ( Math.abs(offer.getValue().getOfferedPrice() - previousOffers.get(offer.getKey()).getOfferedPrice()) >= 0.01 )){
+            if(!previousOffers.containsKey(offer.getKey()) || 
+            (!Util.floatEqual(offer.getValue().getOfferedPrice(), previousOffers.get(offer.getKey()).getOfferedPrice())
+            && !Util.floatEqual(offer.getValue().getOfferedPrice(), ownPreviousOffers.get(offer.getKey()).getOfferedPrice())
+            && !Util.floatEqual(offer.getValue().getOfferedPrice(), counterPrice)))
+            {
                 // Update with the newOffer
-                float counterPrice =  this.counterPrice(offer.getValue(),ownPreviousOffers.get(offer.getKey()));
                 counterOffers.put(offer.getKey(), new OfferInfo(offer.getValue().getProduct(), counterPrice));
                 previousOffers.put(offer.getKey(), offer.getValue());
             }
-            // Else the New Offer price is the same as before, we know that he won't lower the price
+            // Else the negotiation won't finish
             // We won't add it to the counterOffers because it's not worth it
         }
         

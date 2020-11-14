@@ -12,6 +12,7 @@ import models.OfferInfo;
 import models.Product;
 import models.Scam;
 import models.SellerOfferInfo;
+import utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
@@ -50,7 +51,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
                 float offeredPrice = 0;
                 
-                if(previousOffer != null && Math.abs(buyerOffer.getOfferedPrice()- previousOffer.getOfferedPrice())  < 0.01 ){
+                if(previousOffer != null && Util.floatEqual(buyerOffer.getOfferedPrice(), previousOffer.getOfferedPrice())){
                     offeredPrice = previousOffer.getOfferedPrice();
                 }
                 else{
