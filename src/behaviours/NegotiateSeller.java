@@ -149,7 +149,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 int oldCredibility = seller.getCredibility();
                 int newCredibility = seller.reduceCredibility();
 
-                Stats.scam(seller);
+                Stats.scam(seller, maxProposal.getOfferedPrice());
                 seller.logger()
                         .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
                                 seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),

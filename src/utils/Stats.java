@@ -17,10 +17,13 @@ public class Stats {
     private static Map<Product, List<Float>> productsSold = new HashMap<>();
     private static Map<Buyer, Float> moneySavedBuyers = new HashMap<>();
 
-    public static synchronized void scam(Seller seller) {
+    public static synchronized void scam(Seller seller, float price) {
         totalScams++;
         int nScams = scams.getOrDefault(seller, 0);
         scams.put(seller, nScams + 1);
+
+        float totalEarnings = moneyGainedSellers.getOrDefault(seller, 0.0f);
+        moneyGainedSellers.put(seller, totalEarnings + price);
     }
 
     public static synchronized void productSold(Seller seller, Product product, float price) {
