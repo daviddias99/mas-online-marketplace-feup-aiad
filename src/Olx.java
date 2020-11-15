@@ -44,12 +44,21 @@ public class Olx {
             this.container = rt.createAgentContainer(p);
 
         this.products = new HashMap<>();
-        Product[] prov = config.getProducts();
-        for (int i = 0; i < prov.length; i++)
-            this.products.put(prov[i].getName(), prov[i]);
-        this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
-        this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
+        if (config.getProducts() != null) {
+            Product[] prov = config.getProducts();
+            for (int i = 0; i < prov.length; i++)
+                this.products.put(prov[i].getName(), prov[i]);
+        } else {
+            System.out.println("WARNING: no products specified");
+        }
 
+        if (config.getSellers() != null) {
+            this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
+        }
+
+        if (config.getBuyers() != null) {
+            this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
+        }
     }
 
     public void start(boolean kill) {
@@ -58,10 +67,13 @@ public class Olx {
     }
 
     private void createSellers() {
-
         // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are
         // identified
         // using the id "seller_i"
+        if (this.sellers == null) {
+            System.out.println("WARNING: no sellers specified");
+            return;
+        }
 
         for (int j = 0; j < this.sellers.size(); j++) {
 
@@ -74,6 +86,11 @@ public class Olx {
     }
 
     private void createBuyers(boolean kill) {
+        if (this.buyers == null) {
+            System.out.println("WARNING: no buyers specified");
+            return;
+        }
+
         for (int j = 0; j < this.buyers.size(); j++) {
             this.buyers.get(j).setKillIfLast(kill);
             try {
@@ -145,8 +162,13 @@ public class Olx {
         Config config = null;
         try {
             config = Config.read(configPath);
+            if (config == null) {
+                System.out.println("Invalid configuration file.");
+                System.exit(-1);
+            }
         } catch (IOException e) {
             System.out.println("Error while reading configuration file.");
+            System.out.println(e.getMessage());
             System.exit(-1);
         }
 
