@@ -1,11 +1,9 @@
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import agents.TerminationAgent;
+import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -21,11 +19,11 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import utils.Config;
+import utils.Stats;
+import utils.TerminationListener;
 
 // TODO: Improve strategies
-// TODO: erro do kill
-
-public class Olx {
+public class Olx implements TerminationListener {
     private Runtime rt;
     private Profile p;
     private ContainerController container;
@@ -33,10 +31,14 @@ public class Olx {
     private List<Buyer> buyers;
     private Map<String, Product> products;
 
+    private Set<Agent> runningAgents;
+
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
+
+        this.runningAgents = new HashSet<>();
 
         if (mainMode)
             this.container = rt.createMainContainer(p);
@@ -92,7 +94,12 @@ public class Olx {
         }
 
         for (int j = 0; j < this.buyers.size(); j++) {
-            this.buyers.get(j).setKillIfLast(kill);
+
+            if (kill) {
+                this.buyers.get(j).setTerminationListener(this);
+            }
+            this.runningAgents.add(this.buyers.get(j));
+
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
             } catch (StaleProxyException e) {
@@ -110,14 +117,14 @@ public class Olx {
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
                 .description("Modeling a second hand market place using agents.");
-        parser.addArgument("--main")
+        parser.addArgument("--main", "-m")
                 .action(Arguments.storeTrue())
                 .help("start agents in new main container");
-        parser.addArgument("--kill")
+        parser.addArgument("--kill", "-k")
                 .action(Arguments.storeTrue())
                 .help("last buyer agent shuts down the platforms");
-        parser.addArgument("--config")
-                .help("file (YAML or JSON) with buyers and sellers configuration");
+        parser.addArgument("--config", "-c")
+                .help("file (YAML or JSON) with experiment configuration");
 
 
         Namespace parsedArgs = null;
@@ -174,5 +181,30 @@ public class Olx {
 
         Olx olx = new Olx(mainMode, config);
         olx.start(kill);
+    }
+
+    @Override
+    public synchronized void terminated(Agent a) {
+        if (a instanceof TerminationAgent) {
+            System.out.println();
+            Stats.printStats();
+            System.out.println();
+            return;
+        }
+
+        this.runningAgents.remove(a);
+        if (this.runningAgents.isEmpty()) {
+            this.shutdown();
+        }
+    }
+
+    public void shutdown() {
+        try {
+            TerminationAgent a = new TerminationAgent();
+            a.setTerminationListener(this);
+            this.container.acceptNewAgent("terminator", a).start();
+        } catch (StaleProxyException e) {
+            System.out.println("Could not setup terminator agent");
+        }
     }
 }

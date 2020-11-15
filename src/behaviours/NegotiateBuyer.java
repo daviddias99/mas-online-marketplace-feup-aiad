@@ -51,6 +51,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 dueToLackOfHonesty ? "honest" : "", this.product));
         this.buyer.noSellerForProduct(this.product);
         if (this.buyer.finished()) {
+            System.out.printf("! %s is leaving because there are no available sellers %n", this.buyer.getLocalName());
             this.buyer.logger().info(String.format("! %s is leaving %n", this.buyer));
             this.buyer.doDelete();
         }
