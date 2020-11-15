@@ -20,8 +20,8 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
 
         float previouslyOfferedPrice = ownPreviousOffer.getOfferedPrice();
         float currentSellerOffer = offer.getOfferedPrice();
-        float decrementValue = Math.max(previouslyOfferedPrice * 0.1f, 1.0f);
-        float newOffer = previouslyOfferedPrice - decrementValue;
+        float incrementValue = Math.max(previouslyOfferedPrice * 0.1f, 1.0f);
+        float newOffer = previouslyOfferedPrice + incrementValue;
         return Math.min(currentSellerOffer, newOffer);
     }
 
@@ -34,9 +34,6 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
             SellerOfferInfo offer = entry.getValue();
             
             // Lower is better
-            // More credibility -> Lower cost
-            // More rounds -> Higher cost
-
             float perceivedOfferCost = offer.getOfferedPrice();
             buyer.logger().info(String.format("!%s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
 

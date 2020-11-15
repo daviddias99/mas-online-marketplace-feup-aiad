@@ -37,13 +37,13 @@ sellers:
   - scamFactor: 50
     elasticity: 50
     offerStrategy: ABSTFT
-    pickingStrategy: NAIVE
+    pickingStrategy: SMART
     products:
       - pc
   - scamFactor: 50
     elasticity: 50
     offerStrategy: RELTFT
-    pickingStrategy: SMART
+    pickingStrategy: NAIVE
     products:
-      - skate
+      - pc
 

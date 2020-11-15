@@ -19,7 +19,7 @@ public class NaivePickingStrategy extends PricePickingStrategy {
                 min = offer.getOfferedPrice();
         }
 
-        return 0.8f * min;
+        return 0.9f * min;
     }
 
     @Override

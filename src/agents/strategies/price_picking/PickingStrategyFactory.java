@@ -2,15 +2,18 @@ package agents.strategies.price_picking;
 
 public class PickingStrategyFactory {
     enum Type {
-        TEST
+        SMART,
+        NAIVE
     }
 
     public static PricePickingStrategy get(String typeStr) throws IllegalArgumentException {
         Type type = Type.valueOf(typeStr.toUpperCase());
 
         switch (type) {
-            case TEST:
+            case SMART:
                 return new SmartPickingStrategy();
+            case NAIVE:
+                return new NaivePickingStrategy();
         }
 
         return null;

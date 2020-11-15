@@ -21,7 +21,7 @@ public class RandomAbsoluteTFTOfferStrategy extends OfferStrategy {
 			float previouslyOfferedPrice = ownPreviousOffer.getOfferedPrice();
             float currentBuyerOffer = currentOffer.getOfferedPrice();
             float baseDecrement = Math.max(sellerProductPrice * 0.1f, 1.0f);
-            float decrementValue = Util.randomFloatBetween(-baseDecrement/2, baseDecrement/2);
+            float decrementValue = baseDecrement +  Util.randomFloatBetween(-baseDecrement/2, baseDecrement/2);
             float newOffer = previouslyOfferedPrice - decrementValue;
             return  Math.max(currentBuyerOffer,Math.max(minPrice, newOffer));  
         }   
