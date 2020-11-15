@@ -24,30 +24,27 @@ public abstract class Util {
         return Math.round(value * scale) / scale;
     }
 
-
     public static int randomBetween(int min, int max) {
 
         if (min > max) {
             throw new IllegalArgumentException("max must be greater than min");
         }
 
-
         return Util.getInstance().nextInt(max - min) + min;
     }
 
-    public static float getNormalRandom(float avg, float std){
+    public static float getNormalRandom(float avg, float std) {
 
         return (float) Util.getInstance().nextGaussian() * std + avg;
     }
 
-
     public static float average(List<Float> values) {
         if (values.isEmpty())
-            return  -1.0f;
+            return -1.0f;
 
         float acc = 0;
 
-        for (Float value : values){
+        for (Float value : values) {
             acc += value;
         }
 
@@ -69,8 +66,15 @@ public abstract class Util {
         return min;
     }
 
-    public static boolean floatEqual(float f1, float f2){
+    public static boolean floatEqual(float f1, float f2) {
 
-        return Math.abs(f1-f2) < 0.01;
+        return Math.abs(f1 - f2) < 0.01;
+    }
+
+    public static float randomFloatBetween(float a, float b) {
+
+        float diff = b - a;
+        float r = Util.getInstance().nextFloat() * diff;
+        return a + r;
     }
 }

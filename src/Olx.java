@@ -86,8 +86,9 @@ public class Olx implements TerminationListener {
             }
 
             try {
+                Thread.sleep(500);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-            } catch (StaleProxyException e) {
+            } catch (StaleProxyException | InterruptedException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }

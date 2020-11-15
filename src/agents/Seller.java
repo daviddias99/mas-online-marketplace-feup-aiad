@@ -62,9 +62,9 @@ public class Seller extends Agent {
         this.elasticity = elasticity;
         this.credibility = 100;
         // TODO: no futuro nao começar com credibility ja afetada
-        // do {
-        //     this.credibility = (int) Math.abs((new Random()).nextGaussian() * (elasticity / 2.0) + scamF);
-        // } while (this.credibility > 100);
+        do {
+            this.credibility = Util.randomBetween(50, 100);
+        } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], 0.0f);

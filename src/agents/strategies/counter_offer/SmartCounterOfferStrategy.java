@@ -8,7 +8,7 @@ import models.OfferInfo;
 import models.SellerOfferInfo;
 import utils.Util;
 
-public class TestCounterOfferStrategy extends CounterOfferStrategy {
+public class SmartCounterOfferStrategy extends CounterOfferStrategy {
 
     @Override
     public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer) {

@@ -55,19 +55,19 @@ public class Stats {
         stats += "\nBuyers:";
 
         for (Map.Entry<Buyer, Float> entry : moneySavedBuyers.entrySet()) {
-            stats += format + entry.getKey().getName() + " : " + String.format("%.2f", entry.getValue()) + "$ saved";
+            stats += format + entry.getKey().getLocalName() + " : " + String.format("%.2f", entry.getValue()) + "$ saved";
         }
 
         stats += "\nSellers:";
 
         for (Map.Entry<Seller, Float> entry : moneyGainedSellers.entrySet()) {
-            stats += format + entry.getKey().getName() + " : " + String.format("%.2f", entry.getValue()) + "$ earned";
+            stats += format + entry.getKey().getLocalName() + " : " + String.format("%.2f", entry.getValue()) + "$ earned";
         }
 
         stats += "\nScams (total=" + totalScams + "):";
 
         for (Map.Entry<Seller, Integer> entry : scams.entrySet()) {
-            stats += format + entry.getKey().getName() + " : " + entry.getValue();
+            stats += format + entry.getKey().getLocalName() + " : " + entry.getValue();
         }
 
         System.out.println(stats);
