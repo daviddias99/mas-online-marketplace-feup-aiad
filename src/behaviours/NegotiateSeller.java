@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import agents.Buyer;
 import agents.Seller;
 import models.OfferInfo;
 import models.Product;
@@ -50,13 +49,13 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Calculate price to propose
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
                 float offeredPrice = 0;
-                
-                if(previousOffer != null && Util.floatEqual(buyerOffer.getOfferedPrice(), previousOffer.getOfferedPrice())){
+
+                if (previousOffer != null
+                        && Util.floatEqual(buyerOffer.getOfferedPrice(), previousOffer.getOfferedPrice())) {
                     offeredPrice = previousOffer.getOfferedPrice();
-                }
-                else{
+                } else {
                     offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer,
-                    this.ownPreviousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()), seller);
+                            this.ownPreviousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()), seller);
                 }
 
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
@@ -100,18 +99,20 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
 
-        try{
+        try {
             buyerOffer = (OfferInfo) accept.getContentObject();
         } catch (UnreadableException e) {
             result.setPerformative(ACLMessage.FAILURE);
             result.setContent("Could not understand content");
-            seller.logger().warning(String.format("/!\\ %s could not read content sent by %s", seller.getLocalName(), accept.getSender().getLocalName()));
-            seller.logger().warning(String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            seller.logger().warning(String.format("/!\\ %s could not read content sent by %s", seller.getLocalName(),
+                    accept.getSender().getLocalName()));
+            seller.logger().warning(
+                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
             return result;
         }
 
         try {
-            
+
             seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s",
                     seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
@@ -180,8 +181,10 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         } catch (IOException e) {
             result.setPerformative(ACLMessage.FAILURE);
             result.setContent("Could not send proper content");
-            seller.logger().warning(String.format("/!\\ %s could not send content to %s", seller.getLocalName(), accept.getSender().getLocalName()));
-            seller.logger().warning(String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            seller.logger().warning(String.format("/!\\ %s could not send content to %s", seller.getLocalName(),
+                    accept.getSender().getLocalName()));
+            seller.logger().warning(
+                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
             return result;
         }
 

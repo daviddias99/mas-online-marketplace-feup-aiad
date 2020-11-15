@@ -11,6 +11,15 @@ buyers:
   - products:
       - pc
     counterOfferStrategy: test
+  - products:
+      - pc
+    counterOfferStrategy: test
+  - products:
+      - pc
+    counterOfferStrategy: test
+  - products:
+      - pc
+    counterOfferStrategy: test
 
 sellers:
   - scamFactor: 50
@@ -26,7 +35,7 @@ sellers:
     pickingStrategy: test
     products:
       - pc
-  - scamFactor: 50
+  - scamFactor: 0
     elasticity: 50
     offerStrategy: test
     pickingStrategy: test
