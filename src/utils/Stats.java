@@ -46,27 +46,28 @@ public class Stats {
 
     public static void printStats() {
         String stats = "Products sold:";
+        String format = "\n  - ";
 
         for (Map.Entry<Product, List<Float>> entry : productsSold.entrySet()) {
-            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue().size() + " sold : " + Util.average(entry.getValue()) + " avg. price";
+            stats += format + entry.getKey().getName() + " : " + entry.getValue().size() + " sold : " + Util.average(entry.getValue()) + " avg. price";
         }
 
         stats += "\nBuyers:";
 
         for (Map.Entry<Buyer, Float> entry : moneySavedBuyers.entrySet()) {
-            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue() + "$ saved";
+            stats += format + entry.getKey().getName() + " : " + entry.getValue() + "$ saved";
         }
 
         stats += "\nSellers:";
 
         for (Map.Entry<Seller, Float> entry : moneyGainedSellers.entrySet()) {
-            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue() + "$ earned";
+            stats += format + entry.getKey().getName() + " : " + entry.getValue() + "$ earned";
         }
 
         stats += "\nScams (total=" + totalScams + "):";
 
         for (Map.Entry<Seller, Integer> entry : scams.entrySet()) {
-            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue();
+            stats += format + entry.getKey().getName() + " : " + entry.getValue();
         }
 
         System.out.println(stats);

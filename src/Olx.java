@@ -64,6 +64,12 @@ public class Olx {
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
 
             try {
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();

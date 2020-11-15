@@ -25,7 +25,7 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
 
             float patienceDiscount = (float) Math.pow(buyer.getPatience()/100.0f, offer.getRound());
             float perceivedOfferCost = offer.getOfferedPrice() / offer.getSellerCredibility() /patienceDiscount ;
-            buyer.logger().info(String.format("!%s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            buyer.logger().info(String.format("! %s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;

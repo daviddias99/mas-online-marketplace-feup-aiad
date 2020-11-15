@@ -23,6 +23,7 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 import utils.Stats;
 
+// TODO: ver logs qd reject
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;
@@ -100,7 +101,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
 
         v.add(cfp);
-
         return v;
     }
 
@@ -220,7 +220,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             }
             // Negotiation has halted, only store if it would be the best option right now.
             else {
-                reject = this.updateWaitingList(msg, outgoingMessages, sbReject);
+                reject |= this.updateWaitingList(msg, outgoingMessages, sbReject);
             }
         }
 
@@ -348,6 +348,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
     // Helpers
 
     private ACLMessage prepareRejectProposal(ACLMessage msg) {
+        this.previousOffers.remove(msg.getSender());
+        this.ownPreviousOffer.remove(msg.getSender());
         ACLMessage response = msg.createReply();
         response.setPerformative(ACLMessage.REJECT_PROPOSAL);
         return response;
