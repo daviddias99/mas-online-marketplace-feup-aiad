@@ -3,17 +3,25 @@ package models;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class OfferInfo implements Serializable, Comparable<OfferInfo>{
+public class OfferInfo implements Serializable, Comparable<OfferInfo> {
 
     protected Product product;
     protected Float offeredPrice;
+    private int round;
 
-    public OfferInfo(Product product, float offeredPrice){
+    public OfferInfo(Product product, float offeredPrice) {
         this.product = product;
         this.offeredPrice = offeredPrice;
     }
- 
-    public Product getProduct(){
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
+    }
+
+    public Product getProduct() {
         return product;
     }
 

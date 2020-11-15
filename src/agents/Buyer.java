@@ -39,48 +39,46 @@ public class Buyer extends Agent {
     private Map<Product, ProductStatus> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float wealth;
+    private int patience;
     private Set<AID> blackList;
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
     private boolean kill;
 
-    public void setKillIfLast(boolean kill) {
-        this.kill = kill;
-    }
-
     enum ProductStatus {
-        TRYING,
-        BOUGHT,
-        NO_SELLER,
+        TRYING, BOUGHT, NO_SELLER,
     }
 
     @JsonCreator
-    public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
+    public Buyer(@JsonProperty("products") String[] products,
+            @JsonProperty("counterOfferStrategy") String counterOfferStrategy, @JsonProperty("patience") int patience) {
         for (int i = 0; i < products.length; i++)
             this.products.put(new Product(products[i]), ProductStatus.TRYING);
-
+        if (patience > 100 || patience < 0)
+            throw new IllegalArgumentException("Patience must be from 0 to 100 and was " + patience);
         this.kill = false;
         this.wealth = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
         this.blackList = new HashSet<>();
+        this.patience = patience;
     }
 
     public CounterOfferStrategy getCounterOfferStrategy() {
         return counterOfferStrategy;
     }
 
-    public void addScammer(AID seller){
+    public void addScammer(AID seller) {
         this.blackList.add(seller);
     }
 
-    public boolean isScammer(AID seller){
+    public boolean isScammer(AID seller) {
         return this.blackList.contains(seller);
     }
 
-    public Logger logger(){
+    public Logger logger() {
         return this.logger;
     }
-    
+
     // The buyer currently
     @Override
     protected void setup() {
@@ -99,15 +97,76 @@ public class Buyer extends Agent {
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
         negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-        for (Product p : this.products.keySet())        
+        for (Product p : this.products.keySet())
             negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
 
         this.addBehaviour(negotiationsBehaviour);
     }
 
+    public boolean finished() {
+
+        for (Map.Entry<Product, ProductStatus> p : this.products.entrySet()) {
+            if (p.getValue() == ProductStatus.TRYING) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void takeDown() {
+        System.out.println(this.getLocalName() + " is the impostor.");
+        for (Handler h : this.logger.getHandlers())
+            h.close();
+
+        if (this.kill) {
+            AMSAgentDescription[] agents = null;
+            try {
+                SearchConstraints c = new SearchConstraints();
+                agents = AMSService.search(this, new AMSAgentDescription());
+            } catch (Exception e) {
+                // TODO
+            }
+
+            int numBuyers = 0;
+            for (AMSAgentDescription agentDescription : agents) {
+                if (agentDescription.getName().toString().contains("buyer")
+                        && !agentDescription.getName().equals(this.getAID())) {
+                    numBuyers++;
+                }
+            }
+
+            if (numBuyers == 0) {
+                Codec codec = new SLCodec();
+                Ontology jmo = JADEManagementOntology.getInstance();
+                getContentManager().registerLanguage(codec);
+                getContentManager().registerOntology(jmo);
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.addReceiver(getAMS());
+                msg.setLanguage(codec.getName());
+                msg.setOntology(jmo.getName());
+                try {
+                    getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
+                    send(msg);
+                } catch (Exception e) {
+                    // todo
+                }
+            }
+        }
+    }
+
     //
     // Helpers
     //
+
+    public void setKillIfLast(boolean kill) {
+        this.kill = kill;
+    }
+
+    public int getPatience() {
+        return patience;
+    }
 
     private void setupLogger() {
         this.logger = Logger.getLogger(this.getLocalName());
@@ -130,7 +189,7 @@ public class Buyer extends Agent {
         return this.products.keySet();
     }
 
-    public ParallelBehaviour getBehaviour(){
+    public ParallelBehaviour getBehaviour() {
         return this.negotiationsBehaviour;
     }
 
@@ -147,7 +206,7 @@ public class Buyer extends Agent {
         return "Buyer{" + "products=" + this.products + "}";
     }
 
-    public synchronized void changeWealth(float variance){
+    public synchronized void changeWealth(float variance) {
         this.wealth += variance;
     }
 
@@ -157,58 +216,6 @@ public class Buyer extends Agent {
 
     public void noSellerForProduct(Product product) {
         this.products.put(product, ProductStatus.NO_SELLER);
-    }
-
-    public boolean finished() {
-
-        for (Map.Entry<Product, ProductStatus> p : this.products.entrySet()) {
-            if (p.getValue() == ProductStatus.TRYING) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
-    @Override
-    public void takeDown() {
-        System.out.println(this.getLocalName() + " is the impostor.");
-        for (Handler h: this.logger.getHandlers())
-            h.close();
-
-        if (this.kill) {
-            AMSAgentDescription[] agents = null;
-            try {
-                SearchConstraints c = new SearchConstraints();
-                agents = AMSService.search(this, new AMSAgentDescription());
-            } catch (Exception e) {
-                // TODO
-            }
-
-            int numBuyers = 0;
-            for (AMSAgentDescription agentDescription : agents) {
-                if (agentDescription.getName().toString().contains("buyer") && !agentDescription.getName().equals(this.getAID())) {
-                    numBuyers++;
-                }
-            }
-
-            if (numBuyers == 0) {
-                Codec codec = new SLCodec();
-                Ontology jmo = JADEManagementOntology.getInstance();
-                getContentManager().registerLanguage(codec);
-                getContentManager().registerOntology(jmo);
-                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                msg.addReceiver(getAMS());
-                msg.setLanguage(codec.getName());
-                msg.setOntology(jmo.getName());
-                try {
-                    getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
-                    send(msg);
-                } catch (Exception e) {
-                    // todo
-                }
-            }
-        }
     }
 
     public boolean isBuying(Product product) {
