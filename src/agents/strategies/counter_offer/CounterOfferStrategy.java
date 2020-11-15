@@ -12,6 +12,13 @@ import models.Product;
 import models.SellerOfferInfo;
 import utils.Util;
 
+/**
+ * An counter offer strategy is used by buyers to calculate the counter offers to the sellers
+ * offers (counterPrice), to pick the offers which need to be countered (pickOffers) and to choose
+ * the best offer from a collection of offers (makeDecision). The pickOffers signals the problem that
+ * all negotiations are ended by returning an empty Map. The counterPrice function must assure that
+ * the counter offer is of a larger value than the preivous counter offer.
+ */
 public abstract class CounterOfferStrategy implements Serializable {
 
     public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers, Map<AID, OfferInfo> ownPreviousOffers, int round) {

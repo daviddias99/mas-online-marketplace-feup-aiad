@@ -61,7 +61,7 @@ public class Seller extends Agent {
         this.scamFactor = scamF;
         this.elasticity = elasticity;
         this.credibility = 100;
-        // TODO: no futuro nao começar com credibility ja afetada
+
         do {
             this.credibility = Util.randomBetween(50, 100);
         } while (this.credibility > 100);

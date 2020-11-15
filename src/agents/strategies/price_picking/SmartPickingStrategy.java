@@ -1,7 +1,6 @@
 package agents.strategies.price_picking;
 
 import java.util.List;
-import java.util.Random;
 
 import agents.Seller;
 import models.Product;

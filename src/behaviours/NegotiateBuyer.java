@@ -23,7 +23,6 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
 import utils.Stats;
 
-// TODO: ver logs qd reject
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
     private int negotiationRound;

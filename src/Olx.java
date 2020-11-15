@@ -22,7 +22,6 @@ import utils.Config;
 import utils.Stats;
 import utils.TerminationListener;
 
-// TODO: Improve strategies
 public class Olx implements TerminationListener {
     private Runtime rt;
     private Profile p;
@@ -78,12 +77,6 @@ public class Olx implements TerminationListener {
         }
 
         for (int j = 0; j < this.sellers.size(); j++) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
 
             try {
                 Thread.sleep(500);
