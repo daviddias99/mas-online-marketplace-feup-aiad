@@ -4,46 +4,76 @@ products:
     price: 650
   - name: skate
     price: 20
+  - name: nintendo
+    price: 240
+  - name: colunas da JBL
+    price: 120
+  - name: vinil dos Beegees
+    price: 80
+  - name: raspberry PI
+    price: 100
+  - name: bmx
+    price: 300
+  - name: camisola do Man Utd.
+    price: 20
 buyers:
   - products:
       - pc
+      - nintendo
+      - bmx
     counterOfferStrategy: SMART
-    patience: 80
+    patience: 100
+  - products:
+      - raspberry PI
+      - vinil dos Beegees
+      - colunas da JBL
+    counterOfferStrategy: SMART
+    patience: 40
   - products:
       - pc
-    counterOfferStrategy: ABSTFT
-    patience: 80
+      - skate
+      - bmx
+    counterOfferStrategy: RELTFT
+    patience: 100
   - products:
+      - nintendo
+      - vinil dos Beegees
+      - colunas da JBL
+    counterOfferStrategy: ABSTFT
+    patience: 100
+  - products:
+      - camisola do Man Utd.
+      - bmx
       - pc
     counterOfferStrategy: RELTFT
-    patience: 80
-  - products:
-      - pc
-    counterOfferStrategy: ABSTFT
-    patience: 80
-  - products:
-      - pc
-    counterOfferStrategy: RELTFT
-    patience: 80
+    patience: 100
 
 sellers:
   - scamFactor: 50
-    elasticity: 50
+    elasticity: 40
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
       - pc
+      - bmx
+      - raspberry PI
 
   - scamFactor: 50
-    elasticity: 50
+    elasticity: 30
     offerStrategy: ABSTFT
     pickingStrategy: SMART
     products:
       - pc
+      - camisola do Man Utd.
+      - nintendo
+
   - scamFactor: 50
-    elasticity: 50
+    elasticity: 20
     offerStrategy: RELTFT
     pickingStrategy: NAIVE
     products:
       - pc
+      - vinil dos Beegees
+      - colunas da JBL
+      - nintendo
 
