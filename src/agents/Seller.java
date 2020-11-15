@@ -87,8 +87,8 @@ public class Seller extends Agent {
         try {
             DFService.register(this, this.dfd);
         } catch (FIPAException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            this.logger.warning(String.format("/!\\ %s could not register itself in the DF service%n", this.getLocalName()));
+            System.exit(-1);
         }
 
         // Query at what prices the other agents are selling the producs in order to decide
@@ -124,10 +124,8 @@ public class Seller extends Agent {
         try {
             DFService.modify(this, this.dfd);
         } catch (FIPAException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            this.logger.warning(String.format("/!\\ %s could not register product %s in the DF service%n", this.getLocalName(), product));
         }
-
     }
 
     public void deregister(Product product) {
@@ -147,10 +145,8 @@ public class Seller extends Agent {
         try {
             DFService.modify(this, this.dfd);
         } catch (FIPAException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            this.logger.warning(String.format("/!\\ %s could not remove product %s from the DF service%n", this.getLocalName(), product));
         }
-
     }
 
     private void deregister() {
@@ -197,8 +193,7 @@ public class Seller extends Agent {
             this.logger.addHandler(fh);
             fh.setFormatter(new CoolFormatter());
         } catch (SecurityException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.out.printf("/!\\ seller %s was unable to setup logger%n", this.getLocalName());
         }
     }
 

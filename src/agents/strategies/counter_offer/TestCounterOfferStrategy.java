@@ -2,6 +2,7 @@ package agents.strategies.counter_offer;
 
 import java.util.Map;
 
+import agents.Buyer;
 import jade.core.AID;
 import models.OfferInfo;
 import models.SellerOfferInfo;
@@ -10,7 +11,7 @@ import utils.Util;
 public class TestCounterOfferStrategy extends CounterOfferStrategy {
 
     @Override
-    public AID finalDecision(Map<AID, SellerOfferInfo> offers) {
+    public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer) {
         
         AID bestDecision = null;
         float bestValue = Float.MAX_VALUE;
@@ -18,11 +19,16 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
         for (Map.Entry<AID, SellerOfferInfo> entry : offers.entrySet()) {
             SellerOfferInfo offer = entry.getValue();
             
-            // The larger the credibility the smaller the value
-            float perceivedOfferValue = offer.getOfferedPrice() * 1/offer.getSellerCredibility();
+            // Lower is better
+            // More credibility -> Lower cost
+            // More rounds -> Higher cost
 
-            if(perceivedOfferValue < bestValue){
-                bestValue = perceivedOfferValue;
+            float patienceDiscount = (float) Math.pow(buyer.getPatience()/100.0f, offer.getRound());
+            float perceivedOfferCost = offer.getOfferedPrice() / offer.getSellerCredibility() /patienceDiscount ;
+            buyer.logger().info(String.format("!%s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
+
+            if(perceivedOfferCost < bestValue){
+                bestValue = perceivedOfferCost;
                 bestDecision = entry.getKey();
             }
         }

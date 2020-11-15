@@ -24,7 +24,8 @@ public class Stats {
     }
 
     public static synchronized void productSold(Seller seller, Product product, float price) {
-        List<Float> prices = productsSold.getOrDefault(product, new LinkedList<>());
+        productsSold.putIfAbsent(product, new LinkedList<>());
+        List<Float> prices = productsSold.get(product);
         prices.add(price);
 
         float totalEarnings = moneyGainedSellers.getOrDefault(seller, 0.0f);
@@ -62,7 +63,7 @@ public class Stats {
             stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue() + "$ earned";
         }
 
-        stats += "\nScams (total=" + totalScams + "):\n";
+        stats += "\nScams (total=" + totalScams + "):";
 
         for (Map.Entry<Seller, Integer> entry : scams.entrySet()) {
             stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue();

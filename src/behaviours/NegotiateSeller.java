@@ -2,16 +2,18 @@ package behaviours;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import agents.Buyer;
 import agents.Seller;
 import models.OfferInfo;
 import models.Product;
 import models.Scam;
 import models.SellerOfferInfo;
+import utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
@@ -22,12 +24,14 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
     private Map<Product, ConcurrentHashMap<AID, SellerOfferInfo>> ownPreviousOffers;
+    private List<AID> sentOffers;
 
     public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
 
         this.previousOffers = new ConcurrentHashMap<>();
         this.ownPreviousOffers = new ConcurrentHashMap<>();
+        this.sentOffers = new LinkedList<>();
     }
 
     @Override
@@ -50,13 +54,13 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 // Calculate price to propose
                 OfferInfo previousOffer = this.previousOffers.get(buyerOffer.getProduct()).get(cfp.getSender());
                 float offeredPrice = 0;
-                
-                if(previousOffer != null && Math.abs(buyerOffer.getOfferedPrice()- previousOffer.getOfferedPrice())  < 0.01 ){
+
+                if (previousOffer != null
+                        && Util.floatEqual(buyerOffer.getOfferedPrice(), previousOffer.getOfferedPrice())) {
                     offeredPrice = previousOffer.getOfferedPrice();
-                }
-                else{
+                } else {
                     offeredPrice = seller.getOfferStrategy().chooseOffer(buyerOffer, previousOffer,
-                    this.ownPreviousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()), seller);
+                            this.ownPreviousOffers.get(buyerOffer.getProduct()).get(cfp.getSender()), seller);
                 }
 
                 SellerOfferInfo sellerOffer = new SellerOfferInfo(buyerOffer.getProduct(), offeredPrice,
@@ -70,6 +74,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 this.ownPreviousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), sellerOffer);
                 seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(),
                         cfp.getSender().getLocalName(), sellerOffer));
+                this.sentOffers.add(cfp.getSender());
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
                 seller.logger().info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(),
@@ -88,7 +93,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
-        // TODO: later
+
+        this.sentOffers.remove(reject.getSender());
         this.getAgent().logger().info(String.format("> %s received REJECT from agent %s",
                 this.getAgent().getLocalName(), reject.getSender().getLocalName()));
     }
@@ -96,12 +102,26 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     @Override
     protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
 
-        OfferInfo buyerOffer;
+        OfferInfo buyerOffer = null;
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
 
+        this.sentOffers.remove(accept.getSender());
+
         try {
             buyerOffer = (OfferInfo) accept.getContentObject();
+        } catch (UnreadableException e) {
+            result.setPerformative(ACLMessage.FAILURE);
+            result.setContent("Could not understand content");
+            seller.logger().warning(String.format("/!\\ %s could not read content sent by %s", seller.getLocalName(),
+                    accept.getSender().getLocalName()));
+            seller.logger().warning(
+                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            return result;
+        }
+
+        try {
+
             seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s",
                     seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
             String content;
@@ -171,9 +191,14 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             // Clear offer history from agent
             this.previousOffers.get(buyerOffer.getProduct()).remove(cfp.getSender());
 
-        } catch (UnreadableException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (IOException e) {
+            result.setPerformative(ACLMessage.FAILURE);
+            result.setContent("Could not send proper content");
+            seller.logger().warning(String.format("/!\\ %s could not send content to %s", seller.getLocalName(),
+                    accept.getSender().getLocalName()));
+            seller.logger().warning(
+                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+            return result;
         }
 
         return result;
@@ -197,8 +222,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     @Override
     public int onEnd() {
-        if (this.getAgent().finished())
-            this.getAgent().doDelete();
+        // if (this.getAgent().finished() && this.sentOffers.isEmpty())
+        //     this.getAgent().doDelete();
 
         return super.onEnd();
     }

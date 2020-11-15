@@ -22,6 +22,9 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import utils.Config;
 
+// TODO: Improve strategies
+// TODO: erro do kill
+
 public class Olx {
     private Runtime rt;
     private Profile p;
@@ -31,7 +34,7 @@ public class Olx {
     private Map<String, Product> products;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config, boolean kill) {
+    public Olx(boolean mainMode, Config config) {
         this.rt = Runtime.instance();
         this.p = new ProfileImpl();
 
@@ -42,36 +45,32 @@ public class Olx {
 
         this.products = new HashMap<>();
         Product[] prov = config.getProducts();
-        for(int i = 0; i < prov.length; i++)
+        for (int i = 0; i < prov.length; i++)
             this.products.put(prov[i].getName(), prov[i]);
         this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
         this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
 
+    }
+
+    public void start(boolean kill) {
         createSellers();
         createBuyers(kill);
     }
 
     private void createSellers() {
 
-        // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are identified
+        // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are
+        // identified
         // using the id "seller_i"
 
         for (int j = 0; j < this.sellers.size(); j++) {
-            
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
 
             try {
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                System.out.println("/!\\ Could not setup seller_" + j);
             }
-        }            
+        }
     }
 
     private void createBuyers(boolean kill) {
@@ -80,14 +79,14 @@ public class Olx {
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
             } catch (StaleProxyException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
     }
 
     /**
      * Create the OLX platform.
+     * 
      * @param args <configPath> <createHasMainContainer>
      * @throws IOException
      */
@@ -141,7 +140,7 @@ public class Olx {
             System.out.println("Configuration file not found.");
             System.exit(-1);
         }
-
+        
         // Create config object
         Config config = null;
         try {
@@ -151,6 +150,7 @@ public class Olx {
             System.exit(-1);
         }
 
-        new Olx(mainMode, config, kill);
+        Olx olx = new Olx(mainMode, config);
+        olx.start(kill);
     }
 }

@@ -2,7 +2,8 @@ package agents.strategies.offer;
 
 public class OfferStrategyFactory {
     enum Type {
-        TEST
+        TEST,
+        TURTLE
     }
 
     public static OfferStrategy get(String typeStr) throws IllegalArgumentException {
@@ -11,6 +12,8 @@ public class OfferStrategyFactory {
         switch (type) {
             case TEST:
                 return new TestOfferStrategy();
+            case TURTLE:
+                return new TurtleOfferStrategy();
         }
 
         return null;

@@ -5,7 +5,7 @@ import models.OfferInfo;
 import models.SellerOfferInfo;
 import utils.Util;
 
-public class TestOfferStrategy extends OfferStrategy {
+public class TurtleOfferStrategy extends OfferStrategy {
 
 	@Override
 	public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer, Seller seller) {
@@ -17,7 +17,7 @@ public class TestOfferStrategy extends OfferStrategy {
 			return sellerProductPrice;
 		}
 		else {
-			float variance = this.getVariance(currentOffer.getProduct(), (ownPreviousOffer.getOfferedPrice() - currentOffer.getOfferedPrice())/3);
+			float variance = this.getVariance(currentOffer.getProduct(), (ownPreviousOffer.getOfferedPrice() - currentOffer.getOfferedPrice())/15);
 			return Math.max(currentOffer.getOfferedPrice() ,Math.max(Util.round(ownPreviousOffer.getOfferedPrice() - variance, 1), minPrice));
 		}
 	}

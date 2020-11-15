@@ -38,6 +38,7 @@ public class Buyer extends Agent {
     private Map<Product, ProductStatus> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float moneySpent;
+    private int patience;
     private Set<AID> blackList;
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
@@ -59,60 +60,58 @@ public class Buyer extends Agent {
     }
 
     enum ProductStatus {
-        TRYING,
-        BOUGHT,
-        NO_SELLER,
+        TRYING, BOUGHT, NO_SELLER,
     }
 
     @JsonCreator
-    public Buyer(@JsonProperty("products") Product[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
+    public Buyer(@JsonProperty("products") Product[] products,
+            @JsonProperty("counterOfferStrategy") String counterOfferStrategy, @JsonProperty("patience") int patience) {
         for (int i = 0; i < products.length; i++)
             this.products.put(products[i], ProductStatus.TRYING);
-
+        if (patience > 100 || patience < 0)
+            throw new IllegalArgumentException("Patience must be from 0 to 100 and was " + patience);
         this.kill = false;
         this.moneySpent = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
         this.blackList = new HashSet<>();
+        this.patience = patience;
     }
 
     public CounterOfferStrategy getCounterOfferStrategy() {
         return counterOfferStrategy;
     }
 
-    public void addScammer(AID seller){
+    public void addScammer(AID seller) {
         this.blackList.add(seller);
     }
 
-    public boolean isScammer(AID seller){
+    public boolean isScammer(AID seller) {
         return this.blackList.contains(seller);
     }
 
-    public Logger logger(){
+    public Logger logger() {
         return this.logger;
     }
-    
+
     // The buyer currently
     @Override
     protected void setup() {
         this.setupLogger();
         this.logger.info("- START: " + this);
-        // TODO: depois ver se dá para mudar para um que repita ciclicamente até success true. 
-        // Se calhar dá para chegar ao final e por reset se success false
 
         // Buyers sleep to allow for seller setup
         try {
             Thread.sleep(2500);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return;
+            this.logger.warning(String.format("> %s was interrupted while sleeping, ending.%n", this.getLocalName()));
+            Thread.currentThread().interrupt();
         }
 
         // Ask prices of each product to sellers. The ask price behaviour choses the
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
         negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-        for (Product p : this.products.keySet())        
+        for (Product p : this.products.keySet())
             negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
 
         this.addBehaviour(negotiationsBehaviour);
@@ -121,6 +120,10 @@ public class Buyer extends Agent {
     //
     // Helpers
     //
+
+    public int getPatience() {
+        return patience;
+    }
 
     private void setupLogger() {
         this.logger = Logger.getLogger(this.getLocalName());
@@ -134,7 +137,7 @@ public class Buyer extends Agent {
             this.logger.addHandler(fh);
             fh.setFormatter(new CoolFormatter());
         } catch (SecurityException | IOException e) {
-            // TODO Auto-generated catch block
+            System.out.printf("</!\\ %s experienced an error while creating a logger%n", this.getLocalName());
             e.printStackTrace();
         }
     }
@@ -143,7 +146,7 @@ public class Buyer extends Agent {
         return this.products.keySet();
     }
 
-    public ParallelBehaviour getBehaviour(){
+    public ParallelBehaviour getBehaviour() {
         return this.negotiationsBehaviour;
     }
 
@@ -189,7 +192,6 @@ public class Buyer extends Agent {
     
     @Override
     public void takeDown() {
-        System.out.println(this.getLocalName() + " is the impostor.");
         for (Handler h: this.logger.getHandlers())
             h.close();
 
@@ -199,7 +201,8 @@ public class Buyer extends Agent {
                 SearchConstraints c = new SearchConstraints();
                 agents = AMSService.search(this, new AMSAgentDescription());
             } catch (Exception e) {
-                // TODO
+                System.out.printf("/!\\ %s encountered an error while searching for agents%n", this.getLocalName());
+                return;
             }
 
             int numBuyers = 0;
@@ -210,6 +213,7 @@ public class Buyer extends Agent {
             }
 
             if (numBuyers == 0) {
+                System.out.printf("--- %s %n", this.getLocalName());
                 Stats.printStats();
 
                 Codec codec = new SLCodec();

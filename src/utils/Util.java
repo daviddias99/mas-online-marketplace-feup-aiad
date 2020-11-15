@@ -68,4 +68,9 @@ public abstract class Util {
 
         return min;
     }
+
+    public static boolean floatEqual(float f1, float f2){
+
+        return Math.abs(f1-f2) < 0.01;
+    }
 }

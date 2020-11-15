@@ -15,13 +15,13 @@ public class TestPickingStrategy extends PricePickingStrategy {
     public float calculateInitialPrice(Seller s, Product p, List<Float> marketPrices) {
         float marketAverage = Util.average(marketPrices);
         float a = Util.getNormalRandom(0.7f, 0.3f);
-        return Util.round(marketAverage  * Float.min(0.9f,a ), 2) ;
+        return Util.round(marketAverage  * Float.min(0.9f,a ), 1) ;
     }
 
     @Override
     public float calculateInitialPrice(Seller s, Product p) {
         float a = Util.randomBetween(70,90)/100.0f;
-        return  Util.round(p.getOriginalPrice()  * a,2);
+        return  Util.round(p.getOriginalPrice()  * a,1);
     }
 
 }

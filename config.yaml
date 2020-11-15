@@ -1,18 +1,35 @@
 ---
 products:
   - name: pc
-    price: 15
+    price: 650
   - name: skate
     price: 20
 buyers:
   - products:
-      - skate
+      - pc
     counterOfferStrategy: test
+    patience: 80
+  - products:
+      - pc
+    counterOfferStrategy: test
+    patience: 80
+  - products:
+      - pc
+    counterOfferStrategy: test
+    patience: 80
+  - products:
+      - pc
+    counterOfferStrategy: test
+    patience: 80
+  - products:
+      - pc
+    counterOfferStrategy: test
+    patience: 80
 
 sellers:
   - scamFactor: 50
     elasticity: 50
-    offerStrategy: test
+    offerStrategy: turtle
     pickingStrategy: test
     products:
       - pc
@@ -23,7 +40,7 @@ sellers:
     pickingStrategy: test
     products:
       - pc
-  - scamFactor: 0
+  - scamFactor: 50
     elasticity: 50
     offerStrategy: test
     pickingStrategy: test
