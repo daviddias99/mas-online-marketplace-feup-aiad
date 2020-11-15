@@ -16,6 +16,7 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.proto.SSIteratedContractNetResponder;
+import utils.Stats;
 
 public class NegotiateSeller extends SSIteratedContractNetResponder {
 
@@ -127,6 +128,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 seller.changeWealth(maxProposal.getOfferedPrice());
                 int oldCredibility = seller.getCredibility();
                 int newCredibility = seller.reduceCredibility();
+
+                Stats.scam(seller);
                 seller.logger()
                         .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
                                 seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
@@ -147,6 +150,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 int newCredibility = seller.increaseCredibility();
 
                 seller.deregister(buyerOffer.getProduct());
+
+                Stats.productSold(seller, buyerOffer.getProduct(), buyerOffer.getOfferedPrice());
 
                 seller.logger()
                         .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",

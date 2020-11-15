@@ -2,9 +2,7 @@ package agents;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -31,6 +29,7 @@ import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
 import models.Product;
 import utils.CoolFormatter;
+import utils.Stats;
 
 public class Buyer extends Agent {
 
@@ -38,7 +37,7 @@ public class Buyer extends Agent {
     // buyer as acquired the key product.
     private Map<Product, ProductStatus> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
-    private float wealth;
+    private float moneySpent;
     private Set<AID> blackList;
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
@@ -48,6 +47,17 @@ public class Buyer extends Agent {
         this.kill = kill;
     }
 
+    public List<Product> getProductsBought() {
+        List<Product> res = new LinkedList<>();
+        for (Map.Entry<Product, ProductStatus> entry : this.products.entrySet()) {
+            if (entry.getValue() == ProductStatus.BOUGHT) {
+                res.add(entry.getKey());
+            }
+        }
+
+        return res;
+    }
+
     enum ProductStatus {
         TRYING,
         BOUGHT,
@@ -55,12 +65,12 @@ public class Buyer extends Agent {
     }
 
     @JsonCreator
-    public Buyer(@JsonProperty("products") String[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
+    public Buyer(@JsonProperty("products") Product[] products, @JsonProperty("counterOfferStrategy") String counterOfferStrategy) {
         for (int i = 0; i < products.length; i++)
-            this.products.put(new Product(products[i]), ProductStatus.TRYING);
+            this.products.put(products[i], ProductStatus.TRYING);
 
         this.kill = false;
-        this.wealth = 0;
+        this.moneySpent = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
         this.blackList = new HashSet<>();
     }
@@ -150,8 +160,12 @@ public class Buyer extends Agent {
         return "Buyer{" + "products=" + this.products + "}";
     }
 
-    public synchronized void changeWealth(float variance){
-        this.wealth += variance;
+    public synchronized void changeMoneySpent(float variance){
+        this.moneySpent += variance;
+    }
+
+    public float getMoneySpent() {
+        return this.moneySpent;
     }
 
     public void receivedProduct(Product product) {
@@ -196,6 +210,8 @@ public class Buyer extends Agent {
             }
 
             if (numBuyers == 0) {
+                Stats.printStats();
+
                 Codec codec = new SLCodec();
                 Ontology jmo = JADEManagementOntology.getInstance();
                 getContentManager().registerLanguage(codec);

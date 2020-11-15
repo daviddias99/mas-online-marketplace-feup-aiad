@@ -1,35 +1,73 @@
 package utils;
 
+import agents.Buyer;
+import agents.Seller;
 import models.Product;
-import models.Scam;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Stats {
-    private static int numScams = 0;
+    private static int totalScams = 0;
 
+    private static Map<Seller, Integer> scams = new HashMap<>();
+    private static Map<Seller, Float> moneyGainedSellers = new HashMap<>();
     private static Map<Product, List<Float>> productsSold = new HashMap<>();
+    private static Map<Buyer, Float> moneySavedBuyers = new HashMap<>();
 
-    public static void incScams() {
-        numScams++;
+    public static synchronized void scam(Seller seller) {
+        totalScams++;
+        int nScams = scams.getOrDefault(seller, 0);
+        scams.put(seller, nScams + 1);
     }
 
-    public static synchronized void productSold(Product product, float price) {
-        productsSold.putIfAbsent(product, new LinkedList<>());
-        List<Float> prices = productsSold.get(product);
+    public static synchronized void productSold(Seller seller, Product product, float price) {
+        List<Float> prices = productsSold.getOrDefault(product, new LinkedList<>());
         prices.add(price);
+
+        float totalEarnings = moneyGainedSellers.getOrDefault(seller, 0.0f);
+        moneyGainedSellers.put(seller, totalEarnings + price);
     }
+
+    public static synchronized void updateMoneySaved(Buyer buyer) {
+        List<Product> products = buyer.getProductsBought();
+        float savedMoney = - buyer.getMoneySpent();
+
+        for (Product p : products) {
+            savedMoney += p.getOriginalPrice();
+        }
+
+        moneySavedBuyers.put(buyer, savedMoney);
+    }
+
 
     public static void printStats() {
-        String stats = "Scams: " + numScams + "\n" +
-                       "Products sold:";
+        String stats = "Products sold:";
 
         for (Map.Entry<Product, List<Float>> entry : productsSold.entrySet()) {
             stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue().size() + " sold : " + Util.average(entry.getValue()) + " avg. price";
         }
+
+        stats += "\nBuyers:";
+
+        for (Map.Entry<Buyer, Float> entry : moneySavedBuyers.entrySet()) {
+            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue() + "$ saved";
+        }
+
+        stats += "\nSellers:";
+
+        for (Map.Entry<Seller, Float> entry : moneyGainedSellers.entrySet()) {
+            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue() + "$ earned";
+        }
+
+        stats += "\nScams (total=" + totalScams + "):\n";
+
+        for (Map.Entry<Seller, Integer> entry : scams.entrySet()) {
+            stats += "\n  - " + entry.getKey().getName() + " : " + entry.getValue();
+        }
+
+        System.out.println(stats);
     }
 }

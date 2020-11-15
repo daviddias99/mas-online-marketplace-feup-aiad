@@ -21,6 +21,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.proto.ContractNetInitiator;
+import utils.Stats;
 
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
@@ -280,15 +281,15 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
             if (response instanceof Scam) {
                 Scam scam = (Scam) response;
-                this.buyer.changeWealth(-scam.getOfferInfo().getOfferedPrice());
+                this.buyer.changeMoneySpent(scam.getOfferInfo().getOfferedPrice());
                 this.getAgent().logger().info(String.format("< %s was SCAMMED by agent %s with %s", this.getAgent().getLocalName(), inform.getSender().getLocalName(), response));
                 this.getAgent().addScammer(inform.getSender());
             } else if (response instanceof OfferInfo) {
                 OfferInfo offerInfo = (OfferInfo) response;
                 this.buyer.receivedProduct(offerInfo.getProduct());
-                this.buyer.changeWealth(-offerInfo.getOfferedPrice());
+                this.buyer.changeMoneySpent(offerInfo.getOfferedPrice());
+                Stats.updateMoneySaved(this.buyer);
                 if (this.buyer.finished()) {
-                    System.out.println("Buyer bought all stuffs");
                     this.buyer.doDelete();
                 }
             }
