@@ -1,0 +1,34 @@
+---
+products:
+  - name: pc
+    price: 650
+  - name: skate
+    price: 20
+  - name: nintendo
+    price: 240
+  - name: colunas da JBL
+    price: 120
+  - name: vinil dos Beegees
+    price: 80
+  - name: raspberry PI
+    price: 100
+  - name: bmx
+    price: 300
+  - name: camisola do Man Utd.
+    price: 20
+buyers:
+  - products:
+      - pc
+    counterOfferStrategy: SMART
+    patience: 100
+
+sellers:
+  - scamFactor: 0
+    elasticity: 30
+    offerStrategy: SMART
+    pickingStrategy: SMART
+    products:
+      - pc
+
+
+

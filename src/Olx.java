@@ -129,7 +129,7 @@ public class Olx implements TerminationListener {
                 .help("start agents in new main container");
         parser.addArgument("--kill", "-k")
                 .action(Arguments.storeTrue())
-                .help("last buyer agent shuts down the platforms");
+                .help("platform is shutdown after last buyer exits");
         parser.addArgument("--config", "-c")
                 .help("file (YAML or JSON) with experiment configuration");
 
