@@ -153,7 +153,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Map<AID, OfferInfo> counterOffers = this.buyer.getCounterOfferStrategy().pickOffers(offers, this.previousOffers,
                 this.ownPreviousOffer, this.negotiationRound);
 
-        // TODO: we should also add something for "sooner is better than waiting"
         // (because the products can be bought by others while we wait)
         System.out.printf("%s A%n", this.buyer.getLocalName());
         if (counterOffers.isEmpty()) {

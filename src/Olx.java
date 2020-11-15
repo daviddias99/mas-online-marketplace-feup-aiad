@@ -25,7 +25,6 @@ import utils.Config;
 // TODO: Improve strategies
 // TODO: finish end statistics
 // TODO: erro do kill
-// TODO: sooner vs later
 
 public class Olx {
     private Runtime rt;
