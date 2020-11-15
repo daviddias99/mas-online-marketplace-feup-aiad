@@ -30,6 +30,7 @@ import behaviours.NegotiateBuyer;
 import models.Product;
 import utils.CoolFormatter;
 import utils.Stats;
+import utils.TerminationListener;
 
 public class Buyer extends Agent {
 
@@ -42,10 +43,10 @@ public class Buyer extends Agent {
     private Set<AID> blackList;
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
-    private boolean kill;
+    private TerminationListener terminationListener;
 
-    public void setKillIfLast(boolean kill) {
-        this.kill = kill;
+    public void setTerminationListener(TerminationListener listener) {
+        this.terminationListener = listener;
     }
 
     public List<Product> getProductsBought() {
@@ -70,7 +71,7 @@ public class Buyer extends Agent {
             this.products.put(products[i], ProductStatus.TRYING);
         if (patience > 100 || patience < 0)
             throw new IllegalArgumentException("Patience must be from 0 to 100 and was " + patience);
-        this.kill = false;
+        this.terminationListener = null;
         this.moneySpent = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
         this.blackList = new HashSet<>();
@@ -150,7 +151,7 @@ public class Buyer extends Agent {
         return this.negotiationsBehaviour;
     }
 
-    // Get proiducts that have yet to be bough by the buyer
+    // Get products that have yet to be bough by the buyer
     public Set<Product> getMissingProducts() {
         return (this.products.entrySet().stream().filter(map -> map.getValue() == ProductStatus.TRYING)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
@@ -195,42 +196,8 @@ public class Buyer extends Agent {
         for (Handler h: this.logger.getHandlers())
             h.close();
 
-        if (this.kill) {
-            AMSAgentDescription[] agents = null;
-            try {
-                SearchConstraints c = new SearchConstraints();
-                agents = AMSService.search(this, new AMSAgentDescription());
-            } catch (Exception e) {
-                System.out.printf("/!\\ %s encountered an error while searching for agents%n", this.getLocalName());
-                return;
-            }
-
-            int numBuyers = 0;
-            for (AMSAgentDescription agentDescription : agents) {
-                if (agentDescription.getName().toString().contains("buyer") && !agentDescription.getName().equals(this.getAID())) {
-                    numBuyers++;
-                }
-            }
-
-            if (numBuyers == 0) {
-                System.out.printf("--- %s %n", this.getLocalName());
-                Stats.printStats();
-
-                Codec codec = new SLCodec();
-                Ontology jmo = JADEManagementOntology.getInstance();
-                getContentManager().registerLanguage(codec);
-                getContentManager().registerOntology(jmo);
-                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                msg.addReceiver(getAMS());
-                msg.setLanguage(codec.getName());
-                msg.setOntology(jmo.getName());
-                try {
-                    getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
-                    send(msg);
-                } catch (Exception e) {
-                    // todo
-                }
-            }
+        if (this.terminationListener != null) {
+            terminationListener.terminated(this);
         }
     }
 

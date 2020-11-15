@@ -129,7 +129,7 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     private void logSellerList(ACLMessage msg) {
         // Logging
-        StringBuilder sb = new StringBuilder(String.format("< %s asked the price of *%s* to the following sellers: [",
+        StringBuilder sb = new StringBuilder(String.format("< %s asked the price of %s to the following sellers: [",
                 this.getAgent().getLocalName(), this.getProduct().getName()));
         Iterator<AID> it = msg.getAllReceiver();
         boolean first = true;
