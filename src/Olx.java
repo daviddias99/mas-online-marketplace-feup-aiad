@@ -66,8 +66,9 @@ public class Olx {
         for (int j = 0; j < this.sellers.size(); j++) {
 
             try {
+                Thread.sleep(500);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-            } catch (StaleProxyException e) {
+            } catch (StaleProxyException | InterruptedException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }

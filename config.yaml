@@ -7,43 +7,43 @@ products:
 buyers:
   - products:
       - pc
-    counterOfferStrategy: test
+    counterOfferStrategy: SMART
     patience: 80
   - products:
       - pc
-    counterOfferStrategy: test
+    counterOfferStrategy: ABSTFT
     patience: 80
   - products:
       - pc
-    counterOfferStrategy: test
+    counterOfferStrategy: RELTFT
     patience: 80
   - products:
       - pc
-    counterOfferStrategy: test
+    counterOfferStrategy: ABSTFT
     patience: 80
   - products:
       - pc
-    counterOfferStrategy: test
+    counterOfferStrategy: RELTFT
     patience: 80
 
 sellers:
   - scamFactor: 50
     elasticity: 50
-    offerStrategy: turtle
-    pickingStrategy: test
+    offerStrategy: SMART
+    pickingStrategy: SMART
     products:
       - pc
 
   - scamFactor: 50
     elasticity: 50
-    offerStrategy: test
-    pickingStrategy: test
+    offerStrategy: ABSTFT
+    pickingStrategy: NAIVE
     products:
       - pc
   - scamFactor: 50
     elasticity: 50
-    offerStrategy: test
-    pickingStrategy: test
+    offerStrategy: RELTFT
+    pickingStrategy: SMART
     products:
       - skate
 

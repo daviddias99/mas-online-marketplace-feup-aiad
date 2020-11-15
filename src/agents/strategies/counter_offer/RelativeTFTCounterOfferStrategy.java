@@ -8,11 +8,25 @@ import models.OfferInfo;
 import models.SellerOfferInfo;
 import utils.Util;
 
-public class TestCounterOfferStrategy extends CounterOfferStrategy {
+public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
+
+
+    @Override
+    protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
+
+        if(ownPreviousOffer == null){
+            return Util.round(0.5f * offer.getOfferedPrice(), 2);
+        }
+
+        float previouslyOfferedPrice = ownPreviousOffer.getOfferedPrice();
+        float currentSellerOffer = offer.getOfferedPrice();
+        float decrementValue = Math.max(previouslyOfferedPrice * 0.1f, 1.0f);
+        float newOffer = previouslyOfferedPrice - decrementValue;
+        return Math.min(currentSellerOffer, newOffer);
+    }
 
     @Override
     public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer) {
-        
         AID bestDecision = null;
         float bestValue = Float.MAX_VALUE;
 
@@ -23,8 +37,7 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
             // More credibility -> Lower cost
             // More rounds -> Higher cost
 
-            float patienceDiscount = (float) Math.pow(buyer.getPatience()/100.0f, offer.getRound());
-            float perceivedOfferCost = offer.getOfferedPrice() / offer.getSellerCredibility() /patienceDiscount ;
+            float perceivedOfferCost = offer.getOfferedPrice();
             buyer.logger().info(String.format("!%s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
@@ -35,17 +48,4 @@ public class TestCounterOfferStrategy extends CounterOfferStrategy {
 
         return bestDecision;
     }
-
-    @Override
-    protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
-        
-        if(ownPreviousOffer == null){
-            return Util.round(0.5f * offer.getOfferedPrice(), 2);
-        }
-        else{
-            float variance =  this.getVariance(offer.getProduct(),  (offer.getOfferedPrice() - ownPreviousOffer.getOfferedPrice())/4);
-            return Math.min(ownPreviousOffer.getOfferedPrice() + variance, offer.getOfferedPrice());
-        }
-    }
-    
 }

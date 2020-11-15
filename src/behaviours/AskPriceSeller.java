@@ -97,7 +97,7 @@ public class AskPriceSeller extends AchieveREInitiator {
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
         Product p = this.getProduct();
-        List<Float> marketPrices = this.collectPrices(resultNotifications);
+        List<SellerOfferInfo> marketPrices = this.collectPrices(resultNotifications);
         this.logPriceString(marketPrices, p);
 
         // Other sellers are currenttly selling <product>
@@ -110,14 +110,14 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     // HELPERS
 
-    private List<Float> collectPrices(Vector resultNotifications) {
+    private List<SellerOfferInfo> collectPrices(Vector resultNotifications) {
 
-        List<Float> marketPrices = new ArrayList<>();
+        List<SellerOfferInfo> marketPrices = new ArrayList<>();
         // Collect current market prices
         for (int i = 0; i < resultNotifications.size(); i++) {
             ACLMessage message = (ACLMessage) resultNotifications.get(i);
             try {
-                marketPrices.add(((SellerOfferInfo) message.getContentObject()).getOfferedPrice());
+                marketPrices.add((SellerOfferInfo) message.getContentObject());
             } catch (UnreadableException e) {
                 this.getAgent().logger().info(String.format("/!\\ %s could not read object sent by %s",
                         this.getAgent().getLocalName(), message.getSender().getLocalName()));
@@ -143,18 +143,18 @@ public class AskPriceSeller extends AchieveREInitiator {
 
     }
 
-    private void logPriceString(List<Float> marketPrices, Product p) {
+    private void logPriceString(List<SellerOfferInfo> marketPrices, Product p) {
         boolean first = true;
 
         StringBuilder sb = new StringBuilder(
                 String.format("> %s found that product %s has %d sellers with these prices: [", seller.getLocalName(),
                         p.getName(), marketPrices.size()));
-        for (Float soInfo : marketPrices)
+        for (SellerOfferInfo soInfo : marketPrices)
             if (first) {
-                sb.append(String.format("%.2f", soInfo));
+                sb.append(String.format("%.2f - %d", soInfo.getOfferedPrice(), soInfo.getSellerCredibility()));
                 first = false;
             } else
-                sb.append(String.format(", %.2f", soInfo));
+                sb.append(String.format(", %.2f - %d", soInfo.getOfferedPrice(), soInfo.getSellerCredibility()));
         this.seller.logger().info(sb.append("]").toString());
 
     }
