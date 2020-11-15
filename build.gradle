@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 
 application {
@@ -28,4 +29,9 @@ sourceSets {
    }
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'Olx'
+    }
+}
 
