@@ -311,7 +311,6 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     @Override
     protected void handleFailure(ACLMessage failure) {
-        // TODO: Manel
         this.getAgent().logger().info(String.format("> %s received FAILURE from agent %s with %s",
                 this.getAgent().getLocalName(), failure.getSender().getLocalName(), failure.getContent()));
     }

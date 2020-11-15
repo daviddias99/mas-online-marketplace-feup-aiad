@@ -22,6 +22,11 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import utils.Config;
 
+// TODO: Improve strategies
+// TODO: finish end statistics
+// TODO: erro do kill
+// TODO: sooner vs later
+
 public class Olx {
     private Runtime rt;
     private Profile p;

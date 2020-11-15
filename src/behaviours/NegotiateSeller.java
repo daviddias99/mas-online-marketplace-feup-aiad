@@ -2,6 +2,8 @@ package behaviours;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,12 +23,14 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
     private Map<Product, ConcurrentHashMap<AID, SellerOfferInfo>> ownPreviousOffers;
+    private List<AID> sentOffers;
 
     public NegotiateSeller(Seller s, ACLMessage cfp) {
         super(s, cfp);
 
         this.previousOffers = new ConcurrentHashMap<>();
         this.ownPreviousOffers = new ConcurrentHashMap<>();
+        this.sentOffers = new LinkedList<>();
     }
 
     @Override
@@ -69,6 +73,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 this.ownPreviousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), sellerOffer);
                 seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(),
                         cfp.getSender().getLocalName(), sellerOffer));
+                this.sentOffers.add(cfp.getSender());
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
                 seller.logger().info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(),
@@ -87,7 +92,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     @Override
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
-        // TODO: later
+
+        this.sentOffers.remove(reject.getSender());
         this.getAgent().logger().info(String.format("> %s received REJECT from agent %s",
                 this.getAgent().getLocalName(), reject.getSender().getLocalName()));
     }
@@ -98,6 +104,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         OfferInfo buyerOffer = null;
         Seller seller = this.getAgent();
         ACLMessage result = accept.createReply();
+
+        this.sentOffers.remove(accept.getSender());
 
         try {
             buyerOffer = (OfferInfo) accept.getContentObject();
@@ -209,7 +217,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     @Override
     public int onEnd() {
-        if (this.getAgent().finished())
+        if (this.getAgent().finished() && this.sentOffers.isEmpty())
             this.getAgent().doDelete();
 
         return super.onEnd();
