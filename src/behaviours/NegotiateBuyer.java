@@ -79,16 +79,24 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 return v;
             }
 
+
+            String log = "< ask price to sellers:";
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
-                if (!this.getAgent().isScammer(result[i].getName()))
+                if (!this.getAgent().isScammer(result[i].getName())) {
                     cfp.addReceiver(result[i].getName());
+                    log += String.format("%n - %s", result[i].getName().getLocalName());
+                }
+
+            this.buyer.logger()
+                    .info(log);
 
             // No valid receivers found
             if (!cfp.getAllReceiver().hasNext()) {
                 this.leaveDueToNoAvailableSellers(true);
                 return v;
             }
+
 
             // A "blank" offer (with -1) is sent to know the price of the product (we don't
             // send only the <product> because of compability reasons)
@@ -297,7 +305,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     private void handleScam(Scam scam, ACLMessage inform){
 
-        this.buyer.changeMoneySpent(-scam.getOfferInfo().getOfferedPrice());
+        this.buyer.changeMoneySpent(scam.getOfferInfo().getOfferedPrice());
         Stats.updateMoneySaved(this.buyer);
         this.getAgent().logger().info(String.format("! %s was SCAMMED by agent %s with %s",
                 this.getAgent().getLocalName(), inform.getSender().getLocalName(), scam));
@@ -309,7 +317,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.getAgent().logger().info(String.format("! %s BOUGHT %s from agent %s",
         this.getAgent().getLocalName(), offerInfo, inform.getSender().getLocalName()));
         this.buyer.receivedProduct(offerInfo.getProduct());
-        this.buyer.changeMoneySpent(-offerInfo.getOfferedPrice());
+        this.buyer.changeMoneySpent(offerInfo.getOfferedPrice());
         Stats.updateMoneySaved(this.buyer);
         if (this.buyer.finished()) {
             this.buyer.logger().info(String.format("! %s bought every product he needed", this.buyer.getLocalName()));
