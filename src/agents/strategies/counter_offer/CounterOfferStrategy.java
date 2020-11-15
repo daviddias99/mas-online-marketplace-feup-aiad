@@ -48,5 +48,5 @@ public abstract class CounterOfferStrategy implements Serializable {
 
     protected abstract float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer);
 
-    public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer);
+    public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb);
 }

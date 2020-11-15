@@ -26,7 +26,7 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer) {
+    public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb) {
         AID bestDecision = null;
         float bestValue = Float.MAX_VALUE;
 
@@ -35,7 +35,7 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
             
             // Lower is better
             float perceivedOfferCost = offer.getOfferedPrice();
-            buyer.logger().info(String.format("!%s evaluated %s from %s as %f",buyer.getLocalName(), offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            sb.append(String.format("%n - %s from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;

@@ -175,8 +175,10 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private boolean updateWaitingList(ACLMessage incomingMessage, List<ACLMessage> outgoingMessages, StringBuilder sb) {
 
         boolean rejected = false;
-        AID bestSeller = this.buyer.getCounterOfferStrategy().makeDecision(this.previousOffers, this.buyer);
-        this.buyer.logger().info(String.format("! %s thinks best seller is %s",this.buyer.getLocalName(), bestSeller.getLocalName()));
+        StringBuilder decisionSB = new StringBuilder(String.format("! %s reached agreement with %s for %s:", this.getAgent().getLocalName(), incomingMessage.getSender().getLocalName(),this.product.getName()));
+        AID bestSeller = this.buyer.getCounterOfferStrategy().makeDecision(this.previousOffers, this.buyer, decisionSB);
+        decisionSB.append(String.format("%n conclusion: best seller is %s", bestSeller.getLocalName()));
+        this.buyer.logger().info(decisionSB.toString());
         String format = "%n - %s";
         // If the best negotiation that is on wait is no longer a candidate, reject it
         if (this.negotiationOnWait != null && !bestSeller.equals(this.negotiationOnWait.getSender())) {
@@ -250,7 +252,9 @@ public class NegotiateBuyer extends ContractNetInitiator {
                 this.getAgent().getLocalName(), this.negotiationRound));
 
         // Choose the best seller among the possibilities
-        AID bestSeller = this.buyer.getCounterOfferStrategy().makeDecision(this.previousOffers, this.buyer);
+        StringBuilder decisionSB = new StringBuilder(String.format("! %s final decision for %s:", this.getAgent().getLocalName(), this.product.getName()));
+        AID bestSeller = this.buyer.getCounterOfferStrategy().makeDecision(this.previousOffers, this.buyer, decisionSB);
+        this.buyer.logger().info(decisionSB.toString());
 
         // Get all messages that need answering: all from this round + the message on
         // wait if any
