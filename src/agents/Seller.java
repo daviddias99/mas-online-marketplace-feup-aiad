@@ -108,9 +108,12 @@ public class Seller extends Agent {
     @Override
     protected void takeDown() {
         deregister();
-        System.out.println(this.getLocalName() + " exited the chat.");
+        this.logger().info(String.format("! %s is leaving %n", this.getLocalName()));
+
         for(Handler h: this.logger.getHandlers())
             h.close();
+
+        System.out.printf("! %s is leaving %n", this.getLocalName());
     }
 
     public void register(Product product) {
