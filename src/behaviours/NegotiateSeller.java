@@ -222,8 +222,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
     @Override
     public int onEnd() {
-        // if (this.getAgent().finished() && this.sentOffers.isEmpty())
-        //     this.getAgent().doDelete();
+        if (this.getAgent().finished() && this.sentOffers.isEmpty())
+            this.getAgent().doDelete();
 
         return super.onEnd();
     }
