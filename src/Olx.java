@@ -3,12 +3,13 @@ import java.io.IOException;
 import java.util.*;
 
 import agents.TerminationAgent;
-import jade.core.Agent;
+import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
-import jade.core.Runtime;
-import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import sajas.core.Runtime;
+import sajas.wrapper.AgentController;
+import sajas.wrapper.ContainerController;
 import agents.Buyer;
 import agents.Seller;
 import models.Product;
@@ -64,7 +65,7 @@ public class Olx implements TerminationListener {
 
     public void start(boolean kill) {
         createSellers();
-        createBuyers(kill);
+        // createBuyers(kill);
     }
 
     private void createSellers() {
@@ -81,7 +82,7 @@ public class Olx implements TerminationListener {
             try {
                 Thread.sleep(500);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-            } catch (StaleProxyException | InterruptedException e) {
+            } catch (InterruptedException | StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }

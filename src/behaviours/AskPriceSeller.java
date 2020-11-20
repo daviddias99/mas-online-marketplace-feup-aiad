@@ -9,14 +9,14 @@ import java.util.Vector;
 import models.Product;
 import models.SellerOfferInfo;
 import agents.Seller;
-import jade.core.AID;
-import jade.domain.DFService;
+import sajas.core.AID;
+import sajas.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import jade.proto.AchieveREInitiator;
+import sajas.proto.AchieveREInitiator;
 
 public class AskPriceSeller extends AchieveREInitiator {
 

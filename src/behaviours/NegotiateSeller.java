@@ -14,10 +14,10 @@ import models.Product;
 import models.Scam;
 import models.SellerOfferInfo;
 import utils.Util;
-import jade.core.AID;
+import sajas.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import jade.proto.SSIteratedContractNetResponder;
+import sajas.proto.SSIteratedContractNetResponder;
 import utils.Stats;
 
 public class NegotiateSeller extends SSIteratedContractNetResponder {
@@ -67,14 +67,17 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                         seller.getCredibility());
 
                 // Update previous offer record
-                this.previousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), buyerOffer);
+                // TODO: será que precisa mesmo disto?
+                this.previousOffers.get(buyerOffer.getProduct()).put((sajas.core.AID) cfp.getSender(), buyerOffer);
 
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContentObject(sellerOffer);
-                this.ownPreviousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), sellerOffer);
+                // TODO: será que precisa mesmo disto?
+                this.ownPreviousOffers.get(buyerOffer.getProduct()).put((sajas.core.AID) cfp.getSender(), sellerOffer);
                 seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(),
                         cfp.getSender().getLocalName(), sellerOffer));
-                this.sentOffers.add(cfp.getSender());
+                // TODO: será que precisa mesmo disto?
+                this.sentOffers.add((sajas.core.AID) cfp.getSender());
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
                 seller.logger().info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(),
