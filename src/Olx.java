@@ -24,7 +24,7 @@ import utils.Config;
 import utils.Stats;
 import utils.TerminationListener;
 
-public class Olx extends Repast3Launcher implements TerminationListener{
+public class Olx extends Repast3Launcher implements TerminationListener {
     private Runtime rt;
     private Profile p;
     private ContainerController container;
@@ -51,6 +51,7 @@ public class Olx extends Repast3Launcher implements TerminationListener{
     }
 
     private void createSellers() {
+        System.out.println("Creating Sellers");
         // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are
         // identified
         // using the id "seller_i"
@@ -62,16 +63,16 @@ public class Olx extends Repast3Launcher implements TerminationListener{
         for (int j = 0; j < this.sellers.size(); j++) {
 
             try {
-                Thread.sleep(500);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
                 System.out.println("Started ");
-            } catch (InterruptedException | StaleProxyException e) {
+            } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }
     }
 
     private void createBuyers(boolean kill) {
+        System.out.println("Creating Buyers");
         if (this.buyers == null) {
             System.out.println("WARNING: no buyers specified");
             return;

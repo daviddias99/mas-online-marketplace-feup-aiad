@@ -78,7 +78,6 @@ public class Seller extends Agent {
 
     @Override
     protected void setup() {
-        System.out.println("AQUI");
         this.setupLogger();
         this.logger.info("- START: " + this);
         // Agent registration object inside the DF registry. An agent provides one service
@@ -126,7 +125,7 @@ public class Seller extends Agent {
         this.dfd.addServices(sd);
 
         try {
-            DFService.deregister(this, this.dfd);
+            // DFService.deregister(this, this.dfd);
             DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not register product %s in the DF service%n", this.getLocalName(), product));
@@ -146,7 +145,7 @@ public class Seller extends Agent {
         }
 
         try {
-            DFService.deregister(this, this.dfd);
+            // DFService.deregister(this, this.dfd);
             DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not remove product %s from the DF service%n", this.getLocalName(), product));
