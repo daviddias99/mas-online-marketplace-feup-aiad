@@ -13,7 +13,7 @@ import models.OfferInfo;
 import models.Product;
 import models.Scam;
 import models.SellerOfferInfo;
-import sajas.core.AID;
+import jade.core.AID;
 import sajas.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -83,8 +83,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             String log = String.format("< %s ask price of %s to sellers:", this.getAgent().getLocalName(), this.product.getName());
             // Add each one as receiver for price asking
             for (int i = 0; i < result.length; ++i)
-                // TODO: será que precisa mesmo disto?
-                if (!this.getAgent().isScammer((sajas.core.AID) result[i].getName())) {
+                if (!this.getAgent().isScammer( result[i].getName())) {
                     cfp.addReceiver(result[i].getName());
                     log += String.format("%n - %s", result[i].getName().getLocalName());
                 }
@@ -131,8 +130,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             } else if (msg.getPerformative() == ACLMessage.PROPOSE) {
                 try {
                     SellerOfferInfo sellerOffer = (SellerOfferInfo) msg.getContentObject();
-                    // TODO: será que precisa mesmo disto?
-                    offers.put((sajas.core.AID) msg.getSender(), sellerOffer);
+                    offers.put( msg.getSender(), sellerOffer);
                     sb.append(String.format("%n - %s with seller offer %s.", msg.getSender().getLocalName(),
                             sellerOffer));
                 } catch (UnreadableException e) {
@@ -315,8 +313,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.getAgent().logger().info(String.format("! %s was SCAMMED by agent %s with %s",
                 this.getAgent().getLocalName(), inform.getSender().getLocalName(), scam));
         
-        // TODO: será que precisa mesmo disto?
-        this.getAgent().addScammer((sajas.core.AID) inform.getSender());
+        this.getAgent().addScammer( inform.getSender());
     }
 
     private void handleSuccessfulAcquisition(OfferInfo offerInfo, ACLMessage inform){

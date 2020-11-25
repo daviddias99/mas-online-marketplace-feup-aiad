@@ -9,7 +9,7 @@ import java.util.Vector;
 import models.Product;
 import models.SellerOfferInfo;
 import agents.Seller;
-import sajas.core.AID;
+import jade.core.AID;
 import sajas.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;

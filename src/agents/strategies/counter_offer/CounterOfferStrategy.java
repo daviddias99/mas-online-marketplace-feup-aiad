@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import agents.Buyer;
-import sajas.core.AID;
+import jade.core.AID;
 import jade.util.leap.Serializable;
 import models.OfferInfo;
 import models.Product;

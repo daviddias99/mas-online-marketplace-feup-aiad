@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import sajas.core.AID;
+import jade.core.AID;
 import sajas.core.Agent;
 import sajas.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;

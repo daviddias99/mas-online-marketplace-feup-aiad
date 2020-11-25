@@ -3,7 +3,7 @@ package agents.strategies.counter_offer;
 import java.util.Map;
 
 import agents.Buyer;
-import sajas.core.AID;
+import jade.core.AID;
 import models.OfferInfo;
 import models.SellerOfferInfo;
 import utils.Util;
