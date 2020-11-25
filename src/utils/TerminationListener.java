@@ -1,6 +1,6 @@
 package utils;
 
-import jade.core.Agent;
+import sajas.core.Agent;
 
 public interface TerminationListener {
     void terminated(Agent a);

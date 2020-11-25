@@ -1,11 +1,11 @@
 package behaviours;
 
 import agents.Seller;
-import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
+import sajas.core.Agent;
+import sajas.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.proto.SSResponderDispatcher;
+import sajas.proto.SSResponderDispatcher;
 
 public class NegotiationDispatcher extends SSResponderDispatcher {
 

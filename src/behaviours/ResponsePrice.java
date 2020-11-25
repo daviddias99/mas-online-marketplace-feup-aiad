@@ -9,7 +9,7 @@ import java.io.IOException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import jade.proto.AchieveREResponder;
+import sajas.proto.AchieveREResponder;
 
 public class ResponsePrice extends AchieveREResponder {
 

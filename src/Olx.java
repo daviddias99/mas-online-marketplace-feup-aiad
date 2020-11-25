@@ -3,12 +3,14 @@ import java.io.IOException;
 import java.util.*;
 
 import agents.TerminationAgent;
-import jade.core.Agent;
+import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
-import jade.core.Runtime;
-import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
+import sajas.core.Runtime;
+import sajas.sim.repast3.Repast3Launcher;
+import sajas.wrapper.ContainerController;
+import uchicago.src.sim.engine.SimInit;
 import agents.Buyer;
 import agents.Seller;
 import models.Product;
@@ -22,7 +24,7 @@ import utils.Config;
 import utils.Stats;
 import utils.TerminationListener;
 
-public class Olx implements TerminationListener {
+public class Olx extends Repast3Launcher implements TerminationListener {
     private Runtime rt;
     private Profile p;
     private ContainerController container;
@@ -31,43 +33,25 @@ public class Olx implements TerminationListener {
     private Map<String, Product> products;
 
     private Set<Agent> runningAgents;
+    private boolean mainMode;
+    private Config config;
+    private boolean kill;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config) {
-        this.rt = Runtime.instance();
-        this.p = new ProfileImpl();
-
-        this.runningAgents = new HashSet<>();
-
-        if (mainMode)
-            this.container = rt.createMainContainer(p);
-        else
-            this.container = rt.createAgentContainer(p);
-
-        this.products = new HashMap<>();
-        if (config.getProducts() != null) {
-            Product[] prov = config.getProducts();
-            for (int i = 0; i < prov.length; i++)
-                this.products.put(prov[i].getName(), prov[i]);
-        } else {
-            System.out.println("WARNING: no products specified");
-        }
-
-        if (config.getSellers() != null) {
-            this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
-        }
-
-        if (config.getBuyers() != null) {
-            this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
-        }
+    public Olx(boolean mainMode, Config config, boolean kill) {
+        this.mainMode = mainMode;
+        this.config = config;
+        this.kill = kill;
     }
 
-    public void start(boolean kill) {
+    public void start() {
+
         createSellers();
-        createBuyers(kill);
+        createBuyers(this.kill);
     }
 
     private void createSellers() {
+        System.out.println("Creating Sellers");
         // Create the sellers. Seller creation is seperated by 1 seconds. Sellers are
         // identified
         // using the id "seller_i"
@@ -79,15 +63,16 @@ public class Olx implements TerminationListener {
         for (int j = 0; j < this.sellers.size(); j++) {
 
             try {
-                Thread.sleep(500);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-            } catch (StaleProxyException | InterruptedException e) {
+                System.out.println("Started ");
+            } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }
     }
 
     private void createBuyers(boolean kill) {
+        System.out.println("Creating Buyers");
         if (this.buyers == null) {
             System.out.println("WARNING: no buyers specified");
             return;
@@ -179,8 +164,10 @@ public class Olx implements TerminationListener {
             System.exit(-1);
         }
 
-        Olx olx = new Olx(mainMode, config);
-        olx.start(kill);
+        // SAJAS + REPAST
+        SimInit init = new SimInit();
+		init.setNumRuns(1);   // works only in batch mode
+		init.loadModel(new Olx(mainMode, config, kill), null, true);
     }
 
     @Override
@@ -206,5 +193,48 @@ public class Olx implements TerminationListener {
         } catch (StaleProxyException e) {
             System.out.println("Could not setup terminator agent");
         }
+    }
+    
+    // SAJAS + REPAST
+    @Override
+    public String[] getInitParam() {
+        return new String[0];
+    }
+
+    @Override
+    public String getName() {
+        return "Service Consumer/Provider -- SAJaS Repast3 Test";
+    }
+
+    @Override
+    protected void launchJADE() {
+        this.rt = Runtime.instance();
+        this.p = new ProfileImpl();
+
+        this.runningAgents = new HashSet<>();
+
+        if (mainMode)
+            this.container = rt.createMainContainer(p);
+        else
+            this.container = rt.createAgentContainer(p);
+
+        this.products = new HashMap<>();
+        if (config.getProducts() != null) {
+            Product[] prov = config.getProducts();
+            for (int i = 0; i < prov.length; i++)
+                this.products.put(prov[i].getName(), prov[i]);
+        } else {
+            System.out.println("WARNING: no products specified");
+        }
+
+        if (config.getSellers() != null) {
+            this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
+        }
+
+        if (config.getBuyers() != null) {
+            this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
+        }
+
+        this.start();
     }
 }

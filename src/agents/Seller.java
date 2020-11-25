@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import jade.core.Agent;
-import jade.core.behaviours.ParallelBehaviour;
-import jade.domain.DFService;
+import sajas.core.Agent;
+import sajas.core.behaviours.ParallelBehaviour;
+import sajas.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -125,15 +125,14 @@ public class Seller extends Agent {
         this.dfd.addServices(sd);
 
         try {
-            DFService.modify(this, this.dfd);
+            // DFService.deregister(this, this.dfd);
+            DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not register product %s in the DF service%n", this.getLocalName(), product));
         }
     }
 
     public void deregister(Product product) {
-
-
         Iterator<ServiceDescription> it = this.dfd.getAllServices();
 
         while (it.hasNext()) {
@@ -146,7 +145,8 @@ public class Seller extends Agent {
         }
 
         try {
-            DFService.modify(this, this.dfd);
+            // DFService.deregister(this, this.dfd);
+            DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not remove product %s from the DF service%n", this.getLocalName(), product));
         }
