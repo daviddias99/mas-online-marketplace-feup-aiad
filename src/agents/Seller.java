@@ -11,6 +11,7 @@ import agents.strategies.price_picking.*;
 import models.Product;
 import models.Stock;
 import utils.CoolFormatter;
+import utils.ProductQuantity;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class Seller extends Agent {
     private transient Logger logger;
 
     @JsonCreator
-    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
+    public Seller(@JsonProperty("products") ProductQuantity[] products, @JsonProperty("scamFactor") int scamF,
                   @JsonProperty("elasticity") int elasticity, @JsonProperty("pickingStrategy") String pickingStrategy,
                   @JsonProperty("offerStrategy") String offerStrategy) {
         if (scamF > 100 || scamF < 0)
@@ -68,8 +69,7 @@ public class Seller extends Agent {
         } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
-            // TODO: por depois com quantidade direita
-            this.products.put(products[i], new Stock(0.0f, 1));
+            this.products.put(products[i].getProduct(), new Stock(0.0f, products[i].getQuantity()));
 
         this.wealth = 0;
     }
@@ -209,19 +209,7 @@ public class Seller extends Agent {
     public int getCredibility() {
         return this.credibility;
     }
-
-    // public void addProduct(String name, int originalPrice) {
-    //     this.products.put(new Product(name, originalPrice), new Stock(0.0f, 1));
-    // }
-
-    // public void addProduct(Product product) {
-    //     this.products.put(product, new Stock(0.0f, 1));
-    // }
-
-    // public void addProduct(Product product, Stock stock) {
-    //     this.products.put(product, stock);
-    // }
-
+    
     public boolean hasProduct(Product product) {
         return this.products.containsKey(product);
     }
@@ -229,10 +217,6 @@ public class Seller extends Agent {
     public Set<Product> getProducts() {
         return this.products.keySet();
     }
-
-    // public void setProducts(Map<Product, Stock> newP) {
-    //     this.products = newP;
-    // }
 
     public synchronized Stock removeProduct(Product product) {
         Stock stock = this.products.get(product);
