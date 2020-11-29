@@ -26,14 +26,16 @@ import utils.Util;
 
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
+    private int index;
     private int negotiationRound;
     private Map<AID, SellerOfferInfo> previousOffers;
     private Map<AID, OfferInfo> ownPreviousOffer;
     private ACLMessage negotiationOnWait;
 
-    public NegotiateBuyer(Product product, Buyer b, ACLMessage cfp) {
+    public NegotiateBuyer(Product product, int index, Buyer b, ACLMessage cfp) {
         super(b, cfp);
         this.product = product;
+        this.index = index;
         this.negotiationRound = 0;
         this.previousOffers = new ConcurrentHashMap<>();
         this.ownPreviousOffer = new ConcurrentHashMap<>();
@@ -49,7 +51,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Buyer b = this.getAgent();
         b.logger().info(String.format("! %s did not find any %s seller for %s", b.getLocalName(),
                 dueToLackOfHonesty ? "honest" : "", this.product));
-        b.noSellerForProduct(this.product);
+        b.noSellerForProduct(this.product, this.index);
         if (b.finished()) {
             System.out.printf("! %s is leaving because there are no available sellers %n", b.getLocalName());
             b.logger().info(String.format("! %s is leaving %n", b));
@@ -313,7 +315,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Buyer b = this.getAgent();
         b.logger().info(String.format("! %s BOUGHT %s from agent %s",
         b.getLocalName(), offerInfo, inform.getSender().getLocalName()));
-        b.receivedProduct(offerInfo.getProduct());
+        b.receivedProduct(offerInfo.getProduct(), this.index);
         b.changeMoneySpent(offerInfo.getOfferedPrice());
         Stats.updateMoneySaved(b);
         if (b.finished()) {
@@ -370,7 +372,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
 
     @Override
     public int onEnd() {
-        if (this.getAgent().isBuying(this.product)) {
+        if (this.getAgent().isBuying(this.product, this.index)) {
             this.reinitiate();
             this.getAgent().getBehaviour().addSubBehaviour(this);
         }

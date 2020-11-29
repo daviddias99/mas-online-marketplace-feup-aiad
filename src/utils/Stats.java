@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class Stats {
     private static int totalScams = 0;
@@ -36,11 +37,11 @@ public class Stats {
     }
 
     public static synchronized void updateMoneySaved(Buyer buyer) {
-        List<Product> products = buyer.getProductsBought();
+        Map<Product, Integer> products = buyer.getProductsBought();
         float savedMoney = - buyer.getMoneySpent();
 
-        for (Product p : products) {
-            savedMoney += p.getOriginalPrice();
+        for (Map.Entry<Product, Integer> p : products.entrySet()) {
+            savedMoney += (p.getKey().getOriginalPrice() * p.getValue());
         }
 
         moneySavedBuyers.put(buyer, savedMoney);

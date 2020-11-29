@@ -3,12 +3,10 @@ package agents;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,13 +18,14 @@ import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
 import models.Product;
 import utils.CoolFormatter;
+import utils.ProductQuantity;
 import utils.TerminationListener;
 
 public class Buyer extends Agent {
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
-    private Map<Product, ProductStatus> products = new ConcurrentHashMap<>();
+    private Map<Product, List<ProductStatus>> products = new ConcurrentHashMap<>();
     private CounterOfferStrategy counterOfferStrategy;
     private float moneySpent;
     private int patience;
@@ -39,12 +38,15 @@ public class Buyer extends Agent {
         this.terminationListener = listener;
     }
 
-    public List<Product> getProductsBought() {
-        List<Product> res = new LinkedList<>();
-        for (Map.Entry<Product, ProductStatus> entry : this.products.entrySet()) {
-            if (entry.getValue() == ProductStatus.BOUGHT) {
-                res.add(entry.getKey());
-            }
+    public Map<Product, Integer> getProductsBought() {
+        Map<Product, Integer> res = new HashMap<>();
+        int amountBought;
+        for (Map.Entry<Product, List<ProductStatus>> entry : this.products.entrySet()) {
+            amountBought = 0;
+            for(ProductStatus status : entry.getValue())
+                if (status == ProductStatus.BOUGHT)
+                    amountBought++;
+            res.put(entry.getKey(), amountBought);
         }
 
         return res;
@@ -55,12 +57,17 @@ public class Buyer extends Agent {
     }
 
     @JsonCreator
-    public Buyer(@JsonProperty("products") Product[] products,
+    public Buyer(@JsonProperty("products") ProductQuantity[] products,
             @JsonProperty("counterOfferStrategy") String counterOfferStrategy, @JsonProperty("patience") int patience) {
-        for (int i = 0; i < products.length; i++)
-            this.products.put(products[i], ProductStatus.TRYING);
         if (patience > 100 || patience < 0)
             throw new IllegalArgumentException("Patience must be from 0 to 100 and was " + patience);
+        for (int i = 0; i < products.length; i++){
+            List<ProductStatus> statusList = new ArrayList<>();
+            for(int j = 0; j < products[i].getQuantity(); j++)
+                statusList.add(ProductStatus.TRYING);
+            this.products.put(products[i].getProduct(), statusList);
+        }
+
         this.terminationListener = null;
         this.moneySpent = 0;
         this.counterOfferStrategy = CounterOfferStrategyFactory.get(counterOfferStrategy);
@@ -102,8 +109,9 @@ public class Buyer extends Agent {
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
         negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-        for (Product p : this.products.keySet())
-            negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
+        for (Map.Entry<Product, List<ProductStatus>> p : this.products.entrySet())
+            for(int i = 0; i < p.getValue().size(); i++)
+                negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p.getKey(), i, this, new ACLMessage(ACLMessage.CFP)));
 
         this.addBehaviour(negotiationsBehaviour);
     }
@@ -111,7 +119,6 @@ public class Buyer extends Agent {
     //
     // Helpers
     //
-
     public int getPatience() {
         return patience;
     }
@@ -142,10 +149,10 @@ public class Buyer extends Agent {
     }
 
     // Get products that have yet to be bough by the buyer
-    public Set<Product> getMissingProducts() {
-        return (this.products.entrySet().stream().filter(map -> map.getValue() == ProductStatus.TRYING)
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
-    }
+    // public Set<Product> getMissingProducts() {
+    //     return (this.products.entrySet().stream().filter(map -> map.getValue() == ProductStatus.TRYING)
+    //             .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
+    // }
 
     @Override
     public String toString() {
@@ -162,21 +169,24 @@ public class Buyer extends Agent {
         return this.moneySpent;
     }
 
-    public void receivedProduct(Product product) {
-        this.products.put(product, ProductStatus.BOUGHT);
+    public void receivedProduct(Product product, int index) {
+        List<ProductStatus> status = this.products.get(product);
+        status.set(index, ProductStatus.BOUGHT); 
+        this.products.put(product, status);
     }
 
-    public void noSellerForProduct(Product product) {
-        this.products.put(product, ProductStatus.NO_SELLER);
+    public void noSellerForProduct(Product product, int index) {
+        List<ProductStatus> status = this.products.get(product);
+        status.set(index, ProductStatus.NO_SELLER); 
+        this.products.put(product, status);
     }
 
     public boolean finished() {
 
-        for (Map.Entry<Product, ProductStatus> p : this.products.entrySet()) {
-            if (p.getValue() == ProductStatus.TRYING) {
-                return false;
-            }
-        }
+        for (Map.Entry<Product, List<ProductStatus>> p : this.products.entrySet())
+            for(ProductStatus status : p.getValue())
+                if (status == ProductStatus.TRYING)
+                    return false;
 
         return true;
     }
@@ -191,7 +201,8 @@ public class Buyer extends Agent {
         }
     }
 
-    public boolean isBuying(Product product) {
-        return this.products.get(product) == ProductStatus.TRYING;
+    public boolean isBuying(Product product, int index) {
+        List<ProductStatus> status = this.products.get(product);
+        return status.get(index) == ProductStatus.TRYING;
     }
 }

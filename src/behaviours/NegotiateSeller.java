@@ -179,7 +179,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 seller.logger().info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d, quantity left=%d",
                                 seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
-                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility, seller.getProductStock(buyerOffer.getProduct()).getQuantity()));   
+                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility, stock.getQuantity()));   
             }
             // Cancel the sale, already was sold.
             else {
