@@ -21,7 +21,6 @@ import jade.proto.AchieveREInitiator;
 public class AskPriceSeller extends AchieveREInitiator {
 
     private Product product;
-    private Seller seller;
 
     /**
      * Seller <agent> is asking the selling price of <product>
@@ -29,7 +28,6 @@ public class AskPriceSeller extends AchieveREInitiator {
     public AskPriceSeller(Product product, Seller agent, ACLMessage msg) {
         super(agent, msg);
         this.product = product;
-        this.seller = agent;
     }
 
     @Override
@@ -69,7 +67,7 @@ public class AskPriceSeller extends AchieveREInitiator {
             msg.setContentObject(this.product);
             
         } catch (FIPAException | IOException fe) {
-            this.seller.logger().warning("/!\\ %s encounterd an error searching for sellers.%n");
+            this.getAgent().logger().warning("/!\\ %s encounterd an error searching for sellers.%n");
             this.handleNoResults();
             return v;
         }
@@ -87,7 +85,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         // set selling price accordingly
         Seller s = this.getAgent();
         Product p = this.getProduct();
-        s.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(s, p));
+        s.getProductStock(p).setPrice(s.getPricePickingStrategy().calculateInitialPrice(s, p));
         s.logger().info(String.format("! %s found no sellers for product %s. Setting price at %.2f", s.getLocalName(),
                 p.getName(), s.getProductPrice(this.getProduct().getName())));
         // Register that agent is selling <product> in the DF registry
@@ -97,15 +95,16 @@ public class AskPriceSeller extends AchieveREInitiator {
     @Override
     protected void handleAllResultNotifications(Vector resultNotifications) {
         Product p = this.getProduct();
+        Seller s = this.getAgent();
         List<SellerOfferInfo> marketPrices = this.collectPrices(resultNotifications);
         this.logPriceString(marketPrices, p);
 
         // Other sellers are currenttly selling <product>
         // set selling price accordingly
-        this.seller.addProduct(p, this.seller.getPricePickingStrategy().calculateInitialPrice(seller, p, marketPrices));
-        this.seller.logger().info(String.format("! %s set product %s price at %.2f", seller.getLocalName(), p.getName(),
-                seller.getProductPrice(p.getName())));
-        this.seller.register(p);
+        s.getProductStock(p).setPrice(s.getPricePickingStrategy().calculateInitialPrice(s, p, marketPrices));
+        s.logger().info(String.format("! %s set product %s price at %.2f", s.getLocalName(), p.getName(),
+                s.getProductPrice(p.getName())));
+        s.register(p);
     }
 
     // HELPERS
@@ -147,7 +146,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         boolean first = true;
 
         StringBuilder sb = new StringBuilder(
-                String.format("> %s found that product %s has %d sellers with these prices: [", seller.getLocalName(),
+                String.format("> %s found that product %s has %d sellers with these prices: [", this.getAgent().getLocalName(),
                         p.getName(), marketPrices.size()));
         for (SellerOfferInfo soInfo : marketPrices)
             if (first) {
@@ -155,7 +154,7 @@ public class AskPriceSeller extends AchieveREInitiator {
                 first = false;
             } else
                 sb.append(String.format(", %.2f - %d", soInfo.getOfferedPrice(), soInfo.getSellerCredibility()));
-        this.seller.logger().info(sb.append("]").toString());
+        this.getAgent().logger().info(sb.append("]").toString());
 
     }
 }

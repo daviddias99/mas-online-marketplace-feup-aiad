@@ -36,7 +36,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
             
             // Lower is better
             float perceivedOfferCost = offer.getOfferedPrice();
-            sb.append(String.format("%n - %s from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;
                 bestDecision = entry.getKey();

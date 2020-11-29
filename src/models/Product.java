@@ -39,7 +39,7 @@ public class Product implements Serializable {
     public String toString(){
         if(getOriginalPrice() == 0)
             return getName();
-        return getName() + ":" + getOriginalPrice();
+        return String.format("%s:%.2f", getName(), getOriginalPrice());
     }
 
     @Override

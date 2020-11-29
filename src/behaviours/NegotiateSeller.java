@@ -13,6 +13,7 @@ import models.OfferInfo;
 import models.Product;
 import models.Scam;
 import models.SellerOfferInfo;
+import models.Stock;
 import utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -128,6 +129,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
             OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
             boolean scam = this.getAgent().doScam();
+            Stock stock = null;
 
             // Cancel the sale, better offer still at play.
             if (maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()) {
@@ -156,7 +158,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                                 cfp.getSender().getLocalName(), scamObj, oldCredibility, newCredibility));
             }
             // The product will be sold.
-            else if (seller.removeProduct(buyerOffer.getProduct()) != null) {
+            else if ((stock = seller.removeProduct(buyerOffer.getProduct())) != null) {
 
                 result.setPerformative(ACLMessage.INFORM);
                 result.setContentObject(buyerOffer);
@@ -169,14 +171,15 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 int oldCredibility = seller.getCredibility();
                 int newCredibility = seller.increaseCredibility();
 
-                seller.deregister(buyerOffer.getProduct());
+                // Deregister if no quantity left
+                if(stock.empty())
+                    seller.deregister(buyerOffer.getProduct());
 
                 Stats.productSold(seller, buyerOffer.getProduct(), buyerOffer.getOfferedPrice());
 
-                seller.logger()
-                        .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
+                seller.logger().info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
                                 seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
-                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility));
+                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility));   
             }
             // Cancel the sale, already was sold.
             else {

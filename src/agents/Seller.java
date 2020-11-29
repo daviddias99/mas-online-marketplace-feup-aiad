@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import agents.strategies.offer.*;
 import agents.strategies.price_picking.*;
 import models.Product;
+import models.Stock;
 import utils.CoolFormatter;
 
 import java.io.File;
@@ -35,7 +36,7 @@ import java.util.logging.Logger;
 public class Seller extends Agent {
     // List of products which the seller is currently offering and the price
     // of said products (float)
-    private Map<Product, Float> products = new ConcurrentHashMap<>();
+    private Map<Product, Stock> products = new ConcurrentHashMap<>();
 
     private int credibility; // 0 to 100
     private final int scamFactor; // 0 to 100
@@ -67,7 +68,8 @@ public class Seller extends Agent {
         } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
-            this.products.put(products[i], 0.0f);
+            // TODO: por depois com quantidade direita
+            this.products.put(products[i], new Stock(0.0f, 1));
 
         this.wealth = 0;
     }
@@ -208,17 +210,17 @@ public class Seller extends Agent {
         return this.credibility;
     }
 
-    public void addProduct(String name, int originalPrice) {
-        this.products.put(new Product(name, originalPrice), 0.0f);
-    }
+    // public void addProduct(String name, int originalPrice) {
+    //     this.products.put(new Product(name, originalPrice), new Stock(0.0f, 1));
+    // }
 
-    public void addProduct(Product product) {
-        this.products.put(product, 0.0f);
-    }
+    // public void addProduct(Product product) {
+    //     this.products.put(product, new Stock(0.0f, 1));
+    // }
 
-    public void addProduct(Product product, float marketPrice) {
-        this.products.put(product, marketPrice);
-    }
+    // public void addProduct(Product product, Stock stock) {
+    //     this.products.put(product, stock);
+    // }
 
     public boolean hasProduct(Product product) {
         return this.products.containsKey(product);
@@ -228,12 +230,16 @@ public class Seller extends Agent {
         return this.products.keySet();
     }
 
-    public void setProducts(Map<Product, Float> newP) {
-        this.products = newP;
-    }
+    // public void setProducts(Map<Product, Stock> newP) {
+    //     this.products = newP;
+    // }
 
-    public synchronized Float removeProduct(Product product) {
-        return this.products.remove(product);
+    public synchronized Stock removeProduct(Product product) {
+        Stock stock = this.products.get(product);
+        if(stock == null) return stock;
+        stock.decreaseQuantity();
+        if(stock.empty()) return this.products.remove(product);
+        return stock;
     }
 
     public Product getProduct(String name) {
@@ -246,7 +252,15 @@ public class Seller extends Agent {
     }
 
     public Float getProductPrice(String name) {
-        return this.products.get(this.getProduct(name));
+        return this.products.get(this.getProduct(name)).getPrice();
+    }
+
+    public int getProductQuantity(String name) {
+        return this.products.get(this.getProduct(name)).getQuantity();
+    }
+
+    public Stock getProductStock(Product product){
+        return this.products.get(product);
     }
 
     @Override
