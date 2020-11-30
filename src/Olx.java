@@ -1,6 +1,8 @@
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 import agents.TerminationAgent;
 import sajas.core.Agent;
@@ -10,6 +12,9 @@ import jade.wrapper.StaleProxyException;
 import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
+import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.Sequence;
+import uchicago.src.sim.engine.Schedule;
 import uchicago.src.sim.engine.SimInit;
 import agents.Buyer;
 import agents.Seller;
@@ -20,9 +25,14 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import uchicago.src.sim.gui.DisplaySurface;
+import uchicago.src.sim.gui.Network2DDisplay;
+import uchicago.src.sim.gui.OvalNetworkItem;
+import uchicago.src.sim.network.DefaultDrawableNode;
 import utils.Config;
 import utils.Stats;
 import utils.TerminationListener;
+import utils.Util;
 
 public class Olx extends Repast3Launcher implements TerminationListener {
     private Runtime rt;
@@ -45,6 +55,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     public void start() {
+        nodes = new ArrayList<DefaultDrawableNode>();
 
         createSellers();
         createBuyers(this.kill);
@@ -64,7 +75,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-                System.out.println("Started ");
+                DefaultDrawableNode node =
+                        generateNode("S" + j, Color.RED,
+                                Util.randomBetween(WIDTH/2, WIDTH), Util.randomBetween(0, HEIGHT));
+                nodes.add(node);
+                this.sellers.get(j).setNode(node);
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
@@ -87,6 +102,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
+                DefaultDrawableNode node =
+                        generateNode("B" + j, Color.BLUE,
+                                Util.randomBetween(0, WIDTH/2), Util.randomBetween(0, HEIGHT));
+                nodes.add(node);
+                this.buyers.get(j).setNode(node);
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup buyer_" + j);
             }
@@ -203,7 +223,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     @Override
     public String getName() {
-        return "Service Consumer/Provider -- SAJaS Repast3 Test";
+        return "MAS 2nd Hand Marketplace";
     }
 
     @Override
@@ -236,5 +256,83 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
 
         this.start();
+    }
+
+    private static List<DefaultDrawableNode> nodes;
+
+    /*public static DefaultDrawableNode getNode(String label) {
+        for(DefaultDrawableNode node : nodes) {
+            if(node.getNodeLabel().equals(label)) {
+                return node;
+            }
+        }
+        return null;
+    }*/
+
+    private DefaultDrawableNode generateNode(String label, Color color, int x, int y) {
+        OvalNetworkItem oval = new OvalNetworkItem(x,y);
+        oval.allowResizing(false);
+        oval.setHeight(HEIGHT/30);
+        oval.setWidth(WIDTH/30);
+
+        DefaultDrawableNode node = new DefaultDrawableNode(label, oval);
+        node.setColor(color);
+
+        return node;
+    }
+
+    @Override
+    public void begin() {
+        super.begin();
+        buildAndScheduleDisplay();
+    }
+
+    private DisplaySurface dsurf;
+    private int WIDTH = 800, HEIGHT = 800;
+    private OpenSequenceGraph plot;
+
+    private void buildAndScheduleDisplay() {
+
+        // display surface
+        if (dsurf != null) dsurf.dispose();
+        dsurf = new DisplaySurface(this, "MAS 2nd Hand Marketplace Display");
+        registerDisplaySurface("MAS 2nd Hand Marketplace Display", dsurf);
+        Network2DDisplay display = new Network2DDisplay(nodes,WIDTH,HEIGHT);
+        dsurf.addDisplayableProbeable(display, "Network Display");
+        dsurf.addZoomable(display);
+        addSimEventListener(dsurf);
+        dsurf.display();
+
+        // graph
+        /*
+        if (plot != null) plot.dispose();
+        plot = new OpenSequenceGraph("Service performance", this);
+        plot.setAxisTitles("time", "% successful service executions");
+
+        plot.addSequence("Consumers", new Sequence() {
+            public double getSValue() {
+                // iterate through consumers
+                double v = 0.0;
+                for(int i = 0; i < consumers.size(); i++) {
+                    v += consumers.get(i).getMovingAverage(10);
+                }
+                return v / consumers.size();
+            }
+        });
+        plot.addSequence("Filtering Consumers", new Sequence() {
+            public double getSValue() {
+                // iterate through filtering consumers
+                double v = 0.0;
+                for(int i = 0; i < filteringConsumers.size(); i++) {
+                    v += filteringConsumers.get(i).getMovingAverage(10);
+                }
+                return v / filteringConsumers.size();
+            }
+        });
+        plot.display();
+        */
+
+        getSchedule().scheduleActionAtInterval(1, dsurf, "updateDisplay", Schedule.LAST);
+        // getSchedule().scheduleActionAtInterval(100, plot, "step", Schedule.LAST);
     }
 }

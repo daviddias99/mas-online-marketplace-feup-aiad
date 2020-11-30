@@ -4,11 +4,13 @@ import behaviours.AskPriceSeller;
 import behaviours.NegotiationDispatcher;
 import behaviours.ResponsePrice;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import agents.strategies.offer.*;
 import agents.strategies.price_picking.*;
 import models.Product;
+import uchicago.src.sim.network.DefaultDrawableNode;
 import utils.CoolFormatter;
 
 import java.io.File;
@@ -45,6 +47,7 @@ public class Seller extends Agent {
     private PricePickingStrategy pricePickingStrategy;
     private float wealth;
     private transient Logger logger;
+    private DefaultDrawableNode node;
 
     @JsonCreator
     public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
@@ -266,5 +269,10 @@ public class Seller extends Agent {
 
     public boolean finished() {
         return this.products.isEmpty();
+    }
+
+    @JsonIgnore(true)
+    public void setNode(DefaultDrawableNode node) {
+        this.node = node;
     }
 }

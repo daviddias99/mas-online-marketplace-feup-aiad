@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.AID;
 import sajas.core.Agent;
@@ -19,6 +20,7 @@ import jade.lang.acl.ACLMessage;
 import agents.strategies.counter_offer.*;
 import behaviours.NegotiateBuyer;
 import models.Product;
+import uchicago.src.sim.network.DefaultDrawableNode;
 import utils.CoolFormatter;
 import utils.TerminationListener;
 
@@ -34,6 +36,7 @@ public class Buyer extends Agent {
     private transient Logger logger;
     private ParallelBehaviour negotiationsBehaviour;
     private TerminationListener terminationListener;
+    private DefaultDrawableNode node;
 
     public void setTerminationListener(TerminationListener listener) {
         this.terminationListener = listener;
@@ -193,5 +196,10 @@ public class Buyer extends Agent {
 
     public boolean isBuying(Product product) {
         return this.products.get(product) == ProductStatus.TRYING;
+    }
+
+    @JsonIgnore(true)
+    public void setNode(DefaultDrawableNode node) {
+        this.node = node;
     }
 }
