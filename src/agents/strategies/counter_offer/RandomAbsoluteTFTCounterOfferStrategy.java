@@ -20,7 +20,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
 
         float previouslyOfferedPrice = ownPreviousOffer.getOfferedPrice();
         float currentSellerOffer = offer.getOfferedPrice();
-        float baseIncrement = Math.max(offer.getProduct().getOriginalPrice() * 0.1f, 1.0f);
+        float baseIncrement = Math.max(offer.getProduct().getOriginalPrice() * 0.05f, 1.0f);
         float incrementValue = baseIncrement + Util.randomFloatBetween(-baseIncrement / 2, baseIncrement / 2);
         float newOffer = previouslyOfferedPrice + incrementValue;
         return Math.min(currentSellerOffer, newOffer);

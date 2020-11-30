@@ -178,7 +178,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
         decisionSB.append(String.format("%n conclusion: best seller is %s", bestSeller.getLocalName()));
         this.getAgent().logger().info(decisionSB.toString());
         // If the best negotiation that is on wait is no longer a candidate, reject it
-        if (this.negotiationOnWait != null && !bestSeller.equals(this.negotiationOnWait.getSender())) {
+        // If we find out the waiting negotiation is from a scammer, also reject it
+        if (this.negotiationOnWait != null && (!bestSeller.equals(this.negotiationOnWait.getSender()) ||  this.getAgent().isScammer(negotiationOnWait.getSender()) )) {
             outgoingMessages.add(this.prepareRejectProposal(this.negotiationOnWait));
             sb.append(String.format(Util.LIST_FORMAT, negotiationOnWait.getSender().getLocalName()));
             this.negotiationOnWait = null;
@@ -186,7 +187,8 @@ public class NegotiateBuyer extends ContractNetInitiator {
         }
 
         // If msg, i.e. the ended negotiation, isn't the best among the rest cancel it
-        if (!bestSeller.equals(incomingMessage.getSender())) {
+        // Negotiations from scammers are rejected
+        if (!bestSeller.equals(incomingMessage.getSender()) || this.getAgent().isScammer(incomingMessage.getSender())) {
             outgoingMessages.add(this.prepareRejectProposal(incomingMessage));
             sb.append(String.format(Util.LIST_FORMAT, incomingMessage.getSender().getLocalName()));
             rejected = true;
@@ -271,7 +273,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             }
 
             // Accept the proposal of the best offer and reject all others
-            if (msg.getSender().equals(bestSeller)) {
+            if (msg.getSender().equals(bestSeller) && !this.getAgent().isScammer(msg.getSender())) {
                 accept = true;
                 rep.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
 
