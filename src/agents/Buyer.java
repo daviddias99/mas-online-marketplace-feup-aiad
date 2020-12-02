@@ -148,17 +148,23 @@ public class Buyer extends Agent {
         return this.negotiationsBehaviour;
     }
 
-    // Get products that have yet to be bough by the buyer
-    // public Set<Product> getMissingProducts() {
-    //     return (this.products.entrySet().stream().filter(map -> map.getValue() == ProductStatus.TRYING)
-    //             .collect(Collectors.toMap(Entry::getKey, Entry::getValue))).keySet();
-    // }
-
     @Override
     public String toString() {
         if (this.getLocalName() != null)
-            return this.getLocalName() + "{" + "products=" + this.products + "}";
-        return "Buyer{" + "products=" + this.products + "}";
+            return this.getLocalName() + "{" + "products=" + this.productsToString() + "}";
+        return "Buyer{" + "products=" + this.productsToString() + "}";
+    }
+
+    public String productsToString() {
+        // - START: buyer_0{products={2-pc:650.00=[TRYING, TRYING], ...}}
+        StringBuilder res = new StringBuilder("{");
+        this.products.entrySet().forEach(entry-> {
+            res.append(entry.getValue().size() + "-" + entry.getKey() + "=" + entry.getValue() + ", ");  
+        });
+        String fres = res.toString();
+        if(fres.substring(fres.length() - 1).equals(" "))
+            return fres.substring(0, fres.length() - 2) + "}";
+        return fres + "}";
     }
 
     public synchronized void changeMoneySpent(float variance){
@@ -175,14 +181,15 @@ public class Buyer extends Agent {
         this.products.put(product, status);
     }
 
-    public void noSellerForProduct(Product product, int index) {
+    public void noSellerForProduct(Product product) {
         List<ProductStatus> status = this.products.get(product);
-        status.set(index, ProductStatus.NO_SELLER); 
+        for(int i = 0; i < status.size(); i++)
+            if(status.get(i) == ProductStatus.TRYING)
+                status.set(i, ProductStatus.NO_SELLER); 
         this.products.put(product, status);
     }
 
     public boolean finished() {
-
         for (Map.Entry<Product, List<ProductStatus>> p : this.products.entrySet())
             for(ProductStatus status : p.getValue())
                 if (status == ProductStatus.TRYING)
