@@ -118,14 +118,14 @@ public class Seller extends Agent {
 
     public void register(Product product) {
 
-        // Register product under this agent
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName(getLocalName());
-        sd.setType(product.getName());
-        this.dfd.addServices(sd);
-
         try {
-            // DFService.deregister(this, this.dfd);
+            DFService.deregister(this, this.dfd);
+
+            // Register product under this agent
+            ServiceDescription sd = new ServiceDescription();
+            sd.setName(getLocalName());
+            sd.setType(product.getName());
+            this.dfd.addServices(sd);
             DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not register product %s in the DF service%n", this.getLocalName(), product));
@@ -133,6 +133,12 @@ public class Seller extends Agent {
     }
 
     public void deregister(Product product) {
+        try {
+            DFService.deregister(this, this.dfd);
+        } catch (FIPAException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Iterator<ServiceDescription> it = this.dfd.getAllServices();
 
         while (it.hasNext()) {
@@ -145,7 +151,6 @@ public class Seller extends Agent {
         }
 
         try {
-            // DFService.deregister(this, this.dfd);
             DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not remove product %s from the DF service%n", this.getLocalName(), product));

@@ -1,3 +1,4 @@
+package olx;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -12,6 +13,7 @@ import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
 import uchicago.src.sim.engine.SimInit;
 import agents.Buyer;
+import agents.BuyerLauncher;
 import agents.Seller;
 import models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -47,7 +49,12 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public void start() {
 
         createSellers();
-        createBuyers(this.kill);
+        try {
+            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 5000)).start();
+        } catch (StaleProxyException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void createSellers() {
@@ -71,7 +78,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
     }
 
-    private void createBuyers(boolean kill) {
+    public void createBuyers() {
         System.out.println("Creating Buyers");
         if (this.buyers == null) {
             System.out.println("WARNING: no buyers specified");
