@@ -1,5 +1,6 @@
 package olx.utils;
 
+import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
@@ -76,5 +77,37 @@ public abstract class Util {
         float diff = b - a;
         float r = Util.getInstance().nextFloat() * diff;
         return a + r;
+    }
+
+    public static Color getSellerColor(int credibility) {
+        float brightness = 0.1f + credibility * 0.9f / 100;
+        return Color.getHSBColor(0, 1, brightness);
+    }
+
+    public static String localNameToLabel(String localName) {
+        char firstChar = localName.charAt(0);
+
+        if (firstChar != 's' && firstChar != 'b')
+            return localName;
+
+        String id = localName.substring(localName.lastIndexOf('_') + 1);
+
+        return String.valueOf(firstChar).toUpperCase() + id;
+    }
+
+    public static String labelToLocalName(String label) {
+        char firstChar = label.charAt(0);
+
+        if (firstChar != 'S' && firstChar != 'B')
+            return label;
+
+        String id = label.substring(1);
+        String type = "";
+        if (firstChar == 'S')
+            type = "seller";
+        else if (firstChar == 'B')
+            type = "buyer";
+
+        return type + "_" + id;
     }
 }

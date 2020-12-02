@@ -75,9 +75,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         for (int j = 0; j < this.sellers.size(); j++) {
 
             try {
-                this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
+                Seller seller = this.sellers.get(j);
+                this.container.acceptNewAgent("seller_" + j, seller).start();
                 DefaultDrawableNode node =
-                        generateNode("seller_" + j, Color.RED,
+                        generateNode(Util.localNameToLabel("seller_" + j), Util.getSellerColor(seller.getCredibility()),
                                 Util.randomBetween(WIDTH/2, WIDTH), Util.randomBetween(0, HEIGHT));
                 nodes.add(node);
                 this.sellers.get(j).setNode(node);
@@ -104,7 +105,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
                 DefaultDrawableNode node =
-                        generateNode("buyer_" + j, Color.BLUE,
+                        generateNode(Util.localNameToLabel("buyer_" + j), Color.BLUE,
                                 Util.randomBetween(0, WIDTH/2), Util.randomBetween(0, HEIGHT));
                 nodes.add(node);
                 this.buyers.get(j).setNode(node);
@@ -116,7 +117,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     /**
      * Create the OLX platform.
-     * 
+     *
      * @param args <configPath> <createHasMainContainer>
      * @throws IOException
      */
@@ -170,7 +171,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             System.out.println("Configuration file not found.");
             System.exit(-1);
         }
-        
+
         // Create config object
         Config config = null;
         try {
@@ -215,7 +216,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             System.out.println("Could not setup terminator agent");
         }
     }
-    
+
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
@@ -278,6 +279,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         DefaultDrawableNode node = new DefaultDrawableNode(label, oval);
         node.setColor(color);
+        node.setBorderColor(color);
+        node.setBorderWidth(1);
 
         return node;
     }

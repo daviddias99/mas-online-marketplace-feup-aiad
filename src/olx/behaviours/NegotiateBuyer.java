@@ -26,6 +26,7 @@ import jade.lang.acl.UnreadableException;
 import sajas.proto.ContractNetInitiator;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.Stats;
+import olx.utils.Util;
 
 public class NegotiateBuyer extends ContractNetInitiator {
     private Product product;
@@ -313,9 +314,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private void handleScam(Scam scam, ACLMessage inform){
         DefaultDrawableNode myNode = this.getAgent().getNode();
         if (myNode != null) {
-            System.out.println("SUCCESS SCAM");
-
-            DefaultDrawableNode to = Olx.getNode(inform.getSender().getLocalName());
+            DefaultDrawableNode to = Olx.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
             Edge edge = new Edge(myNode, to);
             edge.setColor(Color.ORANGE);
             myNode.addOutEdge(edge);
@@ -326,15 +325,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         Stats.updateMoneySaved(this.buyer);
         this.getAgent().logger().info(String.format("! %s was SCAMMED by agent %s with %s",
                 this.getAgent().getLocalName(), inform.getSender().getLocalName(), scam));
-        
+
         this.getAgent().addScammer( inform.getSender());
     }
 
     private void handleSuccessfulAcquisition(OfferInfo offerInfo, ACLMessage inform){
         DefaultDrawableNode myNode = this.getAgent().getNode();
         if (myNode != null) {
-            System.out.println("SUCCESS ACQUISITION");
-            DefaultDrawableNode to = Olx.getNode(inform.getSender().getLocalName());
+            DefaultDrawableNode to = Olx.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
             Edge edge = new Edge(myNode, to);
             edge.setColor(Color.GREEN);
             myNode.addOutEdge(edge);

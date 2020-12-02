@@ -13,6 +13,7 @@ import olx.models.Product;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.CoolFormatter;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -166,12 +167,15 @@ public class Seller extends Agent {
     public int reduceCredibility(){
         int reduceFactor = Util.randomBetween(70, 90);
         this.credibility = reduceFactor * this.credibility / 100;
+        this.updateNodeColor();
         return this.credibility;
     }
+
 
     public int increaseCredibility(){
         int increaseFactor = Util.randomBetween(110, 140);
         this.credibility = Math.min(100, increaseFactor * this.credibility / 100);
+        this.updateNodeColor();
         return this.credibility;
     }
 
@@ -271,12 +275,17 @@ public class Seller extends Agent {
         return this.products.isEmpty();
     }
 
-    @JsonIgnore(true)
+    @JsonIgnore()
     public void setNode(DefaultDrawableNode node) {
         this.node = node;
     }
 
     public DefaultDrawableNode getNode() {
         return this.node;
+    }
+
+    private void updateNodeColor() {
+        this.node.setColor(Util.getSellerColor(this.credibility));
+        this.node.setBorderColor(Util.getSellerColor(50));
     }
 }
