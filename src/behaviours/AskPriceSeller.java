@@ -77,7 +77,7 @@ public class AskPriceSeller extends AchieveREInitiator {
         v.add(msg);
         // Logging
         this.logSellerList(msg);
-        System.out.printf("%s asked prices for product %s %n", this.getAgent().getLocalName(), this.product);
+        // System.out.printf("%s asked prices for product %s %n", this.getAgent().getLocalName(), this.product);
         return v;
     }
 

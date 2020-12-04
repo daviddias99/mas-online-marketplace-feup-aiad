@@ -71,7 +71,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
-                System.out.println("Started ");
+                System.out.println("Started seller_"+j);
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
