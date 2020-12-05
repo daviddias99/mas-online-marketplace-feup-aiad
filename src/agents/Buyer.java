@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.AID;
+import sajas.core.behaviours.SequentialBehaviour;
 import sajas.core.Agent;
 import sajas.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -32,7 +33,7 @@ public class Buyer extends Agent {
     private int patience;
     private Set<AID> blackList;
     private transient Logger logger;
-    private ParallelBehaviour negotiationsBehaviour;
+    private SequentialBehaviour negotiationsBehaviour;
     private TerminationListener terminationListener;
 
     public void setTerminationListener(TerminationListener listener) {
@@ -101,11 +102,11 @@ public class Buyer extends Agent {
         // Ask prices of each product to sellers. The ask price behaviour choses the
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
-        negotiationsBehaviour = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+        // negotiationsBehaviour = new SequentialBehaviour();
         for (Product p : this.products.keySet())
-            negotiationsBehaviour.addSubBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
+            this.addBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
 
-        this.addBehaviour(negotiationsBehaviour);
+        // this.addBehaviour(negotiationsBehaviour);
     }
 
     //
@@ -137,7 +138,7 @@ public class Buyer extends Agent {
         return this.products.keySet();
     }
 
-    public ParallelBehaviour getBehaviour() {
+    public SequentialBehaviour getBehaviour() {
         return this.negotiationsBehaviour;
     }
 
