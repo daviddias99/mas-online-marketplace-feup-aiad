@@ -31,6 +31,7 @@ import uchicago.src.sim.gui.Network2DDisplay;
 import uchicago.src.sim.gui.OvalNetworkItem;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.Config;
+import olx.utils.MyAverageSequence;
 import olx.utils.Stats;
 import olx.utils.TerminationListener;
 import olx.utils.Util;
@@ -40,6 +41,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private Profile p;
     private ContainerController container;
     private List<Seller> sellers;
+    private Map<Integer, ArrayList<Seller>> scamMap;
+    private Map<Integer, ArrayList<Seller>> elasticityMap;
     private List<Buyer> buyers;
     private Map<String, Product> products;
 
@@ -47,12 +50,18 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean mainMode;
     private Config config;
     private boolean kill;
+    private boolean scamAnalysis;
+    private boolean elasticityAnalysis;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config, boolean kill) {
+    public Olx(boolean mainMode, Config config, boolean kill, boolean scamAnalysis, boolean elasticityAnalysis) {
         this.mainMode = mainMode;
         this.config = config;
         this.kill = kill;
+        this.scamAnalysis = scamAnalysis;
+        this.elasticityAnalysis = elasticityAnalysis;
+        this.scamMap = new HashMap<>();
+        this.elasticityMap = new HashMap<>();
     }
 
     public void start() {
@@ -77,7 +86,33 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             return;
         }
 
+
+        ArrayList<Seller> scam_u25 = new ArrayList<>();
+        ArrayList<Seller> scam_u50 = new ArrayList<>();
+        ArrayList<Seller> scam_u75 = new ArrayList<>();
+        ArrayList<Seller> scam_u100 = new ArrayList<>();
+
+        ArrayList<Seller> elast_u10 = new ArrayList<>();
+        ArrayList<Seller> elast_u20 = new ArrayList<>();
+        ArrayList<Seller> elast_u30 = new ArrayList<>();
+        
         for (int j = 0; j < this.sellers.size(); j++) {
+            ///
+            if(this.sellers.get(j).getScamFactor() <= 25)
+                scam_u25.add(this.sellers.get(j));
+            else if(this.sellers.get(j).getScamFactor() <= 50)
+                scam_u50.add(this.sellers.get(j));
+            else if(this.sellers.get(j).getScamFactor() <= 75)
+                scam_u75.add(this.sellers.get(j));
+            else
+                scam_u100.add(this.sellers.get(j));
+            ///
+            if(this.sellers.get(j).getElasticity() <= 10)
+                elast_u10.add(this.sellers.get(j));
+            else if(this.sellers.get(j).getElasticity() <= 20)
+                elast_u20.add(this.sellers.get(j));
+            else if(this.sellers.get(j).getScamFactor() <= 30)
+                elast_u30.add(this.sellers.get(j));
 
             try {
                 Seller seller = this.sellers.get(j);
@@ -91,6 +126,15 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
         }
+
+        this.scamMap.put(25, scam_u25);
+        this.scamMap.put(50, scam_u50);
+        this.scamMap.put(75, scam_u75);
+        this.scamMap.put(100, scam_u100);
+
+        this.elasticityMap.put(10, elast_u10);
+        this.elasticityMap.put(20, elast_u20);
+        this.elasticityMap.put(30, elast_u30);
     }
 
     public void createBuyers() {
@@ -185,7 +229,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private DisplaySurface dsurf;
     private int WIDTH = 800, HEIGHT = 800;
-    // private OpenSequenceGraph plot;
+    private OpenSequenceGraph plotScam;
+    private OpenSequenceGraph plotElasticy;
     private Network2DDisplay network;
 
     public void updateNetwork() {
@@ -209,25 +254,40 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         registerDisplaySurface("MAS 2nd Hand Marketplace Display", this.dsurf);
         this.updateNetwork();
         this.dsurf.display();
-        // graph
-        /*
-         * if (plot != null) plot.dispose(); plot = new
-         * OpenSequenceGraph("Service performance", this); plot.setAxisTitles("time",
-         * "% successful service executions");
-         * 
-         * plot.addSequence("Consumers", new Sequence() { public double getSValue() { //
-         * iterate through consumers double v = 0.0; for(int i = 0; i <
-         * consumers.size(); i++) { v += consumers.get(i).getMovingAverage(10); } return
-         * v / consumers.size(); } }); plot.addSequence("Filtering Consumers", new
-         * Sequence() { public double getSValue() { // iterate through filtering
-         * consumers double v = 0.0; for(int i = 0; i < filteringConsumers.size(); i++)
-         * { v += filteringConsumers.get(i).getMovingAverage(10); } return v /
-         * filteringConsumers.size(); } }); plot.display();
-         */
 
         getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
+        
+        // graph scam
+        if(this.scamAnalysis){
+            if (this.plotScam != null) 
+                this.plotScam.dispose();
+            this.plotScam = new OpenSequenceGraph("Scam Analysis", this); 
+            this.plotScam.setAxisTitles("time","money earned");
+            this.plotScam.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scamMap.get(25), "getWealth")); 
+            this.plotScam.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scamMap.get(50), "getWealth")); 
+            this.plotScam.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scamMap.get(75), "getWealth")); 
+            this.plotScam.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scamMap.get(100), "getWealth")); 
+            
+            this.plotScam.display();
 
-        // getSchedule().scheduleActionAtInterval(100, plot, "step", Schedule.LAST);
+            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
+            getSchedule().scheduleActionAtInterval(100, this.plotScam, "step", ScheduleBase.LAST);
+        }
+        if(this.elasticityAnalysis){
+            if (this.plotElasticy != null) 
+                this.plotElasticy.dispose();
+            this.plotElasticy = new OpenSequenceGraph("Elasticity Analysis", this); 
+            this.plotElasticy.setAxisTitles("time","money earned");
+            this.plotElasticy.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elasticityMap.get(10), "getWealth")); 
+            this.plotElasticy.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elasticityMap.get(20), "getWealth")); 
+            this.plotElasticy.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elasticityMap.get(30), "getWealth")); 
+            
+            this.plotElasticy.display();
+
+            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
+            getSchedule().scheduleActionAtInterval(100, this.plotElasticy, "step", ScheduleBase.LAST);
+        }
+        
     }
 
     /**
@@ -240,9 +300,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
                 .description("Modeling a second hand market place using olx.agents.");
         parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
-        parser.addArgument("--kill", "-k").action(Arguments.storeTrue())
-                .help("platform is shutdown after last buyer exits");
+        parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
+        parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
+        parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
+        
 
         Namespace parsedArgs = null;
         try {
@@ -255,6 +317,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         boolean mainMode = parsedArgs.get("main");
         boolean kill = parsedArgs.get("kill");
+        boolean scamAnalysis = parsedArgs.get("scam");
+        boolean elasticityAnalysis = parsedArgs.get("elasticity");
         String configPath = parsedArgs.get("config");
         if (configPath == null) {
             parser.printHelp();
@@ -297,7 +361,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         // SAJAS + REPAST
         SimInit init = new SimInit();
         init.setNumRuns(1); // works only in batch mode
-        init.loadModel(new Olx(mainMode, config, kill), null, true);
+        init.loadModel(new Olx(mainMode, config, kill, scamAnalysis, elasticityAnalysis), null, true);
     }
 
     @Override

@@ -239,6 +239,10 @@ public class Seller extends Agent {
     public int getCredibility() {
         return this.credibility;
     }
+
+    public int getScamFactor() {
+        return this.scamFactor;
+    }
     
     public boolean hasProduct(Product product) {
         return this.products.containsKey(product);
@@ -286,6 +290,10 @@ public class Seller extends Agent {
 
     public synchronized void changeWealth(float variance) {
         this.wealth += variance;
+    }
+
+    public float getWealth(){
+        return this.wealth;
     }
 
     public boolean doScam() {

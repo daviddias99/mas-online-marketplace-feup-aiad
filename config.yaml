@@ -65,7 +65,7 @@ buyers:
 
 sellers:
   - scamFactor: 50
-    elasticity: 40
+    elasticity: 17
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
@@ -88,7 +88,7 @@ sellers:
       - name: nintendo
         quantity: 10
 
-  - scamFactor: 50
+  - scamFactor: 25
     elasticity: 20
     offerStrategy: RELTFT
     pickingStrategy: NAIVE
