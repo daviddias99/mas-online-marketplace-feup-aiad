@@ -13,6 +13,7 @@ import olx.models.OfferInfo;
 import olx.models.Product;
 import olx.models.Scam;
 import olx.models.SellerOfferInfo;
+import olx.models.Stock;
 import olx.utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -21,7 +22,8 @@ import sajas.proto.SSIteratedContractNetResponder;
 import olx.utils.Stats;
 
 public class NegotiateSeller extends SSIteratedContractNetResponder {
-
+    private static final long serialVersionUID = 1L;
+    
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
     private Map<Product, ConcurrentHashMap<AID, SellerOfferInfo>> ownPreviousOffers;
     private List<AID> sentOffers;
@@ -41,7 +43,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         Seller seller = this.getAgent();
         try {
             OfferInfo buyerOffer = (OfferInfo) cfp.getContentObject();
-            seller.logger().info(String.format("> %s received CFP from agent %s with %s", seller.getLocalName(),
+            seller.logger().info(String.format("> %s (%s) received CFP from agent %s with %s", seller.getLocalName(), cfp.getConversationId(),
                     cfp.getSender().getLocalName(), buyerOffer));
 
             // If it still has the product
@@ -71,21 +73,21 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContentObject(sellerOffer);
-                this.ownPreviousOffers.get(buyerOffer.getProduct()).put( cfp.getSender(), sellerOffer);
-                seller.logger().info(String.format("< %s sending PROPOSE to agent %s with %s", seller.getLocalName(),
+                this.ownPreviousOffers.get(buyerOffer.getProduct()).put(cfp.getSender(), sellerOffer);
+                seller.logger().info(String.format("< %s (%s) sending PROPOSE to agent %s with %s", seller.getLocalName(), cfp.getConversationId(),
                         cfp.getSender().getLocalName(), sellerOffer));
                 this.sentOffers.add( cfp.getSender());
             } else {
                 reply.setPerformative(ACLMessage.REFUSE);
-                seller.logger().info(String.format("< %s sending REFUSE to agent %s", seller.getLocalName(),
+                seller.logger().info(String.format("< %s (%s) sending REFUSE to agent %s", seller.getLocalName(), cfp.getConversationId(),
                         cfp.getSender().getLocalName()));
             }
 
         } catch (UnreadableException | IOException e) {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent(e.getMessage());
-            seller.logger().warning(String.format("< %s sending REFUSE to agent %s with error %s",
-                    seller.getLocalName(), cfp.getSender().getLocalName(), e.getMessage()));
+            seller.logger().warning(String.format("< %s (%s) sending REFUSE to agent %s with error %s",
+                    seller.getLocalName(), cfp.getConversationId(), cfp.getSender().getLocalName(), e.getMessage()));
         }
 
         return reply;
@@ -95,8 +97,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
     protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
 
         this.sentOffers.remove(reject.getSender());
-        this.getAgent().logger().info(String.format("> %s received REJECT from agent %s",
-                this.getAgent().getLocalName(), reject.getSender().getLocalName()));
+        this.getAgent().logger().info(String.format("> %s (%s) received REJECT from agent %s",
+                this.getAgent().getLocalName(), reject.getConversationId(),reject.getSender().getLocalName()));
     }
 
     @Override
@@ -113,21 +115,22 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         } catch (UnreadableException e) {
             result.setPerformative(ACLMessage.FAILURE);
             result.setContent("Could not understand content");
-            seller.logger().warning(String.format("/!\\ %s could not read content sent by %s", seller.getLocalName(),
+            seller.logger().warning(String.format("/!\\ %s (%s) could not read content sent by %s", seller.getLocalName(), accept.getConversationId(),
                     accept.getSender().getLocalName()));
             seller.logger().warning(
-                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+                    String.format("< %s (%s) sent FAILURE to %s", seller.getLocalName(), accept.getConversationId(), accept.getSender().getLocalName()));
             return result;
         }
 
         try {
 
-            seller.logger().info(String.format("> %s received ACCEPT from agent %s with offer %s",
-                    seller.getLocalName(), accept.getSender().getLocalName(), buyerOffer));
+            seller.logger().info(String.format("> %s (%s) received ACCEPT from agent %s with offer %s",
+                    seller.getLocalName(), accept.getConversationId(), accept.getSender().getLocalName(), buyerOffer));
             String content;
             OfferInfo maxProposal = this.bestCurrentOfferFor(buyerOffer.getProduct());
 
             boolean scam = this.getAgent().doScam();
+            Stock stock = null;
 
             // Cancel the sale, better offer still at play.
             if (maxProposal.getOfferedPrice() > buyerOffer.getOfferedPrice()) {
@@ -136,7 +139,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 result.setContent(content);
 
                 seller.logger()
-                        .info(String.format("< %s sent %s to agent %s saying %s, credibility", seller.getLocalName(),
+                        .info(String.format("< %s (%s) sent %s to agent %s saying %s, credibility", seller.getLocalName(), cfp.getConversationId(),
                                 ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(),
                                 content));
             }
@@ -151,12 +154,12 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
 
                 Stats.scam(seller, maxProposal.getOfferedPrice());
                 seller.logger()
-                        .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
-                                seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
+                        .info(String.format("< %s (%s) sent %s to agent %s saying %s, credibility %d -> %d",
+                                seller.getLocalName(), cfp.getConversationId(), ACLMessage.getPerformative(result.getPerformative()),
                                 cfp.getSender().getLocalName(), scamObj, oldCredibility, newCredibility));
             }
             // The product will be sold.
-            else if (seller.removeProduct(buyerOffer.getProduct()) != null) {
+            else if ((stock = seller.removeProduct(buyerOffer.getProduct())) != null) {
 
                 result.setPerformative(ACLMessage.INFORM);
                 result.setContentObject(buyerOffer);
@@ -169,14 +172,15 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 int oldCredibility = seller.getCredibility();
                 int newCredibility = seller.increaseCredibility();
 
-                seller.deregister(buyerOffer.getProduct());
+                // Deregister if no quantity left
+                if(stock.empty())
+                    seller.deregister(buyerOffer.getProduct());
 
                 Stats.productSold(seller, buyerOffer.getProduct(), buyerOffer.getOfferedPrice());
 
-                seller.logger()
-                        .info(String.format("< %s sent %s to agent %s saying %s, credibility %d -> %d",
-                                seller.getLocalName(), ACLMessage.getPerformative(result.getPerformative()),
-                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility));
+                seller.logger().info(String.format("< %s (%s) sent %s to agent %s saying %s, credibility %d -> %d, quantity left=%d",
+                                seller.getLocalName(), cfp.getConversationId() ,ACLMessage.getPerformative(result.getPerformative()),
+                                cfp.getSender().getLocalName(), content, oldCredibility, newCredibility, stock.getQuantity()));   
             }
             // Cancel the sale, already was sold.
             else {
@@ -184,7 +188,7 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                 content = "Sorry, a better deal came up, already sold it...";
                 result.setContent(content);
 
-                seller.logger().info(String.format("< %s sent %s to agent %s saying %s", seller.getLocalName(),
+                seller.logger().info(String.format("< %s (%s) sent %s to agent %s saying %s", seller.getLocalName(), cfp.getConversationId(),
                         ACLMessage.getPerformative(result.getPerformative()), cfp.getSender().getLocalName(), content));
             }
 
@@ -194,10 +198,10 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
         } catch (IOException e) {
             result.setPerformative(ACLMessage.FAILURE);
             result.setContent("Could not send proper content");
-            seller.logger().warning(String.format("/!\\ %s could not send content to %s", seller.getLocalName(),
+            seller.logger().warning(String.format("/!\\ %s (%s) could not send content to %s", seller.getLocalName(), accept.getConversationId(),
                     accept.getSender().getLocalName()));
             seller.logger().warning(
-                    String.format("< %s sent FAILURE to %s", seller.getLocalName(), accept.getSender().getLocalName()));
+                    String.format("< %s (%s) sent FAILURE to %s", seller.getLocalName(), accept.getConversationId(), accept.getSender().getLocalName()));
             return result;
         }
 

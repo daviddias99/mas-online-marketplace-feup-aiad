@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class OfferInfo implements Serializable, Comparable<OfferInfo> {
-
+    private static final long serialVersionUID = 1L;
+    
     protected Product product;
     protected Float offeredPrice;
     private int round;

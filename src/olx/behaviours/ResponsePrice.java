@@ -12,6 +12,7 @@ import jade.lang.acl.UnreadableException;
 import sajas.proto.AchieveREResponder;
 
 public class ResponsePrice extends AchieveREResponder {
+    private static final long serialVersionUID = 1L;
 
     public ResponsePrice(Seller a, MessageTemplate mt) {
         super(a, mt);

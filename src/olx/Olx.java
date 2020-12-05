@@ -14,7 +14,6 @@ import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
-import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.ScheduleBase;
 import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
@@ -186,7 +185,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private DisplaySurface dsurf;
     private int WIDTH = 800, HEIGHT = 800;
-    private OpenSequenceGraph plot;
+    // private OpenSequenceGraph plot;
     private Network2DDisplay network;
 
     public void updateNetwork() {

@@ -14,7 +14,10 @@ import olx.models.SellerOfferInfo;
  * assure that the offer is smaller than it's previous offer.
  */
 public abstract class OfferStrategy implements Serializable{
-    public abstract float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer, Seller seller);
+    private static final long serialVersionUID = 1L;
+
+    public abstract float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer,
+            Seller seller);
 
     protected final float getVariance(Product p ,float proposed){
         return Math.max(Math.max(0.05f * p.getOriginalPrice(),0.5f), proposed);

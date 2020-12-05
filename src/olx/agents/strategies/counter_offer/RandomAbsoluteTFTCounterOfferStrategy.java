@@ -9,7 +9,7 @@ import olx.models.SellerOfferInfo;
 import olx.utils.Util;
 
 public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy {
-
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
@@ -20,7 +20,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
 
         float previouslyOfferedPrice = ownPreviousOffer.getOfferedPrice();
         float currentSellerOffer = offer.getOfferedPrice();
-        float baseIncrement = Math.max(offer.getProduct().getOriginalPrice() * 0.1f, 1.0f);
+        float baseIncrement = Math.max(offer.getProduct().getOriginalPrice() * 0.05f, 1.0f);
         float incrementValue = baseIncrement + Util.randomFloatBetween(-baseIncrement / 2, baseIncrement / 2);
         float newOffer = previouslyOfferedPrice + incrementValue;
         return Math.min(currentSellerOffer, newOffer);
@@ -36,7 +36,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
             
             // Lower is better
             float perceivedOfferCost = offer.getOfferedPrice();
-            sb.append(String.format("%n - %s from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;
                 bestDecision = entry.getKey();

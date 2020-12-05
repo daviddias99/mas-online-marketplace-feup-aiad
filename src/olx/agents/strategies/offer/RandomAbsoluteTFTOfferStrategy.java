@@ -6,6 +6,7 @@ import olx.models.SellerOfferInfo;
 import olx.utils.Util;
 
 public class RandomAbsoluteTFTOfferStrategy extends OfferStrategy {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer,

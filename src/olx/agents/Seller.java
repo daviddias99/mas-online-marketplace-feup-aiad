@@ -10,8 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import olx.agents.strategies.offer.*;
 import olx.agents.strategies.price_picking.*;
 import olx.models.Product;
+import olx.models.Stock;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.CoolFormatter;
+import olx.utils.ProductQuantity;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +37,10 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public class Seller extends Agent {
+
     // List of products which the seller is currently offering and the price
     // of said products (float)
-    private Map<Product, Float> products = new ConcurrentHashMap<>();
+    private Map<Product, Stock> products = new ConcurrentHashMap<>();
 
     private int credibility; // 0 to 100
     private final int scamFactor; // 0 to 100
@@ -50,7 +53,7 @@ public class Seller extends Agent {
     private DefaultDrawableNode node;
 
     @JsonCreator
-    public Seller(@JsonProperty("products") Product[] products, @JsonProperty("scamFactor") int scamF,
+    public Seller(@JsonProperty("products") ProductQuantity[] products, @JsonProperty("scamFactor") int scamF,
                   @JsonProperty("elasticity") int elasticity, @JsonProperty("pickingStrategy") String pickingStrategy,
                   @JsonProperty("offerStrategy") String offerStrategy) {
         if (scamF > 100 || scamF < 0)
@@ -70,7 +73,7 @@ public class Seller extends Agent {
         } while (this.credibility > 100);
 
         for (int i = 0; i < products.length; i++)
-            this.products.put(products[i], 0.0f);
+            this.products.put(products[i].getProduct(), new Stock(0.0f, products[i].getQuantity()));
 
         this.wealth = 0;
     }
@@ -236,19 +239,7 @@ public class Seller extends Agent {
     public int getCredibility() {
         return this.credibility;
     }
-
-    public void addProduct(String name, int originalPrice) {
-        this.products.put(new Product(name, originalPrice), 0.0f);
-    }
-
-    public void addProduct(Product product) {
-        this.products.put(product, 0.0f);
-    }
-
-    public void addProduct(Product product, float marketPrice) {
-        this.products.put(product, marketPrice);
-    }
-
+    
     public boolean hasProduct(Product product) {
         return this.products.containsKey(product);
     }
@@ -257,12 +248,12 @@ public class Seller extends Agent {
         return this.products.keySet();
     }
 
-    public void setProducts(Map<Product, Float> newP) {
-        this.products = newP;
-    }
-
-    public synchronized Float removeProduct(Product product) {
-        return this.products.remove(product);
+    public synchronized Stock removeProduct(Product product) {
+        Stock stock = this.products.get(product);
+        if(stock == null) return stock;
+        stock.decreaseQuantity();
+        if(stock.empty()) return this.products.remove(product);
+        return stock;
     }
 
     public Product getProduct(String name) {
@@ -275,7 +266,15 @@ public class Seller extends Agent {
     }
 
     public Float getProductPrice(String name) {
-        return this.products.get(this.getProduct(name));
+        return this.products.get(this.getProduct(name)).getPrice();
+    }
+
+    public int getProductQuantity(String name) {
+        return this.products.get(this.getProduct(name)).getQuantity();
+    }
+
+    public Stock getProductStock(Product product){
+        return this.products.get(product);
     }
 
     @Override

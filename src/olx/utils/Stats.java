@@ -17,6 +17,10 @@ public class Stats {
     private static Map<Product, List<Float>> productsSold = new HashMap<>();
     private static Map<Buyer, Float> moneySavedBuyers = new HashMap<>();
 
+    private Stats() {
+        throw new IllegalStateException("Stats class");
+    }
+
     public static synchronized void scam(Seller seller, float price) {
         totalScams++;
         int nScams = scams.getOrDefault(seller, 0);
@@ -36,11 +40,11 @@ public class Stats {
     }
 
     public static synchronized void updateMoneySaved(Buyer buyer) {
-        List<Product> products = buyer.getProductsBought();
+        Map<Product, Integer> products = buyer.getProductsBought();
         float savedMoney = - buyer.getMoneySpent();
 
-        for (Product p : products) {
-            savedMoney += p.getOriginalPrice();
+        for (Map.Entry<Product, Integer> p : products.entrySet()) {
+            savedMoney += (p.getKey().getOriginalPrice() * p.getValue());
         }
 
         moneySavedBuyers.put(buyer, savedMoney);

@@ -20,8 +20,10 @@ import olx.utils.Util;
  * the counter offer is of a larger value than the preivous counter offer.
  */
 public abstract class CounterOfferStrategy implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers, Map<AID, SellerOfferInfo> previousOffers, Map<AID, OfferInfo> ownPreviousOffers, int round) {
+    public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers,
+            Map<AID, SellerOfferInfo> previousOffers, Map<AID, OfferInfo> ownPreviousOffers, int round) {
         Map<AID, OfferInfo> counterOffers = new HashMap<>();
 
         for(Entry<AID, SellerOfferInfo> offer : offers.entrySet()) {

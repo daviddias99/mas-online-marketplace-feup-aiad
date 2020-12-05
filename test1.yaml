@@ -4,17 +4,29 @@ products:
     price: 650
 buyers:
   - products:
-      - pc
+      - name: pc
+        quantity: 2
     counterOfferStrategy: SMART
     patience: 100
-
 sellers:
   - scamFactor: 0
     elasticity: 30
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
-      - pc
-
-
-
+      - name: pc
+        quantity: 2
+  - scamFactor: 0
+    elasticity: 20
+    offerStrategy: SMART
+    pickingStrategy: SMART
+    products:
+      - name: pc
+        quantity: 2
+  - scamFactor: 0
+    elasticity: 10
+    offerStrategy: SMART
+    pickingStrategy: SMART
+    products:
+      - name: pc
+        quantity: 2

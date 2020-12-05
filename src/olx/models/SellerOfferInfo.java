@@ -1,7 +1,8 @@
 package olx.models;
 
 public class SellerOfferInfo extends OfferInfo {
-
+    private static final long serialVersionUID = 1L;
+    
     private int sellerCredibility;
 
     public SellerOfferInfo(Product product, float offeredPrice, int sellerCredibility){

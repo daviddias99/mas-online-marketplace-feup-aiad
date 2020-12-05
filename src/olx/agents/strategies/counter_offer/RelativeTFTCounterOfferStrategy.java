@@ -9,7 +9,7 @@ import olx.models.SellerOfferInfo;
 import olx.utils.Util;
 
 public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
-
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
@@ -35,7 +35,7 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
             
             // Lower is better
             float perceivedOfferCost = offer.getOfferedPrice();
-            sb.append(String.format("%n - %s from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;

@@ -14,8 +14,9 @@ public class PickingStrategyFactory {
                 return new SmartPickingStrategy();
             case NAIVE:
                 return new NaivePickingStrategy();
+            default:
+                throw new IllegalArgumentException("Strategy " + typeStr + " does not exist");
         }
 
-        return null;
     }
 }

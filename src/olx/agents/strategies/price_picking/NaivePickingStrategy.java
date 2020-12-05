@@ -8,6 +8,7 @@ import olx.utils.Util;
 import olx.models.SellerOfferInfo;
 
 public class NaivePickingStrategy extends PricePickingStrategy {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public float calculateInitialPrice(Seller s, Product p, List<SellerOfferInfo> marketPrices) {

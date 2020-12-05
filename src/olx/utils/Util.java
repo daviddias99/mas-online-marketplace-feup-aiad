@@ -20,6 +20,8 @@ public abstract class Util {
         return rng;
     }
 
+    public static final String LIST_FORMAT = "%n - %s";
+
     public static float round(float value, int places) {
         float scale = (float) Math.pow(10, places);
         return Math.round(value * scale) / scale;

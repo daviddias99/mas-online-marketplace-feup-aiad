@@ -18,33 +18,48 @@ products:
     price: 20
 buyers:
   - products:
-      - pc
-      - nintendo
-      - bmx
+      - name: pc
+        quantity: 1
+      - name: nintendo
+        quantity: 1
+      - name: bmx
+        quantity: 1
     counterOfferStrategy: SMART
     patience: 100
   - products:
-      - raspberry
-      - vinil
-      - colunas
+      - name: raspberry
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
     counterOfferStrategy: SMART
     patience: 40
   - products:
-      - pc
-      - skate
-      - bmx
+      - name: pc
+        quantity: 1
+      - name: skate
+        quantity: 1
+      - name: bmx
+        quantity: 1
     counterOfferStrategy: RELTFT
     patience: 100
   - products:
-      - nintendo
-      - vinil
-      - colunas
+      - name: nintendo
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
     counterOfferStrategy: ABSTFT
     patience: 100
   - products:
-      - camisola
-      - bmx
-      - pc
+      - name: camisola
+        quantity: 1
+      - name: bmx
+        quantity: 1
+      - name: pc
+        quantity: 1
     counterOfferStrategy: RELTFT
     patience: 100
 
@@ -54,26 +69,36 @@ sellers:
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
-      - pc
-      - bmx
-      - raspberry
+      - name: pc
+        quantity: 1
+      - name: bmx
+        quantity: 1
+      - name: raspberry
+        quantity: 1
 
   - scamFactor: 50
     elasticity: 30
     offerStrategy: ABSTFT
     pickingStrategy: SMART
     products:
-      - pc
-      - camisola
-      - nintendo
+      - name: pc
+        quantity: 1
+      - name: camisola
+        quantity: 1
+      - name: nintendo
+        quantity: 1
 
   - scamFactor: 50
     elasticity: 20
     offerStrategy: RELTFT
     pickingStrategy: NAIVE
     products:
-      - pc
-      - vinil
-      - colunas
-      - nintendo
+      - name: pc
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
+      - name: nintendo
+        quantity: 1
 

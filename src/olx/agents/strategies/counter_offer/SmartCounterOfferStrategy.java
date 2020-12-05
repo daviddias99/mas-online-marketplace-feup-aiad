@@ -9,6 +9,7 @@ import olx.models.SellerOfferInfo;
 import olx.utils.Util;
 
 public class SmartCounterOfferStrategy extends CounterOfferStrategy {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb) {
@@ -25,7 +26,7 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
 
             float patienceDiscount = (float) Math.pow(buyer.getPatience()/100.0f, offer.getRound());
             float perceivedOfferCost = offer.getOfferedPrice() / offer.getSellerCredibility() /patienceDiscount ;
-            sb.append(String.format("%n - %s from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
+            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
                 bestValue = perceivedOfferCost;

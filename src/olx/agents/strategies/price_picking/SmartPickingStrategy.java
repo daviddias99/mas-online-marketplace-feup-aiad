@@ -8,6 +8,7 @@ import olx.utils.Util;
 import olx.models.SellerOfferInfo;
 
 public class SmartPickingStrategy extends PricePickingStrategy {
+    private static final long serialVersionUID = 1L;
 
     // If more sellers exist, choose the a value between 65% and 90% of the market
     // average
