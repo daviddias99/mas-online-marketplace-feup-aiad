@@ -1,11 +1,9 @@
 package olx;
-
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-
+import java.awt.Color;
 import olx.agents.TerminationAgent;
 import sajas.core.Agent;
 import jade.core.Profile;
@@ -15,9 +13,10 @@ import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
-import uchicago.src.sim.engine.Schedule;
+import uchicago.src.sim.engine.ScheduleBase;
 import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
+import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
 import olx.models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -59,7 +58,12 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         nodes = new ArrayList<DefaultDrawableNode>();
 
         createSellers();
-        createBuyers(this.kill);
+        try {
+            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 5000)).start();
+        } catch (StaleProxyException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void createSellers() {
@@ -88,7 +92,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
     }
 
-    private void createBuyers(boolean kill) {
+    public void createBuyers() {
         System.out.println("Creating Buyers");
         if (this.buyers == null) {
             System.out.println("WARNING: no buyers specified");
@@ -336,7 +340,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         plot.display();
         */
 
-        getSchedule().scheduleActionAtInterval(1, dsurf, "updateDisplay", Schedule.LAST);
+        getSchedule().scheduleActionAtInterval(1, dsurf, "updateDisplay", ScheduleBase.LAST);
         // getSchedule().scheduleActionAtInterval(100, plot, "step", Schedule.LAST);
     }
 }

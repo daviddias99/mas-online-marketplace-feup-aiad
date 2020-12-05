@@ -6,15 +6,15 @@ products:
     price: 20
   - name: nintendo
     price: 240
-  - name: colunas da JBL
+  - name: colunas
     price: 120
-  - name: vinil dos Beegees
+  - name: vinil
     price: 80
-  - name: raspberry PI
+  - name: raspberry
     price: 100
   - name: bmx
     price: 300
-  - name: camisola do Man Utd.
+  - name: camisola
     price: 20
 buyers:
   - products:
@@ -24,9 +24,9 @@ buyers:
     counterOfferStrategy: SMART
     patience: 100
   - products:
-      - raspberry PI
-      - vinil dos Beegees
-      - colunas da JBL
+      - raspberry
+      - vinil
+      - colunas
     counterOfferStrategy: SMART
     patience: 40
   - products:
@@ -37,12 +37,12 @@ buyers:
     patience: 100
   - products:
       - nintendo
-      - vinil dos Beegees
-      - colunas da JBL
+      - vinil
+      - colunas
     counterOfferStrategy: ABSTFT
     patience: 100
   - products:
-      - camisola do Man Utd.
+      - camisola
       - bmx
       - pc
     counterOfferStrategy: RELTFT
@@ -56,7 +56,7 @@ sellers:
     products:
       - pc
       - bmx
-      - raspberry PI
+      - raspberry
 
   - scamFactor: 50
     elasticity: 30
@@ -64,7 +64,7 @@ sellers:
     pickingStrategy: SMART
     products:
       - pc
-      - camisola do Man Utd.
+      - camisola
       - nintendo
 
   - scamFactor: 50
@@ -73,7 +73,7 @@ sellers:
     pickingStrategy: NAIVE
     products:
       - pc
-      - vinil dos Beegees
-      - colunas da JBL
+      - vinil
+      - colunas
       - nintendo
 
