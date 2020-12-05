@@ -19,6 +19,7 @@ import jade.lang.acl.UnreadableException;
 import jade.proto.AchieveREInitiator;
 
 public class AskPriceSeller extends AchieveREInitiator {
+    private static final long serialVersionUID = 1L;
 
     private Product product;
 

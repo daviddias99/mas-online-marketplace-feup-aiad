@@ -3,6 +3,8 @@ package models;
 import java.io.Serializable;
 
 public class Scam implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private final OfferInfo offer;
 
     public Scam(OfferInfo buyerOffer) {

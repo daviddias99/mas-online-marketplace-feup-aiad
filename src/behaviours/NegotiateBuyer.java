@@ -25,6 +25,8 @@ import utils.Stats;
 import utils.Util;
 
 public class NegotiateBuyer extends ContractNetInitiator {
+    private static final long serialVersionUID = 1L;
+
     private Product product;
     private int index;
     private int negotiationRound;

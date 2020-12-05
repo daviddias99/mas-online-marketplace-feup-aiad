@@ -22,6 +22,7 @@ import utils.ProductQuantity;
 import utils.TerminationListener;
 
 public class Buyer extends Agent {
+    private static final long serialVersionUID = 1L;
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
@@ -158,9 +159,7 @@ public class Buyer extends Agent {
     public String productsToString() {
         // - START: buyer_0{products={2-pc:650.00=[TRYING, TRYING], ...}}
         StringBuilder res = new StringBuilder("{");
-        this.products.entrySet().forEach(entry-> {
-            res.append(entry.getValue().size() + "-" + entry.getKey() + "=" + entry.getValue() + ", ");  
-        });
+        this.products.entrySet().forEach(entry-> res.append(entry.getValue().size() + "-" + entry.getKey() + "=" + entry.getValue() + ", ") );
         String fres = res.toString();
         if(fres.substring(fres.length() - 1).equals(" "))
             return fres.substring(0, fres.length() - 2) + "}";

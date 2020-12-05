@@ -35,6 +35,8 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 public class Seller extends Agent {
+    private static final long serialVersionUID = 1L;
+
     // List of products which the seller is currently offering and the price
     // of said products (float)
     private Map<Product, Stock> products = new ConcurrentHashMap<>();
@@ -45,7 +47,7 @@ public class Seller extends Agent {
     private DFAgentDescription dfd;
     private OfferStrategy offerStrategy;
     private PricePickingStrategy pricePickingStrategy;
-    private float wealth;
+    // private float wealth;
     private transient Logger logger;
 
     @JsonCreator

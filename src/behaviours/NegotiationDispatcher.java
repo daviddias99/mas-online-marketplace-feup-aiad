@@ -8,7 +8,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.proto.SSResponderDispatcher;
 
 public class NegotiationDispatcher extends SSResponderDispatcher {
-
+    private static final long serialVersionUID = 1L;
 
     public NegotiationDispatcher(Agent a, MessageTemplate tpl) {
         super(a, tpl);

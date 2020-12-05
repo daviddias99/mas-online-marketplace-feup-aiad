@@ -22,7 +22,8 @@ import jade.proto.SSIteratedContractNetResponder;
 import utils.Stats;
 
 public class NegotiateSeller extends SSIteratedContractNetResponder {
-
+    private static final long serialVersionUID = 1L;
+    
     private Map<Product, ConcurrentHashMap<AID, OfferInfo>> previousOffers;
     private Map<Product, ConcurrentHashMap<AID, SellerOfferInfo>> ownPreviousOffers;
     private List<AID> sentOffers;

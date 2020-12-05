@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class Stats {
     private static int totalScams = 0;
@@ -17,6 +16,10 @@ public class Stats {
     private static Map<Seller, Float> moneyGainedSellers = new HashMap<>();
     private static Map<Product, List<Float>> productsSold = new HashMap<>();
     private static Map<Buyer, Float> moneySavedBuyers = new HashMap<>();
+
+    private Stats() {
+        throw new IllegalStateException("Stats class");
+    }
 
     public static synchronized void scam(Seller seller, float price) {
         totalScams++;

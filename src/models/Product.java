@@ -10,6 +10,8 @@ import java.util.Objects;
 
 @JsonIdentityInfo(scope=Product.class, generator=ObjectIdGenerators.PropertyGenerator.class, property="name")
 public class Product implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private final String name;
     private float originalPrice = 0;
 
