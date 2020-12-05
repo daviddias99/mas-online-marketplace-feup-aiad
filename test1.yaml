@@ -5,7 +5,7 @@ products:
 buyers:
   - products:
       - name: pc
-        quantity: 2
+        quantity: 5
     counterOfferStrategy: SMART
     patience: 100
 sellers:
@@ -15,7 +15,7 @@ sellers:
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 2
+        quantity: 5
   - scamFactor: 0
     elasticity: 20
     offerStrategy: SMART

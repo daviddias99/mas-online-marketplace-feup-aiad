@@ -19,47 +19,47 @@ products:
 buyers:
   - products:
       - name: pc
-        quantity: 1
+        quantity: 5
       - name: nintendo
-        quantity: 1
+        quantity: 3
       - name: bmx
-        quantity: 1
+        quantity: 2
     counterOfferStrategy: SMART
     patience: 100
   - products:
       - name: raspberry
-        quantity: 1
+        quantity: 7
       - name: vinil
-        quantity: 1
+        quantity: 10
       - name: colunas
-        quantity: 1
+        quantity: 2
     counterOfferStrategy: SMART
     patience: 40
   - products:
       - name: pc
         quantity: 1
       - name: skate
-        quantity: 1
+        quantity: 3
       - name: bmx
-        quantity: 1
+        quantity: 5
     counterOfferStrategy: RELTFT
     patience: 100
   - products:
       - name: nintendo
-        quantity: 1
+        quantity: 7
       - name: vinil
-        quantity: 1
+        quantity: 12
       - name: colunas
-        quantity: 1
+        quantity: 4
     counterOfferStrategy: ABSTFT
     patience: 100
   - products:
       - name: camisola
-        quantity: 1
+        quantity: 21
       - name: bmx
-        quantity: 1
+        quantity: 2
       - name: pc
-        quantity: 1
+        quantity: 3
     counterOfferStrategy: RELTFT
     patience: 100
 
@@ -70,11 +70,11 @@ sellers:
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 1
+        quantity: 10
       - name: bmx
-        quantity: 1
+        quantity: 10
       - name: raspberry
-        quantity: 1
+        quantity: 10
 
   - scamFactor: 50
     elasticity: 30
@@ -82,11 +82,11 @@ sellers:
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 1
+        quantity: 10
       - name: camisola
-        quantity: 1
+        quantity: 30
       - name: nintendo
-        quantity: 1
+        quantity: 10
 
   - scamFactor: 50
     elasticity: 20
@@ -94,11 +94,11 @@ sellers:
     pickingStrategy: NAIVE
     products:
       - name: pc
-        quantity: 1
+        quantity: 10
       - name: vinil
-        quantity: 1
+        quantity: 50
       - name: colunas
-        quantity: 1
+        quantity: 20
       - name: nintendo
-        quantity: 1
+        quantity: 15
 

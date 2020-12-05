@@ -337,6 +337,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             DefaultDrawableNode to = Olx.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
             Edge edge = new Edge(myNode, to);
             edge.setColor(Color.GREEN);
+            
             myNode.addOutEdge(edge);
         }
 
