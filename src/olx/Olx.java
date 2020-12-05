@@ -1,4 +1,5 @@
 package olx;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -13,6 +14,7 @@ import sajas.core.Runtime;
 import sajas.sim.repast3.Repast3Launcher;
 import sajas.wrapper.ContainerController;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.ScheduleBase;
 import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
@@ -59,7 +61,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         createSellers();
         try {
-            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 5000)).start();
+            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 2000)).start();
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -81,9 +83,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             try {
                 Seller seller = this.sellers.get(j);
                 this.container.acceptNewAgent("seller_" + j, seller).start();
-                DefaultDrawableNode node =
-                        generateNode(Util.localNameToLabel("seller_" + j), Util.getSellerColor(seller.getCredibility()),
-                                Util.randomBetween(WIDTH/2, WIDTH), Util.randomBetween(0, HEIGHT));
+                DefaultDrawableNode node = generateNode(Util.localNameToLabel("seller_" + j),
+                        Util.getSellerColor(seller.getCredibility()), Util.randomBetween(WIDTH / 2, WIDTH),
+                        Util.randomBetween(0, HEIGHT));
                 nodes.add(node);
                 this.sellers.get(j).setNode(node);
             } catch (StaleProxyException e) {
@@ -108,123 +110,15 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
-                DefaultDrawableNode node =
-                        generateNode(Util.localNameToLabel("buyer_" + j), Color.BLUE,
-                                Util.randomBetween(0, WIDTH/2), Util.randomBetween(0, HEIGHT));
+                DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + j), Color.BLUE,
+                        Util.randomBetween(0, WIDTH / 2), Util.randomBetween(0, HEIGHT));
                 nodes.add(node);
                 this.buyers.get(j).setNode(node);
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
-    }
-
-    /**
-     * Create the OLX platform.
-     *
-     * @param args <configPath> <createHasMainContainer>
-     * @throws IOException
-     */
-    public static void main(String[] args) {
-        ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
-                .description("Modeling a second hand market place using olx.agents.");
-        parser.addArgument("--main", "-m")
-                .action(Arguments.storeTrue())
-                .help("start olx.agents in new main container");
-        parser.addArgument("--kill", "-k")
-                .action(Arguments.storeTrue())
-                .help("platform is shutdown after last buyer exits");
-        parser.addArgument("--config", "-c")
-                .help("file (YAML or JSON) with experiment configuration");
-
-
-        Namespace parsedArgs = null;
-        try {
-            parsedArgs = parser.parseArgs(args);
-        } catch (HelpScreenException e) {
-            System.exit(0);
-        } catch (ArgumentParserException e) {
-            System.exit(-1);
-        }
-
-
-        boolean mainMode = parsedArgs.get("main");
-        boolean kill = parsedArgs.get("kill");
-        String configPath = parsedArgs.get("config");
-        if (configPath == null) {
-            parser.printHelp();
-            System.out.println("\nConfig file is required.");
-            System.exit(-1);
-        }
-
-        String configExtension;
-        if (configPath.contains(".")) {
-            configExtension = configPath.substring(configPath.lastIndexOf('.') + 1);
-        } else {
-            configExtension = "";
-        }
-
-        if (!(configExtension.equals("json") || configExtension.equals("yaml") || configExtension.equals("yml"))) {
-            parser.printHelp();
-            System.out.println("\nThe configuration file format should be either JSON (.json) or YAML (.yaml, .yml).");
-            System.exit(-1);
-        }
-
-
-        if (!new File(configPath).exists()) {
-            System.out.println("Configuration file not found.");
-            System.exit(-1);
-        }
-
-        // Create config object
-        Config config = null;
-        try {
-            config = Config.read(configPath);
-            if (config == null) {
-                System.out.println("Invalid configuration file.");
-                System.exit(-1);
-            }
-        } catch (IOException e) {
-            System.out.println("Error while reading configuration file.");
-            System.out.println(e.getMessage());
-            System.exit(-1);
-        }
-
-        // SAJAS + REPAST
-        SimInit init = new SimInit();
-		init.setNumRuns(1);   // works only in batch mode
-		init.loadModel(new Olx(mainMode, config, kill), null, true);
-    }
-
-    @Override
-    public synchronized void terminated(Agent a) {
-        this.runningAgents.remove(a);
-        if (this.runningAgents.isEmpty()) {
-            System.out.println();
-            Stats.printStats();
-            System.out.println();
-
-            this.shutdown();
-        }
-    }
-
-    public void shutdown() {
-        try {
-            this.container.getPlatformController().kill();
-        } catch (ControllerException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // SAJAS + REPAST
-    @Override
-    public String[] getInitParam() {
-        return new String[0];
-    }
-
-    @Override
-    public String getName() {
-        return "MAS 2nd Hand Marketplace";
+        this.updateNetwork();
     }
 
     @Override
@@ -262,8 +156,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static List<DefaultDrawableNode> nodes;
 
     public static DefaultDrawableNode getNode(String label) {
-        for(DefaultDrawableNode node : nodes) {
-            if(node.getNodeLabel().equals(label)) {
+        for (DefaultDrawableNode node : nodes) {
+            if (node.getNodeLabel().equals(label)) {
                 return node;
             }
         }
@@ -271,10 +165,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     private DefaultDrawableNode generateNode(String label, Color color, int x, int y) {
-        OvalNetworkItem oval = new OvalNetworkItem(x,y);
+        OvalNetworkItem oval = new OvalNetworkItem(x, y);
         oval.allowResizing(false);
-        oval.setHeight(HEIGHT/30);
-        oval.setWidth(WIDTH/30);
+        oval.setHeight(HEIGHT / 30);
+        oval.setWidth(WIDTH / 30);
 
         DefaultDrawableNode node = new DefaultDrawableNode(label, oval);
         node.setColor(color);
@@ -293,49 +187,149 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private DisplaySurface dsurf;
     private int WIDTH = 800, HEIGHT = 800;
     private OpenSequenceGraph plot;
+    private Network2DDisplay network;
+
+    public void updateNetwork() {
+
+        if (this.network != null){
+            this.dsurf.removeProbeableDisplayable(this.network);
+        }
+
+        this.network = new Network2DDisplay(nodes, WIDTH, HEIGHT);
+        this.dsurf.addDisplayableProbeable(this.network, "Network Display" + this.network.hashCode());
+        this.dsurf.addZoomable(this.network);
+        addSimEventListener(this.dsurf);
+    }
 
     private void buildAndScheduleDisplay() {
 
         // display surface
-        if (dsurf != null) dsurf.dispose();
-        dsurf = new DisplaySurface(this, "MAS 2nd Hand Marketplace Display");
-        registerDisplaySurface("MAS 2nd Hand Marketplace Display", dsurf);
-        Network2DDisplay display = new Network2DDisplay(nodes,WIDTH,HEIGHT);
-        dsurf.addDisplayableProbeable(display, "Network Display");
-        dsurf.addZoomable(display);
-        addSimEventListener(dsurf);
-        dsurf.display();
-
+        if (this.dsurf != null)
+            this.dsurf.dispose();
+        this.dsurf = new DisplaySurface(this, "MAS 2nd Hand Marketplace Display");
+        registerDisplaySurface("MAS 2nd Hand Marketplace Display", this.dsurf);
+        this.updateNetwork();
+        this.dsurf.display();
         // graph
         /*
-        if (plot != null) plot.dispose();
-        plot = new OpenSequenceGraph("Service performance", this);
-        plot.setAxisTitles("time", "% successful service executions");
+         * if (plot != null) plot.dispose(); plot = new
+         * OpenSequenceGraph("Service performance", this); plot.setAxisTitles("time",
+         * "% successful service executions");
+         * 
+         * plot.addSequence("Consumers", new Sequence() { public double getSValue() { //
+         * iterate through consumers double v = 0.0; for(int i = 0; i <
+         * consumers.size(); i++) { v += consumers.get(i).getMovingAverage(10); } return
+         * v / consumers.size(); } }); plot.addSequence("Filtering Consumers", new
+         * Sequence() { public double getSValue() { // iterate through filtering
+         * consumers double v = 0.0; for(int i = 0; i < filteringConsumers.size(); i++)
+         * { v += filteringConsumers.get(i).getMovingAverage(10); } return v /
+         * filteringConsumers.size(); } }); plot.display();
+         */
 
-        plot.addSequence("Consumers", new Sequence() {
-            public double getSValue() {
-                // iterate through consumers
-                double v = 0.0;
-                for(int i = 0; i < consumers.size(); i++) {
-                    v += consumers.get(i).getMovingAverage(10);
-                }
-                return v / consumers.size();
-            }
-        });
-        plot.addSequence("Filtering Consumers", new Sequence() {
-            public double getSValue() {
-                // iterate through filtering consumers
-                double v = 0.0;
-                for(int i = 0; i < filteringConsumers.size(); i++) {
-                    v += filteringConsumers.get(i).getMovingAverage(10);
-                }
-                return v / filteringConsumers.size();
-            }
-        });
-        plot.display();
-        */
+        getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
 
-        getSchedule().scheduleActionAtInterval(1, dsurf, "updateDisplay", ScheduleBase.LAST);
         // getSchedule().scheduleActionAtInterval(100, plot, "step", Schedule.LAST);
     }
+
+    /**
+     * Create the OLX platform.
+     *
+     * @param args <configPath> <createHasMainContainer>
+     * @throws IOException
+     */
+    public static void main(String[] args) {
+        ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
+                .description("Modeling a second hand market place using olx.agents.");
+        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
+        parser.addArgument("--kill", "-k").action(Arguments.storeTrue())
+                .help("platform is shutdown after last buyer exits");
+        parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
+
+        Namespace parsedArgs = null;
+        try {
+            parsedArgs = parser.parseArgs(args);
+        } catch (HelpScreenException e) {
+            System.exit(0);
+        } catch (ArgumentParserException e) {
+            System.exit(-1);
+        }
+
+        boolean mainMode = parsedArgs.get("main");
+        boolean kill = parsedArgs.get("kill");
+        String configPath = parsedArgs.get("config");
+        if (configPath == null) {
+            parser.printHelp();
+            System.out.println("\nConfig file is required.");
+            System.exit(-1);
+        }
+
+        String configExtension;
+        if (configPath.contains(".")) {
+            configExtension = configPath.substring(configPath.lastIndexOf('.') + 1);
+        } else {
+            configExtension = "";
+        }
+
+        if (!(configExtension.equals("json") || configExtension.equals("yaml") || configExtension.equals("yml"))) {
+            parser.printHelp();
+            System.out.println("\nThe configuration file format should be either JSON (.json) or YAML (.yaml, .yml).");
+            System.exit(-1);
+        }
+
+        if (!new File(configPath).exists()) {
+            System.out.println("Configuration file not found.");
+            System.exit(-1);
+        }
+
+        // Create config object
+        Config config = null;
+        try {
+            config = Config.read(configPath);
+            if (config == null) {
+                System.out.println("Invalid configuration file.");
+                System.exit(-1);
+            }
+        } catch (IOException e) {
+            System.out.println("Error while reading configuration file.");
+            System.out.println(e.getMessage());
+            System.exit(-1);
+        }
+
+        // SAJAS + REPAST
+        SimInit init = new SimInit();
+        init.setNumRuns(1); // works only in batch mode
+        init.loadModel(new Olx(mainMode, config, kill), null, true);
+    }
+
+    @Override
+    public synchronized void terminated(Agent a) {
+        this.runningAgents.remove(a);
+        if (this.runningAgents.isEmpty()) {
+            System.out.println();
+            Stats.printStats();
+            System.out.println();
+
+            this.shutdown();
+        }
+    }
+
+    public void shutdown() {
+        try {
+            this.container.getPlatformController().kill();
+        } catch (ControllerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // SAJAS + REPAST
+    @Override
+    public String[] getInitParam() {
+        return new String[0];
+    }
+
+    @Override
+    public String getName() {
+        return "MAS 2nd Hand Marketplace";
+    }
+
 }
