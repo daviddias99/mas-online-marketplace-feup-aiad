@@ -379,7 +379,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     public int onEnd() {
         if (this.getAgent().isBuying(this.product)) {
             this.reinitiate();
-            this.getAgent().getBehaviour().addSubBehaviour(this);
+            this.getAgent().addBehaviour(this);
         }
         return super.onEnd();
     }

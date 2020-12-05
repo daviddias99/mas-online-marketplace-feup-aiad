@@ -118,34 +118,55 @@ public class Seller extends Agent {
 
     public void register(Product product) {
 
-        // Register product under this agent
-        ServiceDescription sd = new ServiceDescription();
-        sd.setName(getLocalName());
-        sd.setType(product.getName());
-        this.dfd.addServices(sd);
-
         try {
-            // DFService.deregister(this, this.dfd);
+
+            DFAgentDescription dfdCopy = this.makeCopy(this.dfd);
+            DFService.deregister(this, this.dfd);
+            this.dfd = dfdCopy;
+
+            // Register product under this agent
+            ServiceDescription sd = new ServiceDescription();
+            sd.setName(getLocalName());
+            sd.setType(product.getName());
+            this.dfd.addServices(sd);
+
             DFService.register(this, this.dfd);
+
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not register product %s in the DF service%n", this.getLocalName(), product));
         }
     }
 
-    public void deregister(Product product) {
-        Iterator<ServiceDescription> it = this.dfd.getAllServices();
+    public DFAgentDescription makeCopy(DFAgentDescription dfdesc){
+        DFAgentDescription result = new DFAgentDescription();
+        result.setName(getAID());
 
+        Iterator<ServiceDescription> it = dfdesc.getAllServices();
         while (it.hasNext()) {
-            ServiceDescription sd = it.next();
-
-            if (sd.getType().equals(product.getName())) {
-                this.dfd.removeServices(sd);
-                break;
-            }
+            ServiceDescription s = it.next();
+            result.addServices(s);
         }
+        return result;
+    }
 
+    public void deregister(Product product) {
+        
         try {
-            // DFService.deregister(this, this.dfd);
+            DFAgentDescription dfdCopy = this.makeCopy(this.dfd);
+            DFService.deregister(this, this.dfd);
+            this.dfd = dfdCopy;
+
+            Iterator<ServiceDescription> it = this.dfd.getAllServices();
+
+            while (it.hasNext()) {
+                ServiceDescription sd = it.next();
+
+                if (sd.getType().equals(product.getName())) {
+                    this.dfd.removeServices(sd);
+                    break;
+                }
+            }
+
             DFService.register(this, this.dfd);
         } catch (FIPAException e1) {
             this.logger.warning(String.format("/!\\ %s could not remove product %s from the DF service%n", this.getLocalName(), product));
@@ -154,7 +175,9 @@ public class Seller extends Agent {
 
     private void deregister() {
         try {
+            DFAgentDescription dfdCopy = this.makeCopy(this.dfd);
             DFService.deregister(this);
+            this.dfd = dfdCopy;
         } catch (FIPAException e) {
             e.printStackTrace();
         }
@@ -265,6 +288,6 @@ public class Seller extends Agent {
     }
 
     public boolean finished() {
-        return this.products.isEmpty();
+        return false;
     }
 }
