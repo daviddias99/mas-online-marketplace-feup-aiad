@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.awt.Color;
-import olx.agents.TerminationAgent;
+import jade.wrapper.ControllerException;
 import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -198,26 +198,21 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     @Override
     public synchronized void terminated(Agent a) {
-        if (a instanceof TerminationAgent) {
+        this.runningAgents.remove(a);
+        if (this.runningAgents.isEmpty()) {
             System.out.println();
             Stats.printStats();
             System.out.println();
-            return;
-        }
 
-        this.runningAgents.remove(a);
-        if (this.runningAgents.isEmpty()) {
             this.shutdown();
         }
     }
 
     public void shutdown() {
         try {
-            TerminationAgent a = new TerminationAgent();
-            a.setTerminationListener(this);
-            this.container.acceptNewAgent("terminator", a).start();
-        } catch (StaleProxyException e) {
-            System.out.println("Could not setup terminator agent");
+            this.container.getPlatformController().kill();
+        } catch (ControllerException e) {
+            e.printStackTrace();
         }
     }
 

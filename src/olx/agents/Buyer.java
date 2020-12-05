@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jade.core.AID;
 import sajas.core.behaviours.SequentialBehaviour;
 import sajas.core.Agent;
-import sajas.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
 import olx.agents.strategies.counter_offer.*;
 import olx.behaviours.NegotiateBuyer;
@@ -109,11 +108,8 @@ public class Buyer extends Agent {
         // Ask prices of each product to sellers. The ask price behaviour choses the
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
-        // negotiationsBehaviour = new SequentialBehaviour();
         for (Product p : this.products.keySet())
             this.addBehaviour(new NegotiateBuyer(p, this, new ACLMessage(ACLMessage.CFP)));
-
-        // this.addBehaviour(negotiationsBehaviour);
     }
 
     //

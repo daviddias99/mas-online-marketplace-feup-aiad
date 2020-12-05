@@ -1,14 +1,11 @@
 package olx.behaviours;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import olx.Olx;
-import olx.draw.Edge;
 import olx.models.Product;
 import olx.models.SellerOfferInfo;
 import olx.agents.Seller;
@@ -20,7 +17,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import sajas.proto.AchieveREInitiator;
-import uchicago.src.sim.network.DefaultDrawableNode;
 
 public class AskPriceSeller extends AchieveREInitiator {
 
