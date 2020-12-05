@@ -6,45 +6,60 @@ products:
     price: 20
   - name: nintendo
     price: 240
-  - name: colunas da JBL
+  - name: colunas
     price: 120
-  - name: vinil dos Beegees
+  - name: vinil
     price: 80
-  - name: raspberry PI
+  - name: raspberry
     price: 100
   - name: bmx
     price: 300
-  - name: camisola do Man Utd.
+  - name: camisola
     price: 20
 buyers:
   - products:
-      - pc
-      - nintendo
-      - bmx
+      - name: pc
+        quantity: 1
+      - name: nintendo
+        quantity: 1
+      - name: bmx
+        quantity: 1
     counterOfferStrategy: SMART
     patience: 100
   - products:
-      - raspberry PI
-      - vinil dos Beegees
-      - colunas da JBL
+      - name: raspberry
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
     counterOfferStrategy: SMART
     patience: 40
   - products:
-      - pc
-      - skate
-      - bmx
+      - name: pc
+        quantity: 1
+      - name: skate
+        quantity: 1
+      - name: bmx
+        quantity: 1
     counterOfferStrategy: RELTFT
     patience: 100
   - products:
-      - nintendo
-      - vinil dos Beegees
-      - colunas da JBL
+      - name: nintendo
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
     counterOfferStrategy: ABSTFT
     patience: 100
   - products:
-      - camisola do Man Utd.
-      - bmx
-      - pc
+      - name: camisola
+        quantity: 1
+      - name: bmx
+        quantity: 1
+      - name: pc
+        quantity: 1
     counterOfferStrategy: RELTFT
     patience: 100
 
@@ -54,26 +69,36 @@ sellers:
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
-      - pc
-      - bmx
-      - raspberry PI
+      - name: pc
+        quantity: 1
+      - name: bmx
+        quantity: 1
+      - name: raspberry
+        quantity: 1
 
   - scamFactor: 50
     elasticity: 30
     offerStrategy: ABSTFT
     pickingStrategy: SMART
     products:
-      - pc
-      - camisola do Man Utd.
-      - nintendo
+      - name: pc
+        quantity: 1
+      - name: camisola
+        quantity: 1
+      - name: nintendo
+        quantity: 1
 
   - scamFactor: 50
     elasticity: 20
     offerStrategy: RELTFT
     pickingStrategy: NAIVE
     products:
-      - pc
-      - vinil dos Beegees
-      - colunas da JBL
-      - nintendo
+      - name: pc
+        quantity: 1
+      - name: vinil
+        quantity: 1
+      - name: colunas
+        quantity: 1
+      - name: nintendo
+        quantity: 1
 

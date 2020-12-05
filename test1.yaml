@@ -15,18 +15,18 @@ sellers:
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 1
+        quantity: 2
   - scamFactor: 0
     elasticity: 20
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 1
+        quantity: 2
   - scamFactor: 0
     elasticity: 10
     offerStrategy: SMART
     pickingStrategy: SMART
     products:
       - name: pc
-        quantity: 1
+        quantity: 2
