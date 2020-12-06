@@ -35,6 +35,8 @@ import olx.utils.MyAverageSequence;
 import olx.utils.Stats;
 import olx.utils.TerminationListener;
 import olx.utils.Util;
+import olx.utils.Creator;
+import olx.utils.JsonConfig;
 
 public class Olx extends Repast3Launcher implements TerminationListener {
     private Runtime rt;
@@ -69,7 +71,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         createSellers();
         try {
-            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 2000)).start();
+            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 10000)).start();
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -111,15 +113,15 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 elast_u10.add(this.sellers.get(j));
             else if(this.sellers.get(j).getElasticity() <= 20)
                 elast_u20.add(this.sellers.get(j));
-            else if(this.sellers.get(j).getScamFactor() <= 30)
+            else if(this.sellers.get(j).getElasticity() <= 30)
                 elast_u30.add(this.sellers.get(j));
 
             try {
                 Seller seller = this.sellers.get(j);
                 this.container.acceptNewAgent("seller_" + j, seller).start();
                 DefaultDrawableNode node = generateNode(Util.localNameToLabel("seller_" + j),
-                        Util.getSellerColor(seller.getCredibility()), Util.randomBetween(WIDTH / 2, WIDTH),
-                        Util.randomBetween(0, HEIGHT));
+                        Util.getSellerColor(seller.getCredibility()), Util.randomBetween(2 * WIDTH / 3, WIDTH - WIDTH / 115),
+                        Util.randomBetween(0, HEIGHT - WIDTH / 115));
                 nodes.add(node);
                 this.sellers.get(j).setNode(node);
             } catch (StaleProxyException e) {
@@ -154,7 +156,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
                 DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + j), Color.BLUE,
-                        Util.randomBetween(0, WIDTH / 2), Util.randomBetween(0, HEIGHT));
+                        Util.randomBetween(0, WIDTH / 3), Util.randomBetween(0, HEIGHT - WIDTH / 115));
                 nodes.add(node);
                 this.buyers.get(j).setNode(node);
             } catch (StaleProxyException e) {
@@ -178,19 +180,19 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         this.products = new HashMap<>();
         if (config.getProducts() != null) {
-            Product[] prov = config.getProducts();
-            for (int i = 0; i < prov.length; i++)
-                this.products.put(prov[i].getName(), prov[i]);
+            List<Product> prov = config.getProducts();
+            for (int i = 0; i < prov.size(); i++)
+                this.products.put(prov.get(i).getName(), prov.get(i));
         } else {
             System.out.println("WARNING: no products specified");
         }
-
+        
         if (config.getSellers() != null) {
-            this.sellers = new ArrayList<>(Arrays.asList(config.getSellers()));
+            this.sellers = new ArrayList<>(config.getSellers());
         }
 
         if (config.getBuyers() != null) {
-            this.buyers = new ArrayList<>(Arrays.asList(config.getBuyers()));
+            this.buyers = new ArrayList<>(config.getBuyers());
         }
 
         this.start();
@@ -210,8 +212,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private DefaultDrawableNode generateNode(String label, Color color, int x, int y) {
         OvalNetworkItem oval = new OvalNetworkItem(x, y);
         oval.allowResizing(false);
-        oval.setHeight(HEIGHT / 30);
-        oval.setWidth(WIDTH / 30);
+        oval.setHeight(WIDTH / 115);
+        oval.setWidth(WIDTH / 115);
 
         DefaultDrawableNode node = new DefaultDrawableNode(label, oval);
         node.setColor(color);
@@ -228,7 +230,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     private DisplaySurface dsurf;
-    private int WIDTH = 800, HEIGHT = 800;
+    private int WIDTH = 1920, HEIGHT = 1080;
     private OpenSequenceGraph plotScam;
     private OpenSequenceGraph plotElasticy;
     private Network2DDisplay network;
@@ -304,8 +306,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
+        parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
         
-
         Namespace parsedArgs = null;
         try {
             parsedArgs = parser.parseArgs(args);
@@ -320,15 +322,19 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         boolean scamAnalysis = parsedArgs.get("scam");
         boolean elasticityAnalysis = parsedArgs.get("elasticity");
         String configPath = parsedArgs.get("config");
-        if (configPath == null) {
+        String generatorPath = parsedArgs.get("generator");
+
+        if (configPath == null && generatorPath == null) {
             parser.printHelp();
-            System.out.println("\nConfig file is required.");
+            System.out.println("\nConfig or generator file  is required.");
             System.exit(-1);
         }
 
+        String confPath = configPath == null ? generatorPath : configPath;
+
         String configExtension;
-        if (configPath.contains(".")) {
-            configExtension = configPath.substring(configPath.lastIndexOf('.') + 1);
+        if (confPath.contains(".")) {
+            configExtension = confPath.substring(confPath.lastIndexOf('.') + 1);
         } else {
             configExtension = "";
         }
@@ -339,7 +345,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             System.exit(-1);
         }
 
-        if (!new File(configPath).exists()) {
+        if (!new File(confPath).exists()) {
             System.out.println("Configuration file not found.");
             System.exit(-1);
         }
@@ -347,11 +353,19 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         // Create config object
         Config config = null;
         try {
-            config = Config.read(configPath);
+
+            if(configPath != null) {
+                config = JsonConfig.read(confPath);
+            }
+            else {
+                config = Creator.read(confPath);
+            }
+
             if (config == null) {
-                System.out.println("Invalid configuration file.");
+                System.out.println("Invalid file.");
                 System.exit(-1);
             }
+
         } catch (IOException e) {
             System.out.println("Error while reading configuration file.");
             System.out.println(e.getMessage());
