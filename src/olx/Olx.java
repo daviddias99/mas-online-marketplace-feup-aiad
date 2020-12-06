@@ -305,10 +305,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
+        parser.addArgument("--logger", "-l").action(Arguments.storeTrue()).help("activate logging per agent (files are always created)");
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
         parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
-        parser.addArgument("--logger", "-l").help("activate logging per agent (files are always created)");
 
         
         Namespace parsedArgs = null;

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import olx.Olx;
 import olx.agents.strategies.offer.*;
 import olx.agents.strategies.price_picking.*;
 import olx.models.Product;
