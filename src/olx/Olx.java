@@ -54,6 +54,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean kill;
     private boolean scamAnalysis;
     private boolean elasticityAnalysis;
+    public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config, boolean kill, boolean scamAnalysis, boolean elasticityAnalysis) {
@@ -307,6 +308,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
         parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
+        parser.addArgument("--logger", "-l").help("activate logging per agent (files are always created)");
+
         
         Namespace parsedArgs = null;
         try {
@@ -321,6 +324,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         boolean kill = parsedArgs.get("kill");
         boolean scamAnalysis = parsedArgs.get("scam");
         boolean elasticityAnalysis = parsedArgs.get("elasticity");
+        logging = parsedArgs.get("logger");
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
 

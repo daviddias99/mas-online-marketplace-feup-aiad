@@ -34,6 +34,7 @@ import olx.utils.Util;
 
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Seller extends Agent {
@@ -85,6 +86,7 @@ public class Seller extends Agent {
     @Override
     protected void setup() {
         this.setupLogger();
+        if(!Olx.logging) this.logger.setLevel(Level.OFF);
         this.logger.info("- START: " + this);
         // Agent registration object inside the DF registry. An agent provides one service
         // for each object he his selling.

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +16,7 @@ import jade.core.AID;
 import sajas.core.behaviours.SequentialBehaviour;
 import sajas.core.Agent;
 import jade.lang.acl.ACLMessage;
+import olx.Olx;
 import olx.agents.strategies.counter_offer.*;
 import olx.behaviours.NegotiateBuyer;
 import olx.models.Product;
@@ -101,7 +103,9 @@ public class Buyer extends Agent {
     // The buyer currently
     @Override
     protected void setup() {
+        
         this.setupLogger();
+        if(!Olx.logging) this.logger.setLevel(Level.OFF);
         this.logger.info("- START: " + this);
 
         // Ask prices of each product to sellers. The ask price behaviour choses the
