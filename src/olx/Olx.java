@@ -19,7 +19,9 @@ import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
 import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
+import olx.draw.ElasticityPlot;
 import olx.draw.OlxNetwork;
+import olx.draw.ScamPlot;
 import olx.models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -191,45 +193,17 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         buildAndScheduleDisplay();
     }
 
-    private OpenSequenceGraph plotScam;
-    private OpenSequenceGraph plotElasticy;
+    private ElasticityPlot plotElasticy;
     private OlxNetwork olxNetwork;
+    private ScamPlot scamPlot;
 
     private void buildAndScheduleDisplay() {
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
-
-
         // graph scam
-        if(this.scamAnalysis){
-            if (this.plotScam != null) 
-                this.plotScam.dispose();
-            this.plotScam = new OpenSequenceGraph("Scam Analysis", this); 
-            this.plotScam.setAxisTitles("time","money earned");
-            this.plotScam.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scamMap.get(25), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scamMap.get(50), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scamMap.get(75), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scamMap.get(100), "getWealth")); 
-            
-            this.plotScam.display();
-
-            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
-            getSchedule().scheduleActionAtInterval(100, this.plotScam, "step", ScheduleBase.LAST);
-        }
-        if(this.elasticityAnalysis){
-            if (this.plotElasticy != null) 
-                this.plotElasticy.dispose();
-            this.plotElasticy = new OpenSequenceGraph("Elasticity Analysis", this); 
-            this.plotElasticy.setAxisTitles("time","money earned");
-            this.plotElasticy.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elasticityMap.get(10), "getWealth")); 
-            this.plotElasticy.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elasticityMap.get(20), "getWealth")); 
-            this.plotElasticy.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elasticityMap.get(30), "getWealth")); 
-            
-            this.plotElasticy.display();
-
-            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
-            getSchedule().scheduleActionAtInterval(100, this.plotElasticy, "step", ScheduleBase.LAST);
-        }
-        
+        if(this.scamAnalysis)
+            this.scamPlot = new ScamPlot(this, this.scamMap);
+        if(this.elasticityAnalysis)
+            this.plotElasticy = new ElasticityPlot(this, this.elasticityMap);
     }
 
     /**
