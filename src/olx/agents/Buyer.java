@@ -104,14 +104,6 @@ public class Buyer extends Agent {
         this.setupLogger();
         this.logger.info("- START: " + this);
 
-        // Buyers sleep to allow for seller setup
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            this.logger.warning(String.format("> %s was interrupted while sleeping, ending.%n", this.getLocalName()));
-            Thread.currentThread().interrupt();
-        }
-
         // Ask prices of each product to sellers. The ask price behaviour choses the
         // seller with which to negotiate
         // The ask price behaviour will start the negotiation with the chosen seller.
