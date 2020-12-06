@@ -1,6 +1,7 @@
 package olx.agents.strategies.counter_offer;
 
 import java.util.Map;
+import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -48,5 +49,9 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
             return Math.min(ownPreviousOffer.getOfferedPrice() + variance, offer.getOfferedPrice());
         }
     }
-    
+
+    @Override
+    public Color getColor() {
+        return new Color(10,135,84);
+    }
 }

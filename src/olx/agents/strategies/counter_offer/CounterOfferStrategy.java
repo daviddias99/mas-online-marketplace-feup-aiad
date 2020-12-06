@@ -3,6 +3,7 @@ package olx.agents.strategies.counter_offer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -58,4 +59,7 @@ public abstract class CounterOfferStrategy implements Serializable {
     protected abstract float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer);
 
     public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb);
+
+    // TODO: n devia ser aqui mas não estamos em LPOO
+    public abstract Color getColor();
 }

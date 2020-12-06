@@ -153,7 +153,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
-                DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + j), Color.BLUE,
+                DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + j), this.buyers.get(j).getCounterOfferStrategy().getColor(),
                         Util.randomBetween(0, WIDTH / 2), Util.randomBetween(0, HEIGHT));
                 nodes.add(node);
                 this.buyers.get(j).setNode(node);
@@ -256,7 +256,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.dsurf.display();
 
         getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
-        
+
         // graph scam
         if(this.scamAnalysis){
             if (this.plotScam != null) 

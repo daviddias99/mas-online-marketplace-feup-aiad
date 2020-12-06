@@ -1,5 +1,6 @@
 package olx.agents.strategies.counter_offer;
 
+import java.awt.Color;
 import java.util.Map;
 
 import olx.agents.Buyer;
@@ -14,7 +15,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
     @Override
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
 
-        if(ownPreviousOffer == null){
+        if (ownPreviousOffer == null) {
             return Util.round(0.5f * offer.getOfferedPrice(), 2);
         }
 
@@ -33,16 +34,22 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
 
         for (Map.Entry<AID, SellerOfferInfo> entry : offers.entrySet()) {
             SellerOfferInfo offer = entry.getValue();
-            
+
             // Lower is better
             float perceivedOfferCost = offer.getOfferedPrice();
-            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
-            if(perceivedOfferCost < bestValue){
+            sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(),
+                    perceivedOfferCost));
+            if (perceivedOfferCost < bestValue) {
                 bestValue = perceivedOfferCost;
                 bestDecision = entry.getKey();
             }
         }
 
         return bestDecision;
+    }
+
+    @Override
+    public Color getColor() {
+        return new Color(191,215,234);
     }
 }
