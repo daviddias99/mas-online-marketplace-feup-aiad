@@ -113,7 +113,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 elast_u10.add(this.sellers.get(j));
             else if(this.sellers.get(j).getElasticity() <= 20)
                 elast_u20.add(this.sellers.get(j));
-            else if(this.sellers.get(j).getScamFactor() <= 30)
+            else if(this.sellers.get(j).getElasticity() <= 30)
                 elast_u30.add(this.sellers.get(j));
 
             try {
