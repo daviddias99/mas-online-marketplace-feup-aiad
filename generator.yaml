@@ -1,0 +1,31 @@
+---
+product: 
+  name: vinil
+  price: 100
+numSellers: 80 
+numBuyers: 80
+sellerStock: 15
+buyerStock: 15
+scamFactors:
+  - 100
+  - 75
+  - 50
+  - 25
+elasticities:
+  - 30
+  - 20
+  - 10
+pickingStrategies:
+  - SMART 
+  - NAIVE
+offerStrategies:
+  - SMART 
+  - ABSTFT
+counterOfferStrategies:
+  - SMART 
+  - ABSTFT
+patiences:
+  - 100
+  - 50
+
+
