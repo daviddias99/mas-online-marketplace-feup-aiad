@@ -16,6 +16,7 @@ import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
 import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
+import olx.draw.BuyerStratPlot;
 import olx.draw.ElasticityPlot;
 import olx.draw.OlxNetwork;
 import olx.draw.ScamPlot;
@@ -44,17 +45,16 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean mainMode;
     private Config config;
     private boolean kill;
-    private boolean scamAnalysis;
-    private boolean elasticityAnalysis;
+    private static boolean scamAnalysis;
+    private static boolean elasticityAnalysis;
+    private static boolean buyerStratAnalysis;
     public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config, boolean kill, boolean scamAnalysis, boolean elasticityAnalysis) {
+    public Olx(boolean mainMode, Config config, boolean kill) {
         this.mainMode = mainMode;
         this.config = config;
         this.kill = kill;
-        this.scamAnalysis = scamAnalysis;
-        this.elasticityAnalysis = elasticityAnalysis;
     }
 
     public void start() {
@@ -143,14 +143,17 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private ElasticityPlot plotElasticy;
     private OlxNetwork olxNetwork;
     private ScamPlot scamPlot;
+    private BuyerStratPlot buyerStratPlot;
 
     private void buildAndScheduleDisplay() {
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
         // graph scam
-        if(this.scamAnalysis)
+        if(scamAnalysis)
             this.scamPlot = new ScamPlot(this, this.sellers);
-        if(this.elasticityAnalysis)
+        if(elasticityAnalysis)
             this.plotElasticy = new ElasticityPlot(this, this.sellers);
+        if(buyerStratAnalysis)
+            this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
     }
 
     /**
@@ -165,6 +168,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
+        parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");
         parser.addArgument("--logger", "-l").action(Arguments.storeTrue()).help("activate logging per agent (files are always created)");
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
@@ -182,8 +186,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         boolean mainMode = parsedArgs.get("main");
         boolean kill = parsedArgs.get("kill");
-        boolean scamAnalysis = parsedArgs.get("scam");
-        boolean elasticityAnalysis = parsedArgs.get("elasticity");
+        scamAnalysis = parsedArgs.get("scam");
+        elasticityAnalysis = parsedArgs.get("elasticity");
+        buyerStratAnalysis = parsedArgs.get("bstrat");
         logging = parsedArgs.get("logger");
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
@@ -239,7 +244,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         // SAJAS + REPAST
         SimInit init = new SimInit();
         init.setNumRuns(1); // works only in batch mode
-        init.loadModel(new Olx(mainMode, config, kill, scamAnalysis, elasticityAnalysis), null, true);
+        init.loadModel(new Olx(mainMode, config, kill), null, true);
     }
 
     @Override

@@ -201,9 +201,8 @@ public class Buyer extends Agent {
         for (Handler h: this.logger.getHandlers())
             h.close();
 
-        if (this.terminationListener != null) {
+        if (this.terminationListener != null)
             terminationListener.terminated(this);
-        }
     }
 
     public boolean isBuying(Product product, int index) {
