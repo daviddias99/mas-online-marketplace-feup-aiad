@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import olx.Olx;
 import olx.agents.Buyer;
 import olx.draw.Edge;
+import olx.draw.OlxNetwork;
 import olx.models.OfferInfo;
 import olx.models.Product;
 import olx.models.Scam;
@@ -318,7 +319,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private void handleScam(Scam scam, ACLMessage inform){
         DefaultDrawableNode myNode = this.getAgent().getNode();
         if (myNode != null) {
-            DefaultDrawableNode to = Olx.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
+            DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
             Edge edge = new Edge(myNode, to);
             edge.setColor(Color.ORANGE);
             myNode.addOutEdge(edge);
@@ -334,7 +335,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
     private void handleSuccessfulAcquisition(OfferInfo offerInfo, ACLMessage inform){
         DefaultDrawableNode myNode = this.getAgent().getNode();
         if (myNode != null) {
-            DefaultDrawableNode to = Olx.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
+            DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
             Edge edge = new Edge(myNode, to);
             edge.setColor(Color.GREEN);
             
