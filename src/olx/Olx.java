@@ -19,6 +19,9 @@ import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
 import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
+import olx.draw.ElasticityPlot;
+import olx.draw.OlxNetwork;
+import olx.draw.ScamPlot;
 import olx.models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -26,8 +29,6 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import uchicago.src.sim.gui.DisplaySurface;
-import uchicago.src.sim.gui.Network2DDisplay;
 import uchicago.src.sim.gui.OvalNetworkItem;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.Config;
@@ -68,8 +69,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     public void start() {
-        nodes = new ArrayList<DefaultDrawableNode>();
-
         createSellers();
         try {
             this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 10000)).start();
@@ -118,13 +117,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 elast_u30.add(this.sellers.get(j));
 
             try {
-                Seller seller = this.sellers.get(j);
-                this.container.acceptNewAgent("seller_" + j, seller).start();
-                DefaultDrawableNode node = generateNode(Util.localNameToLabel("seller_" + j),
-                        Util.getSellerColor(seller.getCredibility()), Util.randomBetween(2 * WIDTH / 3, WIDTH - WIDTH / 115),
-                        Util.randomBetween(0, HEIGHT - WIDTH / 115));
-                nodes.add(node);
-                this.sellers.get(j).setNode(node);
+                this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
             }
@@ -156,15 +149,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             try {
                 this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
-                DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + j), this.buyers.get(j).getCounterOfferStrategy().getColor(),
-                        Util.randomBetween(0, WIDTH / 3), Util.randomBetween(0, HEIGHT - WIDTH / 115));
-                nodes.add(node);
-                this.buyers.get(j).setNode(node);
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
-        this.updateNetwork();
     }
 
     @Override
@@ -199,98 +187,23 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.start();
     }
 
-    private static List<DefaultDrawableNode> nodes;
-
-    public static DefaultDrawableNode getNode(String label) {
-        for (DefaultDrawableNode node : nodes) {
-            if (node.getNodeLabel().equals(label)) {
-                return node;
-            }
-        }
-        return null;
-    }
-
-    private DefaultDrawableNode generateNode(String label, Color color, int x, int y) {
-        OvalNetworkItem oval = new OvalNetworkItem(x, y);
-        oval.allowResizing(false);
-        oval.setHeight(WIDTH / 115);
-        oval.setWidth(WIDTH / 115);
-
-        DefaultDrawableNode node = new DefaultDrawableNode(label, oval);
-        node.setColor(color);
-        node.setBorderColor(color);
-        node.setBorderWidth(1);
-
-        return node;
-    }
-
     @Override
     public void begin() {
         super.begin();
         buildAndScheduleDisplay();
     }
 
-    private DisplaySurface dsurf;
-    private int WIDTH = 1920, HEIGHT = 1080;
-    private OpenSequenceGraph plotScam;
-    private OpenSequenceGraph plotElasticy;
-    private Network2DDisplay network;
-
-    public void updateNetwork() {
-
-        if (this.network != null){
-            this.dsurf.removeProbeableDisplayable(this.network);
-        }
-
-        this.network = new Network2DDisplay(nodes, WIDTH, HEIGHT);
-        this.dsurf.addDisplayableProbeable(this.network, "Network Display" + this.network.hashCode());
-        this.dsurf.addZoomable(this.network);
-        addSimEventListener(this.dsurf);
-    }
+    private ElasticityPlot plotElasticy;
+    private OlxNetwork olxNetwork;
+    private ScamPlot scamPlot;
 
     private void buildAndScheduleDisplay() {
-
-        // display surface
-        if (this.dsurf != null)
-            this.dsurf.dispose();
-        this.dsurf = new DisplaySurface(this, "MAS 2nd Hand Marketplace Display");
-        registerDisplaySurface("MAS 2nd Hand Marketplace Display", this.dsurf);
-        this.updateNetwork();
-        this.dsurf.display();
-
-        getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
-
+        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
         // graph scam
-        if(this.scamAnalysis){
-            if (this.plotScam != null) 
-                this.plotScam.dispose();
-            this.plotScam = new OpenSequenceGraph("Scam Analysis", this); 
-            this.plotScam.setAxisTitles("time","money earned");
-            this.plotScam.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scamMap.get(25), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scamMap.get(50), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scamMap.get(75), "getWealth")); 
-            this.plotScam.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scamMap.get(100), "getWealth")); 
-            
-            this.plotScam.display();
-
-            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
-            getSchedule().scheduleActionAtInterval(100, this.plotScam, "step", ScheduleBase.LAST);
-        }
-        if(this.elasticityAnalysis){
-            if (this.plotElasticy != null) 
-                this.plotElasticy.dispose();
-            this.plotElasticy = new OpenSequenceGraph("Elasticity Analysis", this); 
-            this.plotElasticy.setAxisTitles("time","money earned");
-            this.plotElasticy.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elasticityMap.get(10), "getWealth")); 
-            this.plotElasticy.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elasticityMap.get(20), "getWealth")); 
-            this.plotElasticy.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elasticityMap.get(30), "getWealth")); 
-            
-            this.plotElasticy.display();
-
-            // TODO: estava só Schedule. ver qual a != vs ScheduleBase
-            getSchedule().scheduleActionAtInterval(100, this.plotElasticy, "step", ScheduleBase.LAST);
-        }
-        
+        if(this.scamAnalysis)
+            this.scamPlot = new ScamPlot(this, this.scamMap);
+        if(this.elasticityAnalysis)
+            this.plotElasticy = new ElasticityPlot(this, this.elasticityMap);
     }
 
     /**
@@ -390,15 +303,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             Stats.printStats();
             System.out.println();
 
-            this.shutdown();
-        }
-    }
-
-    public void shutdown() {
-        try {
-            this.container.getPlatformController().kill();
-        } catch (ControllerException e) {
-            e.printStackTrace();
+            try {
+                this.container.getPlatformController().kill();
+            } catch (ControllerException e) {
+                e.printStackTrace();
+            }
         }
     }
 
