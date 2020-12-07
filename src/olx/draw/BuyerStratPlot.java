@@ -9,8 +9,8 @@ import olx.agents.strategies.counter_offer.RelativeTFTCounterOfferStrategy;
 import olx.agents.strategies.counter_offer.SmartCounterOfferStrategy;
 import olx.utils.MyAverageSequence;
 import sajas.sim.repast3.Repast3Launcher;
-import uchicago.src.sim.analysis.OpenSeqStatistic;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.PlotModel;
 import uchicago.src.sim.analysis.plot.OpenGraph;
 import uchicago.src.sim.engine.ScheduleBase;
 
@@ -19,6 +19,7 @@ public class BuyerStratPlot {
     private ArrayList<Buyer> smart;
     private ArrayList<Buyer> absTFT;
     private ArrayList<Buyer> relTFT;
+    private static final String METHOD = "getMoneySpent";
 
     public BuyerStratPlot(Repast3Launcher launcher, List<Buyer> buyers){
         this.smart = new ArrayList<>();
@@ -35,7 +36,7 @@ public class BuyerStratPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Counter Offer Strategy Analysis", launcher, dir.getPath() + time + ".csv", OpenSeqStatistic.CSV);
+        this.plot = new OpenSequenceGraph("Counter Offer Strategy Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time","money spent");
 
         this.addBuyers(buyers);
@@ -48,7 +49,7 @@ public class BuyerStratPlot {
         if (!dir2.exists())
             dir2.mkdirs();
 
-        this.plot.setSnapshotFileName(dir2.getPath() + time + "_");
+        this.plot.setSnapshotFileName(dir2.getPath() + "/" + time + "_");
         launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "takeSnapshot", ScheduleBase.LAST);
         launcher.getSchedule().scheduleActionAtEnd(this.plot, "takeSnapshot");
 
@@ -70,10 +71,10 @@ public class BuyerStratPlot {
 
     public void updatePlot(){
         if(!this.smart.isEmpty())
-            this.plot.addSequence("Smart", new MyAverageSequence(this.smart, "getMoneySpent"), this.smart.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE);
+            this.plot.addSequence("Smart", new MyAverageSequence(this.smart, METHOD), this.smart.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE);
         if(!this.relTFT.isEmpty())
-            this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, "getMoneySpent"), this.relTFT.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE); 
+            this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), this.relTFT.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE); 
         if(!this.absTFT.isEmpty())
-            this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, "getMoneySpent"), this.absTFT.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE); 
+            this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), this.absTFT.get(0).getCounterOfferStrategy().getColor(), OpenGraph.FILLED_CIRCLE); 
     }
 }

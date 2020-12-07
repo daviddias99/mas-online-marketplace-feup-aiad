@@ -1,15 +1,14 @@
 package olx.draw;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import olx.agents.Seller;
 import olx.utils.MyAverageSequence;
 import sajas.sim.repast3.Repast3Launcher;
-import uchicago.src.sim.analysis.OpenSeqStatistic;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.PlotModel;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class ScamPlot {
@@ -18,6 +17,7 @@ public class ScamPlot {
     private ArrayList<Seller> scam_u50;
     private ArrayList<Seller> scam_u75;
     private ArrayList<Seller> scam_u100;
+    private static final String METHOD = "getWealth";
 
     public ScamPlot(Repast3Launcher launcher, List<Seller> sellers) {
         this.scam_u25 = new ArrayList<>();
@@ -35,8 +35,7 @@ public class ScamPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Scam Analysis", launcher, dir.getPath() + time + ".csv",
-                OpenSeqStatistic.CSV);
+        this.plot = new OpenSequenceGraph("Scam Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time", "money earned");
 
         this.addSellers(sellers);
@@ -49,7 +48,7 @@ public class ScamPlot {
         if (!dir2.exists())
             dir2.mkdirs();
 
-        this.plot.setSnapshotFileName(dir2.getPath() + time + "_");
+        this.plot.setSnapshotFileName(dir2.getPath() + "/" + time + "_");
         launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "takeSnapshot", ScheduleBase.LAST);
         launcher.getSchedule().scheduleActionAtEnd(this.plot, "takeSnapshot");
 
@@ -72,9 +71,9 @@ public class ScamPlot {
     }
 
     public void updatePlot(){
-        this.plot.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scam_u25, "getWealth")); 
-        this.plot.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scam_u50, "getWealth")); 
-        this.plot.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scam_u75, "getWealth")); 
-        this.plot.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scam_u100, "getWealth")); 
+        this.plot.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scam_u25, METHOD)); 
+        this.plot.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scam_u50, METHOD)); 
+        this.plot.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scam_u75, METHOD)); 
+        this.plot.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scam_u100, METHOD)); 
     }
 }

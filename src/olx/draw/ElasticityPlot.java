@@ -7,8 +7,8 @@ import java.util.List;
 import olx.agents.Seller;
 import olx.utils.MyAverageSequence;
 import sajas.sim.repast3.Repast3Launcher;
-import uchicago.src.sim.analysis.OpenSeqStatistic;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
+import uchicago.src.sim.analysis.PlotModel;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class ElasticityPlot {
@@ -17,6 +17,8 @@ public class ElasticityPlot {
     private ArrayList<Seller> elast_u10;
     private ArrayList<Seller> elast_u20;
     private ArrayList<Seller> elast_u30;
+    private static final String METHOD = "getWealth";
+
 
     public ElasticityPlot(Repast3Launcher launcher, List<Seller> sellers){
         this.elast_u10 = new ArrayList<>();
@@ -33,7 +35,7 @@ public class ElasticityPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Elasticity Analysis", launcher, dir.getPath() + time + ".csv", OpenSeqStatistic.CSV);
+        this.plot = new OpenSequenceGraph("Elasticity Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time","money earned");
 
         this.addSellers(sellers);        
@@ -46,7 +48,7 @@ public class ElasticityPlot {
         if (!dir2.exists())
             dir2.mkdirs();
 
-        this.plot.setSnapshotFileName(dir2.getPath() + time + "_");
+        this.plot.setSnapshotFileName(dir2.getPath() + "/" + time + "_");
         launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "takeSnapshot", ScheduleBase.LAST);
         launcher.getSchedule().scheduleActionAtEnd(this.plot, "takeSnapshot");
 
@@ -67,8 +69,8 @@ public class ElasticityPlot {
     }
 
     public void updatePlot() {
-        this.plot.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elast_u10, "getWealth")); 
-        this.plot.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elast_u20, "getWealth")); 
-        this.plot.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elast_u30, "getWealth")); 
+        this.plot.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elast_u10, METHOD)); 
+        this.plot.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elast_u20, METHOD)); 
+        this.plot.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elast_u30, METHOD)); 
     }
 }

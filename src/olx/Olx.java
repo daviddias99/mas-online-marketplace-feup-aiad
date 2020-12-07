@@ -3,7 +3,6 @@ package olx;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 import jade.wrapper.ControllerException;
 import sajas.core.Agent;
 import jade.core.Profile;
@@ -17,6 +16,7 @@ import olx.agents.Buyer;
 import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
 import olx.draw.BuyerStratPlot;
+import olx.draw.CredibilityHistogram;
 import olx.draw.ElasticityPlot;
 import olx.draw.OlxNetwork;
 import olx.draw.ScamPlot;
@@ -48,6 +48,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean scamAnalysis;
     private static boolean elasticityAnalysis;
     private static boolean buyerStratAnalysis;
+    private static boolean credibilityAnalysis;
     public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
@@ -144,6 +145,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private OlxNetwork olxNetwork;
     private ScamPlot scamPlot;
     private BuyerStratPlot buyerStratPlot;
+    private CredibilityHistogram credibilityHistogram;
 
     private void buildAndScheduleDisplay() {
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
@@ -154,6 +156,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             this.plotElasticy = new ElasticityPlot(this, this.sellers);
         if(buyerStratAnalysis)
             this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
+        if(credibilityAnalysis)
+            this.credibilityHistogram = new CredibilityHistogram(this, this.sellers);
     }
 
     /**
@@ -169,6 +173,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");
+        parser.addArgument("--credibility", "-cr").action(Arguments.storeTrue()).help("make a sellers' credibility distribution analysis");
         parser.addArgument("--logger", "-l").action(Arguments.storeTrue()).help("activate logging per agent (files are always created)");
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
@@ -189,6 +194,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         scamAnalysis = parsedArgs.get("scam");
         elasticityAnalysis = parsedArgs.get("elasticity");
         buyerStratAnalysis = parsedArgs.get("bstrat");
+        credibilityAnalysis = parsedArgs.get("credibility");
         logging = parsedArgs.get("logger");
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
