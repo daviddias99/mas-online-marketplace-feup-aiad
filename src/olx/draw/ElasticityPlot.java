@@ -1,11 +1,13 @@
 package olx.draw;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import olx.agents.Seller;
 import olx.utils.MyAverageSequence;
 import sajas.sim.repast3.Repast3Launcher;
+import uchicago.src.sim.analysis.OpenSeqStatistic;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.engine.ScheduleBase;
 
@@ -21,16 +23,35 @@ public class ElasticityPlot {
         this.elast_u20 = new ArrayList<>();
         this.elast_u30 = new ArrayList<>();
 
+        long time = System.currentTimeMillis();
+
         if (this.plot != null) 
             this.plot.dispose();
 
-        this.plot = new OpenSequenceGraph("Elasticity Analysis", launcher); 
+        // TODO: maybe put the variables in the name?
+        File dir = new File("analysis/csv/elasticity/");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        this.plot = new OpenSequenceGraph("Elasticity Analysis", launcher, dir.getPath() + time + ".csv", OpenSeqStatistic.CSV);
         this.plot.setAxisTitles("time","money earned");
 
         this.addSellers(sellers);        
         this.plot.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.plot, "step", ScheduleBase.LAST);
+
+        // TODO: maybe put the variables in the name?
+        File dir2 = new File("analysis/snapshots/elasticity/");
+        if (!dir2.exists())
+            dir2.mkdirs();
+
+        this.plot.setSnapshotFileName(dir2.getPath() + time + "_");
+        launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "takeSnapshot", ScheduleBase.LAST);
+        launcher.getSchedule().scheduleActionAtEnd(this.plot, "takeSnapshot");
+
+        launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "writeToFile", ScheduleBase.LAST);
+        launcher.getSchedule().scheduleActionAtEnd(this.plot, "writeToFile");
     }
 
     public void addSellers(List<Seller> sellers) {

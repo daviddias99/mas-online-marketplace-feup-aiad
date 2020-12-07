@@ -1,11 +1,14 @@
 package olx.draw;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import olx.agents.Seller;
 import olx.utils.MyAverageSequence;
 import sajas.sim.repast3.Repast3Launcher;
+import uchicago.src.sim.analysis.OpenSeqStatistic;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.engine.ScheduleBase;
 
@@ -16,23 +19,42 @@ public class ScamPlot {
     private ArrayList<Seller> scam_u75;
     private ArrayList<Seller> scam_u100;
 
-
-    public ScamPlot(Repast3Launcher launcher, List<Seller> sellers){
+    public ScamPlot(Repast3Launcher launcher, List<Seller> sellers) {
         this.scam_u25 = new ArrayList<>();
         this.scam_u50 = new ArrayList<>();
         this.scam_u75 = new ArrayList<>();
         this.scam_u100 = new ArrayList<>();
 
-        if (this.plot != null) 
+        long time = System.currentTimeMillis();
+
+        if (this.plot != null)
             this.plot.dispose();
 
-        this.plot = new OpenSequenceGraph("Scam Analysis", launcher); 
-        this.plot.setAxisTitles("time","money earned");
+        // TODO: maybe put the variables in the name?
+        File dir = new File("analysis/csv/scam/");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        this.plot = new OpenSequenceGraph("Scam Analysis", launcher, dir.getPath() + time + ".csv",
+                OpenSeqStatistic.CSV);
+        this.plot.setAxisTitles("time", "money earned");
 
         this.addSellers(sellers);
         this.plot.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.plot, "step", ScheduleBase.LAST);
+
+        // TODO: maybe put the variables in the name?
+        File dir2 = new File("analysis/snapshots/scam/");
+        if (!dir2.exists())
+            dir2.mkdirs();
+
+        this.plot.setSnapshotFileName(dir2.getPath() + time + "_");
+        launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "takeSnapshot", ScheduleBase.LAST);
+        launcher.getSchedule().scheduleActionAtEnd(this.plot, "takeSnapshot");
+
+        launcher.getSchedule().scheduleActionAtInterval(Math.pow(10, 5), this.plot, "writeToFile", ScheduleBase.LAST);
+        launcher.getSchedule().scheduleActionAtEnd(this.plot, "writeToFile");
     }
 
     public void addSellers(List<Seller> sellers){
