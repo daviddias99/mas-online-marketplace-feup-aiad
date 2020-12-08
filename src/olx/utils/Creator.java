@@ -1,22 +1,26 @@
 package olx.utils;
 
 import olx.agents.*;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.models.Product;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-public class Creator implements Config{
+public class Creator implements Config {
 
   private List<Seller> sellers;
   private List<Buyer> buyers;
   private List<Product> products;
+  private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
   public Creator(
     @JsonProperty("product") Product product, 
@@ -35,6 +39,7 @@ public class Creator implements Config{
     this.buyers = new ArrayList<>();
     this.products = new ArrayList<>();
     this.generate(product, numSellers, numBuyers, productStockSeller, productStockBuyer, scamFactors, elasticities, pickingStrategies, offerStrategies, counterOfferStrategies, patiences);
+    this.fillBuyerStrategies(counterOfferStrategies);
   }
 
   public static Creator read(String path) throws IOException {
@@ -100,4 +105,15 @@ public class Creator implements Config{
     }
   }
 
+  @Override
+  public Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies() {
+    return this.buyerStrategies;
+  }
+
+  private void fillBuyerStrategies(String[] counterOfferStrategies) {
+    this.buyerStrategies = new HashMap<>();
+    for (int i = 0; i < counterOfferStrategies.length; i++) {
+      this.buyerStrategies.put(CounterOfferStrategy.Type.valueOf(counterOfferStrategies[i]), i);
+    }
+  }
 }

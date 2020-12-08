@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jade.wrapper.ControllerException;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -140,6 +141,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if (config.getBuyers() != null)
             this.buyers = new ArrayList<>(config.getBuyers());
 
+
         this.start();
     }
 
@@ -190,7 +192,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private CredibilityHistogram credibilityHistogram;
 
     private void buildAndScheduleDisplay() {
-        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
+        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         // graph scam
         if (scamAnalysis)
             this.scamPlot = new ScamPlot(this, this.sellers);
@@ -253,11 +255,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
      * @throws IOException
      */
     public static void main(String[] args) {
-        ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
-                .description("Modeling a second hand market place using olx.agents.");
-        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
-        parser.addArgument("--kill", "-k").action(Arguments.storeTrue())
-                .help("platform is shutdown after last buyer exits");
+        ArgumentParser parser = ArgumentParsers.newFor("Olx").build().description("Modeling a second hand market place using agents.");
+        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start agents in new main container");
+        parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--batch", "-b").action(Arguments.storeTrue()).help("Exec in batch mode");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");

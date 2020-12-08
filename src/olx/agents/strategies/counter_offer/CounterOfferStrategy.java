@@ -3,7 +3,6 @@ package olx.agents.strategies.counter_offer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -21,6 +20,12 @@ import olx.utils.Util;
  * the counter offer is of a larger value than the preivous counter offer.
  */
 public abstract class CounterOfferStrategy implements Serializable {
+    public enum Type {
+        SMART,
+        RELTFT,
+        ABSTFT,
+    }
+
     private static final long serialVersionUID = 1L;
 
     public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers,
@@ -60,6 +65,5 @@ public abstract class CounterOfferStrategy implements Serializable {
 
     public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb);
 
-    // TODO: n devia ser aqui mas não estamos em LPOO
-    public abstract Color getColor();
+    public abstract CounterOfferStrategy.Type getType();
 }

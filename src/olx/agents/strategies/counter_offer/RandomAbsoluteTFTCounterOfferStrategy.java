@@ -1,6 +1,5 @@
 package olx.agents.strategies.counter_offer;
 
-import java.awt.Color;
 import java.util.Map;
 
 import olx.agents.Buyer;
@@ -49,7 +48,7 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
     }
 
     @Override
-    public Color getColor() {
-        return new Color(191,215,234);
+    public Type getType() {
+        return Type.ABSTFT;
     }
 }

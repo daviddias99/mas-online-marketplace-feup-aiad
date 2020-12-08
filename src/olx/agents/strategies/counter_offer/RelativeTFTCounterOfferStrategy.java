@@ -1,7 +1,6 @@
 package olx.agents.strategies.counter_offer;
 
 import java.util.Map;
-import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -48,7 +47,7 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    public Color getColor() {
-        return new Color(80,140,164);
+    public Type getType() {
+        return Type.RELTFT;
     }
 }

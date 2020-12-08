@@ -1,7 +1,6 @@
 package olx.agents.strategies.counter_offer;
 
 import java.util.Map;
-import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -39,6 +38,11 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
+    public Type getType() {
+        return Type.SMART;
+    }
+
+    @Override
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
         
         if(ownPreviousOffer == null){
@@ -48,10 +52,5 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
             float variance =  this.getVariance(offer.getProduct(),  (offer.getOfferedPrice() - ownPreviousOffer.getOfferedPrice())/4);
             return Math.min(ownPreviousOffer.getOfferedPrice() + variance, offer.getOfferedPrice());
         }
-    }
-
-    @Override
-    public Color getColor() {
-        return new Color(10,135,84);
     }
 }

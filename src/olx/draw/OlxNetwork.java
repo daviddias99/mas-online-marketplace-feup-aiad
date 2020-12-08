@@ -3,9 +3,11 @@ package olx.draw;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import olx.agents.Buyer;
 import olx.agents.Seller;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.utils.Util;
 import sajas.sim.repast3.Repast3Launcher;
 import uchicago.src.sim.engine.ScheduleBase;
@@ -22,11 +24,14 @@ public class OlxNetwork {
     private int nBuyers;
     private int nSellers;
     private int WIDTH = 1920, HEIGHT = 1080;
+    private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
-    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers) {
+    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers, Map<CounterOfferStrategy.Type, Integer> buyerStrategies) {
         this.launcher = launcher;
         this.nBuyers = 0;
         this.nSellers = 0;
+
+        this.buyerStrategies = buyerStrategies;
 
         // display surface
         if (this.dsurf != null)
@@ -42,11 +47,19 @@ public class OlxNetwork {
         this.launcher.getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
     }
 
-    public void addBuyers(List<Buyer> buyers){
+    public void addBuyers(List<Buyer> buyers) {
         for(int i = 0; i < buyers.size(); i++, this.nBuyers++){
-            DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + this.nBuyers), buyers.get(i).getCounterOfferStrategy().getColor(),
-                Util.randomBetween(0, WIDTH / 3), Util.randomBetween(0, HEIGHT - WIDTH / 115));
-            buyers.get(i).setNode(node);
+            Buyer buyer = buyers.get(i);
+
+            int index = this.buyerStrategies.get(buyer.getCounterOfferStrategy().getType());
+            int delta = (HEIGHT - WIDTH / 115) / this.buyerStrategies.size();
+            int yMin = index * delta;
+            int yMax = yMin + delta;
+            Color buyerColor = Util.getBuyerColor(buyer.getCounterOfferStrategy().getType());
+
+            DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + this.nBuyers), buyerColor,
+                Util.randomBetween(0, WIDTH / 3), Util.randomBetween(yMin, yMax));
+            buyer.setNode(node);
         }
         this.updateNetwork();
     }
