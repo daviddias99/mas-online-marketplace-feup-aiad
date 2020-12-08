@@ -61,7 +61,4 @@ public abstract class CounterOfferStrategy implements Serializable {
     public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb);
 
     public abstract String getName();
-
-    // TODO: n devia ser aqui mas não estamos em LPOO
-    public abstract Color getColor();
 }

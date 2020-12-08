@@ -113,7 +113,7 @@ public class Creator implements Config {
   private void fillBuyerStrategies(String[] counterOfferStrategies) {
     this.buyerStrategies = new HashMap<>();
     for (int i = 0; i < counterOfferStrategies.length; i++) {
-      this.buyerStrategies.put(counterOfferStrategies[i], i);
+      this.buyerStrategies.put(counterOfferStrategies[i].toLowerCase(), i);
     }
   }
 }

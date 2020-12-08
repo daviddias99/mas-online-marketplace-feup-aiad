@@ -112,4 +112,17 @@ public abstract class Util {
 
         return type + "_" + id;
     }
+
+    public static Color getBuyerColor(String name) {
+        switch (name) {
+            case "smart":
+                return new Color(10,135,84);
+            case "reltft":
+                return new Color(80,140,164);
+            case "abstft":
+                return new Color(191,215,234);
+            default:
+                return new Color(0, 0, 0);
+        }
+    }
 }

@@ -152,9 +152,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private CredibilityHistogram credibilityHistogram;
 
     private void buildAndScheduleDisplay() {
-        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
-        if (this.config.getBuyerStrategies() != null)
-            this.olxNetwork.setBuyerStrategies(this.config.getBuyerStrategies());
+        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         // graph scam
         if(scamAnalysis)
             this.scamPlot = new ScamPlot(this, this.sellers);

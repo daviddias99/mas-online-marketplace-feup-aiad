@@ -26,12 +26,12 @@ public class OlxNetwork {
     private int WIDTH = 1920, HEIGHT = 1080;
     private Map<String, Integer> buyerStrategies;
 
-    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers) {
+    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers, Map<String, Integer> buyerStrategies) {
         this.launcher = launcher;
         this.nBuyers = 0;
         this.nSellers = 0;
 
-        this.buyerStrategies = new HashMap<>();
+        this.buyerStrategies = buyerStrategies;
 
         // display surface
         if (this.dsurf != null)
@@ -47,11 +47,19 @@ public class OlxNetwork {
         this.launcher.getSchedule().scheduleActionAtInterval(1, this.dsurf, "updateDisplay", ScheduleBase.LAST);
     }
 
-    public void addBuyers(List<Buyer> buyers){
+    public void addBuyers(List<Buyer> buyers) {
         for(int i = 0; i < buyers.size(); i++, this.nBuyers++){
-            DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + this.nBuyers), buyers.get(i).getCounterOfferStrategy().getColor(),
-                Util.randomBetween(0, WIDTH / 3), Util.randomBetween(0, HEIGHT - WIDTH / 115));
-            buyers.get(i).setNode(node);
+            Buyer buyer = buyers.get(i);
+
+            int index = this.buyerStrategies.get(buyer.getCounterOfferStrategy().getName());
+            int delta = (HEIGHT - WIDTH / 115) / this.buyerStrategies.size();
+            int yMin = index * delta;
+            int yMax = yMin + delta;
+            Color buyerColor = Util.getBuyerColor(buyer.getCounterOfferStrategy().getName());
+
+            DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + this.nBuyers), buyerColor,
+                Util.randomBetween(0, WIDTH / 3), Util.randomBetween(yMin, yMax));
+            buyer.setNode(node);
         }
         this.updateNetwork();
     }
@@ -98,11 +106,5 @@ public class OlxNetwork {
             }
         }
         return null;
-    }
-
-    public void setBuyerStrategies(Map<String, Integer> buyerStrategies) {
-        if (buyerStrategies != null) {
-            this.buyerStrategies = buyerStrategies;
-        }
     }
 }
