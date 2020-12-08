@@ -2,10 +2,10 @@
 product: 
   name: vinil
   price: 100
-numSellers: 80 
-numBuyers: 80
-sellerStock: 15
-buyerStock: 15
+numSellers: 5 
+numBuyers: 5
+sellerStock: 10
+buyerStock: 10
 scamFactors:
   - 100
   - 75

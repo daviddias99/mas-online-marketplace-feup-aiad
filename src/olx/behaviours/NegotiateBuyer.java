@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import olx.Olx;
 import olx.agents.Buyer;
 import olx.draw.Edge;
 import olx.draw.OlxNetwork;

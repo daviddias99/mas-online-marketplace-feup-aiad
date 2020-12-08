@@ -3,7 +3,6 @@ package olx.agents.strategies.counter_offer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
