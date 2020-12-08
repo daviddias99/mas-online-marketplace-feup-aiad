@@ -91,9 +91,8 @@ public class Creator implements Config{
     }
 
     for (int i = 0; i < numBuyers; i++) {
-
-      int currentPatience = patiences[i/(numSellers/ patiences.length)];
-      String currentCounterOfferStrategy = counterOfferStrategies[i/(numSellers/ counterOfferStrategies.length)];
+      int currentPatience = patiences[i/(int)(Math.ceil((float) numBuyers/ patiences.length))];
+      String currentCounterOfferStrategy = counterOfferStrategies[i/(int)(Math.ceil((float)numBuyers/ counterOfferStrategies.length))];
       
       ProductQuantity productQuantity = new ProductQuantity(product, productStockBuyer);
       ProductQuantity[] pQuantities = { productQuantity };
