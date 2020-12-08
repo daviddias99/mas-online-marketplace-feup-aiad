@@ -48,7 +48,7 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    public String getName() {
-        return "reltft";
+    public Type getType() {
+        return Type.RELTFT;
     }
 }

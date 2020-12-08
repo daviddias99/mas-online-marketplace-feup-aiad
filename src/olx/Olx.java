@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import jade.wrapper.ControllerException;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -50,7 +51,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean buyerStratAnalysis;
     private static boolean credibilityAnalysis;
     public static boolean logging;
-    private Map<String, Integer> buyerStrategies;
+    private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config, boolean kill) {

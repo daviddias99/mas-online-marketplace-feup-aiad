@@ -5,6 +5,7 @@ import olx.agents.Seller;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.models.Product;
 
 import java.io.File;
@@ -18,7 +19,7 @@ public class JsonConfig implements Config{
     private final Buyer[] buyers;
     private final Product[] products;
     private final Seller[] sellers;
-    private Map<String, Integer> buyerStrategies;
+    private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
     JsonConfig(@JsonProperty("products") Product[] products,
            @JsonProperty("buyers") Buyer[] buyers,
@@ -59,7 +60,7 @@ public class JsonConfig implements Config{
         int nextStrategyID = 0;
 
         for (Buyer buyer : this.buyers) {
-            String buyerStrategy = buyer.getCounterOfferStrategy().getName();
+            CounterOfferStrategy.Type buyerStrategy = buyer.getCounterOfferStrategy().getType();
 
             if (! this.buyerStrategies.containsKey(buyerStrategy)) {
                 this.buyerStrategies.put(buyerStrategy, nextStrategyID);
@@ -69,7 +70,7 @@ public class JsonConfig implements Config{
     }
 
     @Override
-    public Map<String, Integer> getBuyerStrategies() {
+    public Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies() {
         return this.buyerStrategies;
     }
 

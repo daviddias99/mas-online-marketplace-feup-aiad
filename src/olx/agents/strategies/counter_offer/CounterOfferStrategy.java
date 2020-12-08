@@ -21,6 +21,12 @@ import olx.utils.Util;
  * the counter offer is of a larger value than the preivous counter offer.
  */
 public abstract class CounterOfferStrategy implements Serializable {
+    public enum Type {
+        SMART,
+        RELTFT,
+        ABSTFT,
+    }
+
     private static final long serialVersionUID = 1L;
 
     public final Map<AID, OfferInfo> pickOffers(Map<AID, SellerOfferInfo> offers,
@@ -60,5 +66,5 @@ public abstract class CounterOfferStrategy implements Serializable {
 
     public abstract AID makeDecision(Map<AID, SellerOfferInfo> offers, Buyer buyer, StringBuilder sb);
 
-    public abstract String getName();
+    public abstract CounterOfferStrategy.Type getType();
 }

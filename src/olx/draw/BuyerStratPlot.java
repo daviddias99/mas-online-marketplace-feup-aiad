@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import olx.agents.Buyer;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.agents.strategies.counter_offer.RelativeTFTCounterOfferStrategy;
 import olx.agents.strategies.counter_offer.SmartCounterOfferStrategy;
 import olx.utils.MyAverageSequence;
@@ -72,10 +73,10 @@ public class BuyerStratPlot {
 
     public void updatePlot(){
         if(!this.smart.isEmpty())
-            this.plot.addSequence("Smart", new MyAverageSequence(this.smart, METHOD), Util.getBuyerColor("smart"), OpenGraph.FILLED_CIRCLE);
+            this.plot.addSequence("Smart", new MyAverageSequence(this.smart, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.SMART), OpenGraph.FILLED_CIRCLE);
         if(!this.relTFT.isEmpty())
-            this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), Util.getBuyerColor("reltft"), OpenGraph.FILLED_CIRCLE);
+            this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.RELTFT), OpenGraph.FILLED_CIRCLE);
         if(!this.absTFT.isEmpty())
-            this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), Util.getBuyerColor("abstft"), OpenGraph.FILLED_CIRCLE);
+            this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.ABSTFT), OpenGraph.FILLED_CIRCLE);
     }
 }

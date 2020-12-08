@@ -1,7 +1,6 @@
 package olx.agents.strategies.counter_offer;
 
 import java.util.Map;
-import java.awt.Color;
 
 import olx.agents.Buyer;
 import jade.core.AID;
@@ -39,8 +38,8 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
-    public String getName() {
-        return "smart";
+    public Type getType() {
+        return Type.SMART;
     }
 
     @Override

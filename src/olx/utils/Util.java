@@ -1,8 +1,13 @@
 package olx.utils;
 
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
+
 import java.awt.Color;
 import java.util.List;
 import java.util.Random;
+
+import static olx.agents.strategies.counter_offer.CounterOfferStrategy.*;
+import static olx.agents.strategies.counter_offer.CounterOfferStrategy.Type.SMART;
 
 public abstract class Util {
 
@@ -113,13 +118,13 @@ public abstract class Util {
         return type + "_" + id;
     }
 
-    public static Color getBuyerColor(String name) {
-        switch (name) {
-            case "smart":
+    public static Color getBuyerColor(Type type) {
+        switch (type) {
+            case SMART:
                 return new Color(10,135,84);
-            case "reltft":
+            case RELTFT:
                 return new Color(80,140,164);
-            case "abstft":
+            case ABSTFT:
                 return new Color(191,215,234);
             default:
                 return new Color(0, 0, 0);

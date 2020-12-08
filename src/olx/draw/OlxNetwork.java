@@ -8,6 +8,7 @@ import java.util.Map;
 
 import olx.agents.Buyer;
 import olx.agents.Seller;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.utils.Util;
 import sajas.sim.repast3.Repast3Launcher;
 import uchicago.src.sim.engine.ScheduleBase;
@@ -24,9 +25,9 @@ public class OlxNetwork {
     private int nBuyers;
     private int nSellers;
     private int WIDTH = 1920, HEIGHT = 1080;
-    private Map<String, Integer> buyerStrategies;
+    private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
-    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers, Map<String, Integer> buyerStrategies) {
+    public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers, Map<CounterOfferStrategy.Type, Integer> buyerStrategies) {
         this.launcher = launcher;
         this.nBuyers = 0;
         this.nSellers = 0;
@@ -51,11 +52,11 @@ public class OlxNetwork {
         for(int i = 0; i < buyers.size(); i++, this.nBuyers++){
             Buyer buyer = buyers.get(i);
 
-            int index = this.buyerStrategies.get(buyer.getCounterOfferStrategy().getName());
+            int index = this.buyerStrategies.get(buyer.getCounterOfferStrategy().getType());
             int delta = (HEIGHT - WIDTH / 115) / this.buyerStrategies.size();
             int yMin = index * delta;
             int yMax = yMin + delta;
-            Color buyerColor = Util.getBuyerColor(buyer.getCounterOfferStrategy().getName());
+            Color buyerColor = Util.getBuyerColor(buyer.getCounterOfferStrategy().getType());
 
             DefaultDrawableNode node = generateNode(Util.localNameToLabel("buyer_" + this.nBuyers), buyerColor,
                 Util.randomBetween(0, WIDTH / 3), Util.randomBetween(yMin, yMax));

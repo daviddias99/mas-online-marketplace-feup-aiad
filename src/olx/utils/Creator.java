@@ -1,6 +1,7 @@
 package olx.utils;
 
 import olx.agents.*;
+import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.models.Product;
 
 import java.io.File;
@@ -19,7 +20,7 @@ public class Creator implements Config {
   private List<Seller> sellers;
   private List<Buyer> buyers;
   private List<Product> products;
-  private Map<String, Integer> buyerStrategies;
+  private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
   public Creator(
     @JsonProperty("product") Product product, 
@@ -106,14 +107,14 @@ public class Creator implements Config {
   }
 
   @Override
-  public Map<String, Integer> getBuyerStrategies() {
+  public Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies() {
     return this.buyerStrategies;
   }
 
   private void fillBuyerStrategies(String[] counterOfferStrategies) {
     this.buyerStrategies = new HashMap<>();
     for (int i = 0; i < counterOfferStrategies.length; i++) {
-      this.buyerStrategies.put(counterOfferStrategies[i].toLowerCase(), i);
+      this.buyerStrategies.put(CounterOfferStrategy.Type.valueOf(counterOfferStrategies[i]), i);
     }
   }
 }
