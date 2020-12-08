@@ -10,12 +10,15 @@ import olx.models.Product;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JsonConfig implements Config{
     private final Buyer[] buyers;
     private final Product[] products;
     private final Seller[] sellers;
+    private Map<String, Integer> buyerStrategies;
 
     JsonConfig(@JsonProperty("products") Product[] products,
            @JsonProperty("buyers") Buyer[] buyers,
@@ -23,6 +26,7 @@ public class JsonConfig implements Config{
         this.products = products;
         this.buyers = buyers;
         this.sellers = sellers;
+        this.fillBuyerStrategies();
     }
 
     public static JsonConfig read(String path) throws IOException {
@@ -48,6 +52,25 @@ public class JsonConfig implements Config{
 
     public List<Seller>  getSellers() {
         return Arrays.asList(sellers);
+    }
+
+    private void fillBuyerStrategies() {
+        this.buyerStrategies = new HashMap<>();
+        int nextStrategyID = 0;
+
+        for (Buyer buyer : this.buyers) {
+            String buyerStrategy = buyer.getCounterOfferStrategy().getName();
+
+            if (! this.buyerStrategies.containsKey(buyerStrategy)) {
+                this.buyerStrategies.put(buyerStrategy, nextStrategyID);
+                nextStrategyID++;
+            }
+        }
+    }
+
+    @Override
+    public Map<String, Integer> getBuyerStrategies() {
+        return this.buyerStrategies;
     }
 
     @Override

@@ -49,6 +49,11 @@ public class RandomAbsoluteTFTCounterOfferStrategy extends CounterOfferStrategy 
     }
 
     @Override
+    public String getName() {
+        return "abstft";
+    }
+
+    @Override
     public Color getColor() {
         return new Color(191,215,234);
     }

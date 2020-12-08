@@ -39,6 +39,11 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
+    public String getName() {
+        return "smart";
+    }
+
+    @Override
     protected float counterPrice(SellerOfferInfo offer, OfferInfo ownPreviousOffer) {
         
         if(ownPreviousOffer == null){

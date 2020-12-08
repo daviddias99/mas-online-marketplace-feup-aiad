@@ -50,6 +50,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean buyerStratAnalysis;
     private static boolean credibilityAnalysis;
     public static boolean logging;
+    private Map<String, Integer> buyerStrategies;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(boolean mainMode, Config config, boolean kill) {
@@ -132,6 +133,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if (config.getBuyers() != null)
             this.buyers = new ArrayList<>(config.getBuyers());
 
+
+            this.buyerStrategies = config.getBuyerStrategies();
+
         this.start();
     }
 
@@ -149,6 +153,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private void buildAndScheduleDisplay() {
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers);
+        if (this.config.getBuyerStrategies() != null)
+            this.olxNetwork.setBuyerStrategies(this.config.getBuyerStrategies());
         // graph scam
         if(scamAnalysis)
             this.scamPlot = new ScamPlot(this, this.sellers);
@@ -168,8 +174,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
      */
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
-                .description("Modeling a second hand market place using olx.agents.");
-        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start olx.agents in new main container");
+                .description("Modeling a second hand market place using agents.");
+        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start agents in new main container");
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");

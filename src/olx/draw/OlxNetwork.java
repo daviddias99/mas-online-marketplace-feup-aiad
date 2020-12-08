@@ -2,7 +2,9 @@ package olx.draw;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import olx.agents.Buyer;
 import olx.agents.Seller;
@@ -22,11 +24,14 @@ public class OlxNetwork {
     private int nBuyers;
     private int nSellers;
     private int WIDTH = 1920, HEIGHT = 1080;
+    private Map<String, Integer> buyerStrategies;
 
     public OlxNetwork(Repast3Launcher launcher, List<Buyer> buyers, List<Seller> sellers) {
         this.launcher = launcher;
         this.nBuyers = 0;
         this.nSellers = 0;
+
+        this.buyerStrategies = new HashMap<>();
 
         // display surface
         if (this.dsurf != null)
@@ -93,5 +98,11 @@ public class OlxNetwork {
             }
         }
         return null;
+    }
+
+    public void setBuyerStrategies(Map<String, Integer> buyerStrategies) {
+        if (buyerStrategies != null) {
+            this.buyerStrategies = buyerStrategies;
+        }
     }
 }

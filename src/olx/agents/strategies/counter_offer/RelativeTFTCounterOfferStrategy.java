@@ -48,6 +48,11 @@ public class RelativeTFTCounterOfferStrategy extends CounterOfferStrategy {
     }
 
     @Override
+    public String getName() {
+        return "reltft";
+    }
+
+    @Override
     public Color getColor() {
         return new Color(80,140,164);
     }
