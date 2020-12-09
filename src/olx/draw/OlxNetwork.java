@@ -11,13 +11,12 @@ import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import olx.utils.Util;
 import sajas.sim.repast3.Repast3Launcher;
 import uchicago.src.sim.engine.ScheduleBase;
-import uchicago.src.sim.gui.DisplaySurface;
 import uchicago.src.sim.gui.Network2DDisplay;
 import uchicago.src.sim.gui.OvalNetworkItem;
 import uchicago.src.sim.network.DefaultDrawableNode;
 
 public class OlxNetwork {
-    private DisplaySurface dsurf;
+    private MyDisplaySurface dsurf;
     private Repast3Launcher launcher;
     private Network2DDisplay network;
     private static List<DefaultDrawableNode> nodes = new ArrayList<>();
@@ -36,7 +35,7 @@ public class OlxNetwork {
         // display surface
         if (this.dsurf != null)
             this.dsurf.dispose();
-        this.dsurf = new DisplaySurface(this.launcher, "MAS 2nd Hand Marketplace Display");
+        this.dsurf = new MyDisplaySurface(this.launcher, "MAS 2nd Hand Marketplace Display");
         this.launcher.registerDisplaySurface("MAS 2nd Hand Marketplace Display", this.dsurf);
 
         // Initate Sellers
@@ -110,6 +109,11 @@ public class OlxNetwork {
 
     public void close() {
         this.dsurf.dispose();
-        this.nodes = new ArrayList<>();
+        OlxNetwork.nodes = new ArrayList<>();
+    }
+
+    public void removeNode(DefaultDrawableNode node) {
+        nodes.remove(node);
+        this.updateNetwork();
     }
 }

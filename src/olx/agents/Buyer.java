@@ -19,13 +19,14 @@ import jade.lang.acl.ACLMessage;
 import olx.Olx;
 import olx.agents.strategies.counter_offer.*;
 import olx.behaviours.NegotiateBuyer;
+import olx.draw.NetworkAgent;
 import olx.models.Product;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.CoolFormatter;
 import olx.utils.ProductQuantity;
 import olx.utils.TerminationListener;
 
-public class Buyer extends Agent {
+public class Buyer extends Agent implements NetworkAgent {
 
     // The products map contains pairs where the values are true if the
     // buyer as acquired the key product.
@@ -154,9 +155,10 @@ public class Buyer extends Agent {
             return this.getLocalName() + "{" + "products=" + this.productsToString() + "}";
         return "Buyer{" + "products=" + this.productsToString() + "}";
     }
-
+    /**
+     * buyer_0{products={2-pc:650.00=[TRYING, TRYING], ...}}
+     */
     public String productsToString() {
-        // - START: buyer_0{products={2-pc:650.00=[TRYING, TRYING], ...}}
         StringBuilder res = new StringBuilder("{");
         this.products.entrySet().forEach(entry-> res.append(entry.getValue().size() + "-" + entry.getKey() + "=" + entry.getValue() + ", ") );
         String fres = res.toString();
@@ -198,11 +200,11 @@ public class Buyer extends Agent {
     
     @Override
     public void takeDown() {
+        this.node.clearOutEdges();
         for (Handler h: this.logger.getHandlers())
             h.close();
 
-        if (this.terminationListener != null)
-            terminationListener.terminated(this);
+        terminationListener.terminated(this);
     }
 
     public boolean isBuying(Product product, int index) {

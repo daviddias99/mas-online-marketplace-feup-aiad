@@ -3,6 +3,8 @@ package olx.agents;
 import olx.behaviours.AskPriceSeller;
 import olx.behaviours.NegotiationDispatcher;
 import olx.behaviours.ResponsePrice;
+import olx.draw.NetworkAgent;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,7 +40,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Seller extends Agent {
+public class Seller extends Agent implements NetworkAgent {
 
     // List of products which the seller is currently offering and the price
     // of said products (float)
@@ -117,7 +119,7 @@ public class Seller extends Agent {
     @Override
     protected void takeDown() {
         deregister();
-        this.logger().info(String.format("! %s is leaving %n", this.getLocalName()));
+        this.logger().info(String.format("! %s is leaving%n", this.getLocalName()));
 
         for(Handler h: this.logger.getHandlers())
             h.close();

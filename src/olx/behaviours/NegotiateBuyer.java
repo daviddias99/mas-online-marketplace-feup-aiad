@@ -115,6 +115,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
             this.getAgent().logger().warning(String.format("/!\\ %s(%s) could not send initial offer for product %s%n", this.getAgent().getLocalName(), this.conversationID, this.product));
             return v;
         }
+        
         v.add(cfp);
         return v;
     }
@@ -396,6 +397,7 @@ public class NegotiateBuyer extends ContractNetInitiator {
         this.negotiationRound = 0;
         this.previousOffers = new ConcurrentHashMap<>();
         this.negotiationOnWait = null;
+        this.conversationID += ".1";
         reset(new ACLMessage(ACLMessage.CFP));
     }
 
