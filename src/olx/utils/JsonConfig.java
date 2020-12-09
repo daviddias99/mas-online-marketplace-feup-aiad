@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JsonConfig implements Config{
+    private static String file;
     private final Buyer[] buyers;
     private final Product[] products;
     private final Seller[] sellers;
@@ -32,6 +33,7 @@ public class JsonConfig implements Config{
 
     public static JsonConfig read(String path) throws IOException {
         File file = new File(path);
+        JsonConfig.file = path;
 
         ObjectMapper objectMapper;
         if (path.contains("json")) {
@@ -44,15 +46,15 @@ public class JsonConfig implements Config{
     }
 
     public List<Product> getProducts() {
-        return Arrays.asList(products);
+        return Arrays.asList(products.clone());
     }
 
     public List<Buyer>  getBuyers() {
-        return Arrays.asList(buyers);
+        return Arrays.asList(buyers.clone());
     }
 
     public List<Seller>  getSellers() {
-        return Arrays.asList(sellers);
+        return Arrays.asList(sellers.clone());
     }
 
     private void fillBuyerStrategies() {
@@ -81,5 +83,16 @@ public class JsonConfig implements Config{
                 ",\n  products=" + Arrays.toString(products) +
                 ",\n  sellers=" + Arrays.toString(sellers) +
                 "\n}";
+    }
+
+    @Override
+    public Config readSelf(Config conf) {
+        try {
+            return ((JsonConfig) conf).read(JsonConfig.file);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 }

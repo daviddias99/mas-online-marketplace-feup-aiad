@@ -107,6 +107,11 @@ public class OlxNetwork {
         return null;
     }
 
+    public void close() {
+        this.dsurf.dispose();
+        OlxNetwork.nodes = new ArrayList<>();
+    }
+
     public void removeNode(DefaultDrawableNode node) {
         nodes.remove(node);
         this.updateNetwork();

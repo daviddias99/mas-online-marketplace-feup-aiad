@@ -10,10 +10,12 @@ import uchicago.src.sim.analysis.Histogram;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class CredibilityHistogram {
+    private static int id = 0;
     private Histogram histogram;
     private List<Seller> sellers;
 
     public CredibilityHistogram(Repast3Launcher launcher, List<Seller> sellers){
+        CredibilityHistogram.id++;
         this.sellers = new ArrayList<>();
 
         long time = System.currentTimeMillis();
@@ -25,7 +27,7 @@ public class CredibilityHistogram {
         if (!dir.exists())
             dir.mkdirs();
     
-        this.histogram = new MyHistogram("Credibility Distribution", 10, 0, 100, launcher, dir.getPath() + "/" + time + ".csv");
+        this.histogram = new MyHistogram("Credibility Distribution " + CredibilityHistogram.id, 10, 0, 100, launcher, dir.getPath() + "/" + time + ".csv");
 
         this.addSellers(sellers);
         this.histogram.display();
@@ -53,5 +55,8 @@ public class CredibilityHistogram {
     public void updateHistogram(){
         this.histogram.createHistogramItem("Credibility", this.sellers, "getCredibility", -1, 0);
     }
-    
+
+    public void close() {
+        this.histogram.dispose();
+    }
 }
