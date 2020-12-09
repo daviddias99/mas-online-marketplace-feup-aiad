@@ -123,9 +123,9 @@ public abstract class Util {
             case SMART:
                 return new Color(10,135,84);
             case RELTFT:
-                return new Color(80,140,164);
+                return new Color(50, 97, 114);
             case ABSTFT:
-                return new Color(191,215,234);
+                return new Color(93, 3, 127);
             default:
                 return new Color(0, 0, 0);
         }
