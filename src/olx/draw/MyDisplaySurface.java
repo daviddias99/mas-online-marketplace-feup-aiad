@@ -1,6 +1,5 @@
 package olx.draw;
 
-import java.awt.Dimension;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.swing.JMenuItem;
@@ -35,7 +34,7 @@ public class MyDisplaySurface extends DisplaySurface {
 
                 for(int var7 = this.menu.getItemCount(); var6 < var7; ++var6) {
                     JMenuItem var8 = this.menu.getItem(var6);
-                    System.out.println(var6 + "/" + var7 + "(" + var5 + ")"+ " - " + (var8 != null ? var8.getText() : null));
+                    // System.out.println(var6 + "/" + var7 + "(" + var5 + ")"+ " - " + (var8 != null ? var8.getText() : null));
                     // if(var8 == null || var8.getText().equals("Resize to Default")){
                     //     this.menu.remove(var6);
                     //     var6--;
