@@ -2,6 +2,7 @@ package olx.draw;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import olx.agents.Seller;
@@ -12,6 +13,7 @@ import uchicago.src.sim.analysis.PlotModel;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class ScamPlot {
+    private static int id = 0;
     private OpenSequenceGraph plot;
     private ArrayList<Seller> scam_u25;
     private ArrayList<Seller> scam_u50;
@@ -20,6 +22,7 @@ public class ScamPlot {
     private static final String METHOD = "getWealth";
 
     public ScamPlot(Repast3Launcher launcher, List<Seller> sellers) {
+        ScamPlot.id++;
         this.scam_u25 = new ArrayList<>();
         this.scam_u50 = new ArrayList<>();
         this.scam_u75 = new ArrayList<>();
@@ -35,7 +38,7 @@ public class ScamPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Scam Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
+        this.plot = new OpenSequenceGraph("Scam Analysis " + ScamPlot.id, launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time", "money earned");
 
         this.addSellers(sellers);
@@ -75,5 +78,9 @@ public class ScamPlot {
         this.plot.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scam_u50, METHOD)); 
         this.plot.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scam_u75, METHOD)); 
         this.plot.addSequence("Scam ≤ 100" , new MyAverageSequence(this.scam_u100, METHOD)); 
+    }
+
+    public void close() {
+        this.plot.dispose();
     }
 }

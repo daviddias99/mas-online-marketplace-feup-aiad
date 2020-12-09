@@ -17,6 +17,7 @@ import uchicago.src.sim.analysis.plot.OpenGraph;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class BuyerStratPlot {
+    private static int id = 0;
     private OpenSequenceGraph plot;
     private ArrayList<Buyer> smart;
     private ArrayList<Buyer> absTFT;
@@ -24,6 +25,7 @@ public class BuyerStratPlot {
     private static final String METHOD = "getMoneySpent";
 
     public BuyerStratPlot(Repast3Launcher launcher, List<Buyer> buyers){
+        BuyerStratPlot.id++;
         this.smart = new ArrayList<>();
         this.absTFT = new ArrayList<>();
         this.relTFT = new ArrayList<>();
@@ -38,7 +40,7 @@ public class BuyerStratPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Counter Offer Strategy Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
+        this.plot = new OpenSequenceGraph("Counter Offer Strategy Analysis " + BuyerStratPlot.id, launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time","money spent");
 
         this.addBuyers(buyers);
@@ -78,5 +80,9 @@ public class BuyerStratPlot {
             this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.RELTFT), OpenGraph.FILLED_CIRCLE);
         if(!this.absTFT.isEmpty())
             this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.ABSTFT), OpenGraph.FILLED_CIRCLE);
+    }
+
+    public void close() {
+        this.plot.dispose();
     }
 }

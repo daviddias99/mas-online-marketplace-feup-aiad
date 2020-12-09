@@ -13,4 +13,5 @@ public interface Config {
   public List<Buyer> getBuyers();
   public List<Seller> getSellers();
   public Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies();
+  public Config readSelf(Config conf);
 }

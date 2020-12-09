@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Creator implements Config {
-
+  private static String file;
   private List<Seller> sellers;
   private List<Buyer> buyers;
   private List<Product> products;
@@ -44,6 +44,7 @@ public class Creator implements Config {
 
   public static Creator read(String path) throws IOException {
     File file = new File(path);
+    Creator.file = path;
 
     ObjectMapper objectMapper;
     if (path.contains("json")) {
@@ -115,5 +116,16 @@ public class Creator implements Config {
     for (int i = 0; i < counterOfferStrategies.length; i++) {
       this.buyerStrategies.put(CounterOfferStrategy.Type.valueOf(counterOfferStrategies[i]), i);
     }
+  }
+
+  @Override
+  public Config readSelf(Config conf) {
+      try {
+          return ((Creator) conf).read(Creator.file);
+      } catch (IOException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+      }
+      return null;
   }
 }

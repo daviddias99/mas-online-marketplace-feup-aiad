@@ -4,8 +4,8 @@ product:
   price: 100
 numSellers: 5 
 numBuyers: 5
-sellerStock: 10
-buyerStock: 10
+sellerStock: 3
+buyerStock: 3
 scamFactors:
   - 100
   - 75

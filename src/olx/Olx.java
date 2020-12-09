@@ -44,6 +44,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private List<Seller> sellers;
     private List<Buyer> buyers;
     private Map<String, Product> products;
+    public static boolean isFirstRun = true;
 
     private Set<Agent> runningAgents;
     private boolean mainMode;
@@ -125,6 +126,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if (this.config == null) {
             this.config = this.parseConfigFromParameters();
         }
+        else {
+            this.config = this.config.readSelf(this.config);
+        }
 
         this.products = new HashMap<>();
         if (config.getProducts() != null) {
@@ -182,7 +186,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     @Override
     public void begin() {
         super.begin();
+
+        // if(Olx.isFirstRun)
         buildAndScheduleDisplay();
+        // Olx.isFirstRun = false;
     }
 
     private ElasticityPlot plotElasticy;
@@ -192,16 +199,37 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private CredibilityHistogram credibilityHistogram;
 
     private void buildAndScheduleDisplay() {
+
+        if(this.olxNetwork != null){
+            this.olxNetwork.close();
+        }
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         // graph scam
-        if (scamAnalysis)
+        if (scamAnalysis){
+
+            if(this.scamPlot != null)
+                this.scamPlot.close();
+
             this.scamPlot = new ScamPlot(this, this.sellers);
-        if (elasticityAnalysis)
+        }
+        if (elasticityAnalysis){
+            if(this.plotElasticy != null)
+                this.plotElasticy.close();
+    
             this.plotElasticy = new ElasticityPlot(this, this.sellers);
-        if (buyerStratAnalysis)
+        }
+        if (buyerStratAnalysis){
+            if(this.buyerStratPlot != null)
+                this.buyerStratPlot.close();
+
             this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
-        if (credibilityAnalysis)
+        }
+        if (credibilityAnalysis) {
+            if(this.credibilityHistogram != null)
+                this.credibilityHistogram.close();
+
             this.credibilityHistogram = new CredibilityHistogram(this, this.sellers);
+        }
     }
 
     private static Config getConfig(String confPath, ArgumentParser parser, boolean generate) {
@@ -259,7 +287,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start agents in new main container");
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
-        parser.addArgument("--batch", "-b").action(Arguments.storeTrue()).help("Exec in batch mode");
+        parser.addArgument("--batch", "-b").help("Exec in batch mode with X runs (default=1)");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");
         parser.addArgument("--credibility", "-cr").action(Arguments.storeTrue())
                 .help("make a sellers' credibility distribution analysis");
@@ -275,12 +303,16 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         } catch (HelpScreenException e) {
             System.exit(0);
         } catch (ArgumentParserException e) {
+            System.out.println(e);
             System.exit(-1);
         }
 
         boolean mainMode = parsedArgs.get("main");
         boolean kill = parsedArgs.get("kill");
-        boolean batchMode = parsedArgs.get("batch");
+        String batchMode = parsedArgs.get("batch");
+        boolean isBatchMode = batchMode != null;
+        int numBatches = isBatchMode ? (batchMode.equals("") ? 1 : Integer.parseInt(batchMode)) : 1;
+
         scamAnalysis = parsedArgs.get("scam");
         elasticityAnalysis = parsedArgs.get("elasticity");
         buyerStratAnalysis = parsedArgs.get("bstrat");
@@ -298,15 +330,15 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         boolean generate = generatorPath != null;
         Config config = (configPath != null || generatorPath != null) ? getConfig(confPath, parser, generate) : null;
 
-        if(config != null && !batchMode){
+        if(config != null && !isBatchMode){
             System.out.println("File configs are meant for batch processing");
             System.exit(-1);  
         }
 
         // SAJAS + REPAST
         SimInit init = new SimInit();
-        init.setNumRuns(1); // works only in batch mode
-        init.loadModel(new Olx(mainMode, config, kill), null, batchMode);
+        init.setNumRuns(numBatches); // works only in batch mode
+        init.loadModel(new Olx(mainMode, config, kill), null, isBatchMode);
     }
 
     @Override

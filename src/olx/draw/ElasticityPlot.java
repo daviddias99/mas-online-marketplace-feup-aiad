@@ -12,6 +12,7 @@ import uchicago.src.sim.analysis.PlotModel;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class ElasticityPlot {
+    private static int id = 0;
     private OpenSequenceGraph plot;
 
     private ArrayList<Seller> elast_u10;
@@ -21,6 +22,7 @@ public class ElasticityPlot {
 
 
     public ElasticityPlot(Repast3Launcher launcher, List<Seller> sellers){
+        ElasticityPlot.id++;
         this.elast_u10 = new ArrayList<>();
         this.elast_u20 = new ArrayList<>();
         this.elast_u30 = new ArrayList<>();
@@ -35,7 +37,7 @@ public class ElasticityPlot {
         if (!dir.exists())
             dir.mkdirs();
 
-        this.plot = new OpenSequenceGraph("Elasticity Analysis", launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
+        this.plot = new OpenSequenceGraph("Elasticity Analysis " + ElasticityPlot.id, launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time","money earned");
 
         this.addSellers(sellers);        
@@ -72,5 +74,9 @@ public class ElasticityPlot {
         this.plot.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elast_u10, METHOD)); 
         this.plot.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elast_u20, METHOD)); 
         this.plot.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elast_u30, METHOD)); 
+    }
+
+    public void close() {
+        this.plot.dispose();
     }
 }

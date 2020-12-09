@@ -107,4 +107,9 @@ public class OlxNetwork {
         }
         return null;
     }
+
+    public void close() {
+        this.dsurf.dispose();
+        this.nodes = new ArrayList<>();
+    }
 }
