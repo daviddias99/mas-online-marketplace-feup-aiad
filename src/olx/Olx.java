@@ -45,7 +45,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private List<Buyer> buyers;
     private Map<String, Product> products;
     private Set<Agent> runningAgents;
-    private boolean mainMode;
     private Config config;
     private boolean kill;
     private static boolean scamAnalysis;
@@ -55,9 +54,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
-    public Olx(boolean mainMode, Config config, boolean kill) {
+    public Olx(Config config, boolean kill) {
         super();
-        this.mainMode = mainMode;
         this.config = config;
         this.kill = kill;
     }
@@ -117,7 +115,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         this.runningAgents = new HashSet<>();
 
-        this.container = mainMode ? rt.createMainContainer(p) : rt.createAgentContainer(p);
+        this.container = rt.createMainContainer(p);
         this.config = this.config == null ? this.parseConfigFromParameters() : this.config.readSelf(this.config);
 
         this.products = new HashMap<>();
@@ -271,7 +269,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
      */
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newFor("Olx").build().description("Modeling a second hand market place using agents.");
-        parser.addArgument("--main", "-m").action(Arguments.storeTrue()).help("start agents in new main container");
         parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--batch", "-b").help("Exec in batch mode with X runs (default=1)");
@@ -294,7 +291,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             System.exit(-1);
         }
 
-        boolean mainMode = parsedArgs.get("main");
         boolean kill = parsedArgs.get("kill");
         String batchMode = parsedArgs.get("batch");
         boolean isBatchMode = batchMode != null;
@@ -325,7 +321,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         // SAJAS + REPAST
         SimInit init = new SimInit();
         init.setNumRuns(numBatches); // works only in batch mode
-        init.loadModel(new Olx(mainMode, config, kill), null, isBatchMode);
+        init.loadModel(new Olx(config, kill), null, isBatchMode);
     }
 
     @Override
