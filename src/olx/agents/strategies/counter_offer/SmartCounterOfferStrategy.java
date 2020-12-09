@@ -25,7 +25,7 @@ public class SmartCounterOfferStrategy extends CounterOfferStrategy {
             // More rounds -> Higher cost
 
             float patienceDiscount = (float) Math.pow(buyer.getPatience()/100.0f, offer.getRound());
-            float perceivedOfferCost = offer.getOfferedPrice() / offer.getSellerCredibility() /patienceDiscount ;
+            float perceivedOfferCost = offer.getOfferedPrice() / (1.5f * offer.getSellerCredibility() + 0.0001f) /patienceDiscount ;
             sb.append(String.format(Util.LIST_FORMAT + " from %s evaluated as %f", offer, entry.getKey().getLocalName(), perceivedOfferCost));
 
             if(perceivedOfferCost < bestValue){
