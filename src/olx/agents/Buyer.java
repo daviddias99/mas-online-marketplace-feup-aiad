@@ -85,6 +85,21 @@ public class Buyer extends Agent implements NetworkAgent {
         this.patience = patience;
     }
 
+    public Buyer(Buyer buyer){
+        for (Map.Entry<Product, List<ProductStatus>> entry : buyer.products.entrySet()){
+            List<ProductStatus> statusList = new ArrayList<>();
+            for(int j = 0; j < entry.getValue().size(); j++)
+                statusList.add(ProductStatus.TRYING);
+            this.products.put(entry.getKey(), statusList);
+        }
+
+        this.terminationListener = buyer.terminationListener;
+        this.moneySpent = 0;
+        this.counterOfferStrategy = buyer.getCounterOfferStrategy();
+        this.blackList = new HashSet<>();
+        this.patience = buyer.patience;
+    }
+
     public CounterOfferStrategy getCounterOfferStrategy() {
         return counterOfferStrategy;
     }

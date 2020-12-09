@@ -8,20 +8,32 @@ public class BuyerLauncher extends Agent{
     
     private Olx olx;
     private long timeout;
+    private int nWaves;
+    private final long FIRST_TIMEOUT = 10000;
 
-    public BuyerLauncher(Olx olx, long timeout){
+    public BuyerLauncher(Olx olx, long timeout, int nWaves){
         this.olx = olx;
         this.timeout = timeout;
+        this.nWaves = nWaves;
     }
 
 
     public void createBuyers() {
-        this.olx.createBuyers();
+        this.olx.addBuyers();
     }
 
     @Override
     protected void setup() {
-        this.addBehaviour(new CreateBuyersBehavior(this, this.timeout));
+        for(long i = this.FIRST_TIMEOUT; i <= (this.nWaves - 1) * this.timeout + this.FIRST_TIMEOUT; i += this.timeout){
+            System.out.println("Next Wave: " + i);
+
+            this.addBehaviour(new CreateBuyersBehavior(this, i));
+        }
+    }
+
+    @Override
+    public void takeDown() {
+        this.olx.terminated(this);
     }
 
     class CreateBuyersBehavior extends WakerBehaviour{

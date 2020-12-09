@@ -42,7 +42,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private Profile p;
     private ContainerController container;
     private List<Seller> sellers;
-    private List<Buyer> buyers;
+    private List<Buyer> initialBuyers;
+    private List<Buyer> buyers = new ArrayList<>();
+
     private Map<String, Product> products;
     private Set<Agent> runningAgents;
     private Config config;
@@ -63,7 +65,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public void start() {
         createSellers();
         try {
-            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 10000)).start();
+            BuyerLauncher bl = new BuyerLauncher(this, 5000, 2);
+            this.container.acceptNewAgent("buyer_waker", bl ).start();
+            this.runningAgents.add(bl);
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -89,24 +93,37 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
     }
 
-    public void createBuyers() {
-        System.out.println("Creating Buyers");
-        if (this.buyers == null) {
+    public void addBuyers() {
+        System.out.println("Adding Buyers");
+        if (this.initialBuyers == null) {
             System.out.println("WARNING: no buyers specified");
             return;
         }
 
-        for (int j = 0; j < this.buyers.size(); j++) {
-            this.buyers.get(j).setTerminationListener(this);
-            this.runningAgents.add(this.buyers.get(j));
+        List<Buyer> newBuyers = new ArrayList<>();
+        for (int j = 0; j < this.initialBuyers.size(); j++) {
+            Buyer newBuyer = new Buyer(this.initialBuyers.get(j));
+            newBuyer.setTerminationListener(this);
+            this.runningAgents.add(newBuyer);
+            this.buyers.add(newBuyer);
+            newBuyers.add(newBuyer);
 
             try {
-                this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
+                this.container.acceptNewAgent("buyer_" + this.buyers.size(), newBuyer).start();
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
+
+        this.addBuyersDisplay(newBuyers);
     }
+
+    private void addBuyersDisplay(List<Buyer> buyers) {
+        this.olxNetwork.addBuyers(buyers);
+        if (buyerStratAnalysis || this.BSTRAT_PLOT)
+            this.buyerStratPlot.addBuyers(buyers);
+    }
+
 
     @Override
     protected void launchJADE() {
@@ -131,7 +148,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             this.sellers = new ArrayList<>(config.getSellers());
 
         if (config.getBuyers() != null)
-            this.buyers = new ArrayList<>(config.getBuyers());
+            this.initialBuyers = new ArrayList<>(config.getBuyers());
 
         this.start();
     }
@@ -328,9 +345,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public synchronized void terminated(Agent a) {
         if(a instanceof NetworkAgent)
             this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
+        this.runningAgents.remove(a);
         if(!this.kill)
             return;
-        this.runningAgents.remove(a);
         
         if (this.runningAgents.isEmpty()) {
             System.out.println();
