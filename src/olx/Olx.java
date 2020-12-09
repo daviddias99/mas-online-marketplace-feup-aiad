@@ -44,8 +44,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private List<Seller> sellers;
     private List<Buyer> buyers;
     private Map<String, Product> products;
-    public static boolean isFirstRun = true;
-
     private Set<Agent> runningAgents;
     private boolean mainMode;
     private Config config;
@@ -120,13 +118,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.runningAgents = new HashSet<>();
 
         this.container = mainMode ? rt.createMainContainer(p) : rt.createAgentContainer(p);
-
-        if (this.config == null) {
-            this.config = this.parseConfigFromParameters();
-        }
-        else {
-            this.config = this.config.readSelf(this.config);
-        }
+        this.config = this.config == null ? this.parseConfigFromParameters() : this.config.readSelf(this.config);
 
         this.products = new HashMap<>();
         if (config.getProducts() != null) {
@@ -142,7 +134,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         if (config.getBuyers() != null)
             this.buyers = new ArrayList<>(config.getBuyers());
-
 
         this.start();
     }
@@ -185,9 +176,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public void begin() {
         super.begin();
 
-        // if(Olx.isFirstRun)
         buildAndScheduleDisplay();
-        // Olx.isFirstRun = false;
     }
 
     private ElasticityPlot plotElasticy;
@@ -203,26 +192,26 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         // graph scam
-        if (scamAnalysis){
+        if (scamAnalysis || this.SCAM_PLOT){
 
             if(this.scamPlot != null)
                 this.scamPlot.close();
 
             this.scamPlot = new ScamPlot(this, this.sellers);
         }
-        if (elasticityAnalysis){
+        if (elasticityAnalysis || this.ELAS_PLOT){
             if(this.plotElasticy != null)
                 this.plotElasticy.close();
     
             this.plotElasticy = new ElasticityPlot(this, this.sellers);
         }
-        if (buyerStratAnalysis){
+        if (buyerStratAnalysis || this.BSTRAT_PLOT){
             if(this.buyerStratPlot != null)
                 this.buyerStratPlot.close();
 
             this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
         }
-        if (credibilityAnalysis) {
+        if (credibilityAnalysis || this.CRED_PLOT) {
             if(this.credibilityHistogram != null)
                 this.credibilityHistogram.close();
 
@@ -372,13 +361,17 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private String OFFER_STRATS = "SMART, ABSTFT";
     private String CTOFFER_STRATS = "SMART, ABSTFT";
     private String PATIENCES = "100, 50";
+    private boolean SCAM_PLOT = false;
+    private boolean CRED_PLOT = false;
+    private boolean ELAS_PLOT = false;
+    private boolean BSTRAT_PLOT = false;
 
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
         return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "SELLER_STOCK",
                 "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS", "OFFER_STRATS", "CTOFFER_STRATS",
-                "PATIENCES" };
+                "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT" };
     }
 
     @Override
@@ -481,5 +474,37 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     public void setCTOFFER_STRATS(String CTOFFER_STRATS) {
         this.CTOFFER_STRATS = CTOFFER_STRATS;
+    }
+
+    public boolean getSCAM_PLOT() {
+        return SCAM_PLOT;
+    }
+
+    public void setSCAM_PLOT(boolean SCAM_PLOT) {
+        this.SCAM_PLOT = SCAM_PLOT;
+    }
+    
+    public boolean getCRED_PLOT() {
+        return CRED_PLOT;
+    }
+
+    public void setCRED_PLOT(boolean CRED_PLOT) {
+        this.CRED_PLOT = CRED_PLOT;
+    }
+
+    public boolean getELAS_PLOT() {
+        return ELAS_PLOT;
+    }
+
+    public void setELAS_PLOT(boolean ELAS_PLOT) {
+        this.ELAS_PLOT = ELAS_PLOT;
+    }
+
+    public boolean getBSTRAT_PLOT() {
+        return BSTRAT_PLOT;
+    }
+
+    public void setBSTRAT_PLOT(boolean BSTRAT_PLOT) {
+        this.BSTRAT_PLOT = BSTRAT_PLOT;
     }
 }
