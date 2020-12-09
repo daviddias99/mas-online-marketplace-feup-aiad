@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jade.wrapper.ControllerException;
-import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -22,6 +21,7 @@ import olx.agents.Seller;
 import olx.draw.BuyerStratPlot;
 import olx.draw.CredibilityHistogram;
 import olx.draw.ElasticityPlot;
+import olx.draw.NetworkAgent;
 import olx.draw.OlxNetwork;
 import olx.draw.ScamPlot;
 import olx.models.Product;
@@ -100,9 +100,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
 
         for (int j = 0; j < this.buyers.size(); j++) {
-            if (kill)
-                this.buyers.get(j).setTerminationListener(this);
-
+            this.buyers.get(j).setTerminationListener(this);
             this.runningAgents.add(this.buyers.get(j));
 
             try {
@@ -311,7 +309,12 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     @Override
     public synchronized void terminated(Agent a) {
+        if(a instanceof NetworkAgent)
+            this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
+        if(!this.kill)
+            return;
         this.runningAgents.remove(a);
+        
         if (this.runningAgents.isEmpty()) {
             System.out.println();
             Stats.printStats();
