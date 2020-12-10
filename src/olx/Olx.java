@@ -43,7 +43,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private ContainerController container;
     private List<Seller> sellers;
     private List<Buyer> initialBuyers;
-    private List<Buyer> buyers = new ArrayList<>();
+    private List<Buyer> buyers;
 
     private Map<String, Product> products;
     private Set<Agent> runningAgents;
@@ -60,6 +60,13 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         super();
         this.config = config;
         this.kill = kill;
+
+        // Runnable endActions = () -> {
+        //     System.out.println("Performing end actions");
+        //     this.getSchedule().executeEndActions();
+        // };
+
+        // java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
     }
 
     public void start() {
@@ -149,6 +156,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if (config.getBuyers() != null)
             this.initialBuyers = new ArrayList<>(config.getBuyers());
 
+        this.buyers = new ArrayList<>();
         this.start();
     }
 
@@ -338,7 +346,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         // SAJAS + REPAST
         SimInit init = new SimInit();
         init.setNumRuns(numBatches); // works only in batch mode
-        init.loadModel(new Olx(config, kill), null, isBatchMode);
+        Olx olx = new Olx(config, kill);
+        init.loadModel(olx, null, isBatchMode);
+
     }
 
     @Override

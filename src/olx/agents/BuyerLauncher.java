@@ -24,10 +24,11 @@ public class BuyerLauncher extends Agent{
 
     @Override
     protected void setup() {
-        for(long i = this.FIRST_TIMEOUT; i <= (this.nWaves - 1) * this.timeout + this.FIRST_TIMEOUT; i += this.timeout){
+        long upperLimit = (this.nWaves - 1) * this.timeout + this.FIRST_TIMEOUT;
+        for(long i = this.FIRST_TIMEOUT; i <= upperLimit; i += this.timeout){
             System.out.println("Next Wave: " + i);
 
-            this.addBehaviour(new CreateBuyersBehavior(this, i));
+            this.addBehaviour(new CreateBuyersBehaviour(this, i, i == upperLimit));
         }
     }
 
@@ -36,19 +37,23 @@ public class BuyerLauncher extends Agent{
         this.olx.terminated(this);
     }
 
-    class CreateBuyersBehavior extends WakerBehaviour{
+    class CreateBuyersBehaviour extends WakerBehaviour{
 
         private static final long serialVersionUID = 1L;
         BuyerLauncher agent;
+        private boolean lastBehaviour;
 
-        public CreateBuyersBehavior(BuyerLauncher a, long timeout) {
+        public CreateBuyersBehaviour(BuyerLauncher a, long timeout, boolean lastBehaviour) {
             super(a, timeout);
             this.agent = a;
+            this.lastBehaviour = lastBehaviour;
         }
 
         @Override
-        protected void handleElapsedTimeout() {
+        protected void onWake() {
             this.agent.createBuyers();
+            if(this.lastBehaviour)
+                this.agent.doDelete();
         }
     }
 
