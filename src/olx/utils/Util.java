@@ -1,13 +1,11 @@
 package olx.utils;
 
-import olx.agents.strategies.counter_offer.CounterOfferStrategy;
 
 import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
 import static olx.agents.strategies.counter_offer.CounterOfferStrategy.*;
-import static olx.agents.strategies.counter_offer.CounterOfferStrategy.Type.SMART;
 
 public abstract class Util {
 
