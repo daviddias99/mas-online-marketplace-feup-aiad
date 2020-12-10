@@ -8,10 +8,35 @@ import olx.models.Product;
 import java.util.List;
 import java.util.Map;
 
-public interface Config {
-  public List<Product> getProducts();
-  public List<Buyer> getBuyers();
-  public List<Seller> getSellers();
-  public Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies();
-  public Config readSelf(Config conf);
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public abstract class Config {
+    private int nWavesBuyers;
+    private long periodBuyers;
+
+    public Config(
+        @JsonProperty("wavesBuyers") int nWavesBuyers,
+        @JsonProperty("periodBuyers") long periodBuyers
+    ){
+        this.nWavesBuyers = nWavesBuyers;
+        this.periodBuyers = periodBuyers;
+    }
+
+    public abstract List<Product> getProducts();
+
+    public abstract List<Buyer> getBuyers();
+
+    public abstract List<Seller> getSellers();
+
+    public abstract Map<CounterOfferStrategy.Type, Integer> getBuyerStrategies();
+
+    public abstract Config readSelf(Config conf);
+
+    public long getBuyersPeriod() {
+        return this.periodBuyers;
+    }
+
+    public int getNWavesBuyers() {
+        return this.nWavesBuyers;
+    }
 }

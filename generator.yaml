@@ -4,6 +4,8 @@ product:
   price: 100
 numSellers: 3
 numBuyers: 3
+wavesBuyers: 2
+periodBuyers: 5001 
 sellerStock: 5
 buyerStock: 5
 scamFactors:

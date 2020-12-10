@@ -62,7 +62,8 @@ buyers:
         quantity: 3
     counterOfferStrategy: RELTFT
     patience: 100
-
+wavesBuyers: 2
+periodBuyers: 5002
 sellers:
   - scamFactor: 50
     elasticity: 17

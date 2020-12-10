@@ -15,16 +15,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JsonConfig implements Config{
+public class JsonConfig extends Config{
     private static String file;
     private final Buyer[] buyers;
     private final Product[] products;
     private final Seller[] sellers;
     private Map<CounterOfferStrategy.Type, Integer> buyerStrategies;
 
-    JsonConfig(@JsonProperty("products") Product[] products,
-           @JsonProperty("buyers") Buyer[] buyers,
-           @JsonProperty("sellers") Seller[] sellers) {
+    JsonConfig(
+        @JsonProperty("products") Product[] products,
+        @JsonProperty("buyers") Buyer[] buyers,
+        @JsonProperty("wavesBuyers") int nWavesBuyers,
+        @JsonProperty("periodBuyers") long periodBuyers,
+        @JsonProperty("sellers") Seller[] sellers) {
+        super(nWavesBuyers, periodBuyers);
         this.products = products;
         this.buyers = buyers;
         this.sellers = sellers;
