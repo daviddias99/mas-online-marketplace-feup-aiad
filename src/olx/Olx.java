@@ -42,7 +42,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private Profile p;
     private ContainerController container;
     private List<Seller> sellers;
+    private List<Buyer> initialBuyers;
     private List<Buyer> buyers;
+
     private Map<String, Product> products;
     private Set<Agent> runningAgents;
     private Config config;
@@ -58,12 +60,21 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         super();
         this.config = config;
         this.kill = kill;
+
+        // Runnable endActions = () -> {
+        //     System.out.println("Performing end actions");
+        //     this.getSchedule().executeEndActions();
+        // };
+
+        // java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
     }
 
     public void start() {
         createSellers();
         try {
-            this.container.acceptNewAgent("buyer_waker", new BuyerLauncher(this, 10000)).start();
+            BuyerLauncher bl = new BuyerLauncher(this, config.getBuyersPeriod(), config.getNWavesBuyers());
+            this.container.acceptNewAgent("buyer_waker", bl).start();
+            this.runningAgents.add(bl);
         } catch (StaleProxyException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -89,23 +100,35 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         }
     }
 
-    public void createBuyers() {
-        System.out.println("Creating Buyers");
-        if (this.buyers == null) {
+    public void addBuyers() {
+        System.out.println("Adding Buyers");
+        if (this.initialBuyers == null) {
             System.out.println("WARNING: no buyers specified");
             return;
         }
 
-        for (int j = 0; j < this.buyers.size(); j++) {
-            this.buyers.get(j).setTerminationListener(this);
-            this.runningAgents.add(this.buyers.get(j));
+        List<Buyer> newBuyers = new ArrayList<>();
+        for (int j = 0; j < this.initialBuyers.size(); j++) {
+            Buyer newBuyer = new Buyer(this.initialBuyers.get(j));
+            newBuyer.setTerminationListener(this);
+            this.runningAgents.add(newBuyer);
+            this.buyers.add(newBuyer);
+            newBuyers.add(newBuyer);
 
             try {
-                this.container.acceptNewAgent("buyer_" + j, this.buyers.get(j)).start();
+                this.container.acceptNewAgent("buyer_" + this.buyers.size(), newBuyer).start();
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup buyer_" + j);
             }
         }
+
+        this.addBuyersDisplay(newBuyers);
+    }
+
+    private void addBuyersDisplay(List<Buyer> buyers) {
+        this.olxNetwork.addBuyers(buyers);
+        if (buyerStratAnalysis || this.BSTRAT_PLOT)
+            this.buyerStratPlot.addBuyers(buyers);
     }
 
     @Override
@@ -131,8 +154,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
             this.sellers = new ArrayList<>(config.getSellers());
 
         if (config.getBuyers() != null)
-            this.buyers = new ArrayList<>(config.getBuyers());
+            this.initialBuyers = new ArrayList<>(config.getBuyers());
 
+        this.buyers = new ArrayList<>();
         this.start();
     }
 
@@ -163,8 +187,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     private Config parseConfigFromParameters() {
-        return new Creator(new Product(this.PRODUCT_NAME, this.PRODUCT_PRICE), this.NUM_SELLERS, this.NUM_BUYERS,
-                this.SELLER_STOCK, this.BUYER_STOCK, this.parseIntsFromString(this.SCAM_FACTORS),
+        return new Creator(new Product(this.PRODUCT_NAME, this.PRODUCT_PRICE), this.NUM_SELLERS, this.NUM_BUYERS, 
+                this.WAVES_BUYERS, this.PERIOD_BUYERS, this.SELLER_STOCK, this.BUYER_STOCK, this.parseIntsFromString(this.SCAM_FACTORS),
                 this.parseIntsFromString(this.ELASTICITIES), this.parseStrategiesFromString(this.PICKING_STRATS),
                 this.parseStrategiesFromString(this.OFFER_STRATS), this.parseStrategiesFromString(this.CTOFFER_STRATS),
                 this.parseIntsFromString(this.PATIENCES));
@@ -173,7 +197,6 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     @Override
     public void begin() {
         super.begin();
-
         buildAndScheduleDisplay();
     }
 
@@ -185,32 +208,32 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private void buildAndScheduleDisplay() {
 
-        if(this.olxNetwork != null){
+        if (this.olxNetwork != null) {
             this.olxNetwork.close();
         }
         this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         // graph scam
-        if (scamAnalysis || this.SCAM_PLOT){
+        if (scamAnalysis || this.SCAM_PLOT) {
 
-            if(this.scamPlot != null)
+            if (this.scamPlot != null)
                 this.scamPlot.close();
 
             this.scamPlot = new ScamPlot(this, this.sellers);
         }
-        if (elasticityAnalysis || this.ELAS_PLOT){
-            if(this.plotElasticy != null)
+        if (elasticityAnalysis || this.ELAS_PLOT) {
+            if (this.plotElasticy != null)
                 this.plotElasticy.close();
-    
+
             this.plotElasticy = new ElasticityPlot(this, this.sellers);
         }
-        if (buyerStratAnalysis || this.BSTRAT_PLOT){
-            if(this.buyerStratPlot != null)
+        if (buyerStratAnalysis || this.BSTRAT_PLOT) {
+            if (this.buyerStratPlot != null)
                 this.buyerStratPlot.close();
 
             this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
         }
         if (credibilityAnalysis || this.CRED_PLOT) {
-            if(this.credibilityHistogram != null)
+            if (this.credibilityHistogram != null)
                 this.credibilityHistogram.close();
 
             this.credibilityHistogram = new CredibilityHistogram(this, this.sellers);
@@ -268,8 +291,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
      * @throws IOException
      */
     public static void main(String[] args) {
-        ArgumentParser parser = ArgumentParsers.newFor("Olx").build().description("Modeling a second hand market place using agents.");
-        parser.addArgument("--kill", "-k").action(Arguments.storeTrue()).help("platform is shutdown after last buyer exits");
+        ArgumentParser parser = ArgumentParsers.newFor("Olx").build()
+                .description("Modeling a second hand market place using agents.");
+        parser.addArgument("--kill", "-k").action(Arguments.storeTrue())
+                .help("platform is shutdown after last buyer exits");
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--batch", "-b").help("Exec in batch mode with X runs (default=1)");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");
@@ -313,25 +338,27 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         boolean generate = generatorPath != null;
         Config config = (configPath != null || generatorPath != null) ? getConfig(confPath, parser, generate) : null;
 
-        if(config != null && !isBatchMode){
+        if (config != null && !isBatchMode) {
             System.out.println("File configs are meant for batch processing");
-            System.exit(-1);  
+            System.exit(-1);
         }
 
         // SAJAS + REPAST
         SimInit init = new SimInit();
         init.setNumRuns(numBatches); // works only in batch mode
-        init.loadModel(new Olx(config, kill), null, isBatchMode);
+        Olx olx = new Olx(config, kill);
+        init.loadModel(olx, null, isBatchMode);
+
     }
 
     @Override
     public synchronized void terminated(Agent a) {
-        if(a instanceof NetworkAgent)
+        if (a instanceof NetworkAgent)
             this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
-        if(!this.kill)
-            return;
         this.runningAgents.remove(a);
-        
+        if (!this.kill)
+            return;
+
         if (this.runningAgents.isEmpty()) {
             System.out.println();
             Stats.printStats();
@@ -349,6 +376,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private int PRODUCT_PRICE = 100;
     private int NUM_SELLERS = 80;
     private int NUM_BUYERS = 80;
+    private int WAVES_BUYERS = 1;
+    private long PERIOD_BUYERS = 1;
     private int SELLER_STOCK = 80;
     private int BUYER_STOCK = 80;
     private String SCAM_FACTORS = "100, 75, 50, 25";
@@ -365,7 +394,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
-        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "SELLER_STOCK",
+        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS", "PERIOD_BUYERS", "SELLER_STOCK",
                 "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS", "OFFER_STRATS", "CTOFFER_STRATS",
                 "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT" };
     }
@@ -502,5 +531,21 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     public void setBSTRAT_PLOT(boolean BSTRAT_PLOT) {
         this.BSTRAT_PLOT = BSTRAT_PLOT;
+    }
+
+    public long getPERIOD_BUYERS() {
+        return PERIOD_BUYERS;
+    }
+
+    public void setPERIOD_BUYERS(long pERIOD_BUYERS) {
+        this.PERIOD_BUYERS = pERIOD_BUYERS;
+    }
+
+    public int getWAVES_BUYERS() {
+        return WAVES_BUYERS;
+    }
+
+    public void setWAVES_BUYERS(int wAVES_BUYERS) {
+        this.WAVES_BUYERS = wAVES_BUYERS;
     }
 }

@@ -2,7 +2,6 @@ package olx.draw;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import olx.agents.Seller;
@@ -42,6 +41,7 @@ public class ScamPlot {
         this.plot.setAxisTitles("time", "money earned");
 
         this.addSellers(sellers);
+        this.setPlot();
         this.plot.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.plot, "step", ScheduleBase.LAST);
@@ -69,11 +69,9 @@ public class ScamPlot {
                 this.scam_u75.add(sellers.get(i));
             else
                 this.scam_u100.add(sellers.get(i));
-
-        this.updatePlot();
     }
 
-    public void updatePlot(){
+    public void setPlot(){
         this.plot.addSequence("Scam ≤ 25" , new MyAverageSequence(this.scam_u25, METHOD)); 
         this.plot.addSequence("Scam ≤ 50" , new MyAverageSequence(this.scam_u50, METHOD)); 
         this.plot.addSequence("Scam ≤ 75" , new MyAverageSequence(this.scam_u75, METHOD)); 

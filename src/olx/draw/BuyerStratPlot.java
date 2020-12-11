@@ -44,6 +44,7 @@ public class BuyerStratPlot {
         this.plot.setAxisTitles("time","money spent");
 
         this.addBuyers(buyers);
+        this.setPlot();
         this.plot.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.plot, "step", ScheduleBase.LAST);
@@ -70,16 +71,12 @@ public class BuyerStratPlot {
             else
                 this.absTFT.add(buyers.get(i));
 
-        this.updatePlot();
     }
 
-    public void updatePlot(){
-        if(!this.smart.isEmpty())
-            this.plot.addSequence("Smart", new MyAverageSequence(this.smart, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.SMART), OpenGraph.FILLED_CIRCLE);
-        if(!this.relTFT.isEmpty())
-            this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.RELTFT), OpenGraph.FILLED_CIRCLE);
-        if(!this.absTFT.isEmpty())
-            this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.ABSTFT), OpenGraph.FILLED_CIRCLE);
+    public void setPlot(){
+        this.plot.addSequence("Smart", new MyAverageSequence(this.smart, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.SMART), OpenGraph.FILLED_CIRCLE);
+        this.plot.addSequence("Relative TFT" , new MyAverageSequence(this.relTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.RELTFT), OpenGraph.FILLED_CIRCLE);
+        this.plot.addSequence("Absolute TFT" , new MyAverageSequence(this.absTFT, METHOD), Util.getBuyerColor(CounterOfferStrategy.Type.ABSTFT), OpenGraph.FILLED_CIRCLE);
     }
 
     public void close() {

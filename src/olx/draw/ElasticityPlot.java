@@ -40,7 +40,8 @@ public class ElasticityPlot {
         this.plot = new OpenSequenceGraph("Elasticity Analysis " + ElasticityPlot.id, launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
         this.plot.setAxisTitles("time","money earned");
 
-        this.addSellers(sellers);        
+        this.addSellers(sellers);     
+        this.setPlot();   
         this.plot.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.plot, "step", ScheduleBase.LAST);
@@ -66,11 +67,9 @@ public class ElasticityPlot {
                 this.elast_u20.add(sellers.get(i));
             else if(sellers.get(i).getElasticity() <= 30)
                 this.elast_u30.add(sellers.get(i));
-
-        this.updatePlot();
     }
 
-    public void updatePlot() {
+    public void setPlot() {
         this.plot.addSequence("Elasticity ≤ 10" , new MyAverageSequence(this.elast_u10, METHOD)); 
         this.plot.addSequence("Elasticity ≤ 20" , new MyAverageSequence(this.elast_u20, METHOD)); 
         this.plot.addSequence("Elasticity ≤ 30" , new MyAverageSequence(this.elast_u30, METHOD)); 

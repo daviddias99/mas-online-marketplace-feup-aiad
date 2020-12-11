@@ -30,6 +30,7 @@ public class CredibilityHistogram {
         this.histogram = new MyHistogram("Credibility Distribution " + CredibilityHistogram.id, 10, 0, 100, launcher, dir.getPath() + "/" + time + ".csv");
 
         this.addSellers(sellers);
+        this.histogram.createHistogramItem("Credibility", this.sellers, "getCredibility", -1, 0);
         this.histogram.display();
 
         launcher.getSchedule().scheduleActionAtInterval(100, this.histogram, "step", ScheduleBase.LAST);
@@ -49,11 +50,6 @@ public class CredibilityHistogram {
 
     public void addSellers(List<Seller> sellers){
         this.sellers.addAll(sellers);
-        this.updateHistogram();
-    }
-
-    public void updateHistogram(){
-        this.histogram.createHistogramItem("Credibility", this.sellers, "getCredibility", -1, 0);
     }
 
     public void close() {
