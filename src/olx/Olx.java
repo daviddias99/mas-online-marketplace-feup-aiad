@@ -24,6 +24,7 @@ import olx.draw.ElasticityPlot;
 import olx.draw.NetworkAgent;
 import olx.draw.OlxNetwork;
 import olx.draw.ScamPlot;
+import olx.draw.SellerStratPlot;
 import olx.models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -52,6 +53,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean scamAnalysis;
     private static boolean elasticityAnalysis;
     private static boolean buyerStratAnalysis;
+    private static boolean sellerStratAnalysis;
     private static boolean credibilityAnalysis;
     public static int SHOWN_EDGE_COUNT = 4;
     public static boolean logging;
@@ -200,6 +202,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     @Override
     public void begin() {
         super.begin();
+        OlxNetwork.DISPLAY_NET &= SHOW_NETWORK;
+        Olx.SHOWN_EDGE_COUNT = CLEAN_EDGES ? Olx.SHOWN_EDGE_COUNT : -1;
         buildAndScheduleDisplay();
     }
 
@@ -207,6 +211,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private OlxNetwork olxNetwork;
     private ScamPlot scamPlot;
     private BuyerStratPlot buyerStratPlot;
+    private SellerStratPlot sellerStratPlot;
     private CredibilityHistogram credibilityHistogram;
 
     private void buildAndScheduleDisplay() {
@@ -238,6 +243,13 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 this.buyerStratPlot.close();
 
             this.buyerStratPlot = new BuyerStratPlot(this, this.buyers);
+        }
+        if (sellerStratAnalysis || this.SSTRAT_PLOT) {
+            if (this.sellerStratPlot != null)
+                this.sellerStratPlot.close();
+
+            this.sellerStratPlot = new SellerStratPlot(this, this.sellers);
+            this.sellerStratPlot.addSellers(sellers);
         }
         if (credibilityAnalysis || this.CRED_PLOT) {
             if (this.credibilityHistogram != null)
@@ -305,6 +317,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--scam", "-s").action(Arguments.storeTrue()).help("perform a scam analysis");
         parser.addArgument("--batch", "-b").help("Exec in batch mode with X runs (default=1)");
         parser.addArgument("--bstrat", "-bs").action(Arguments.storeTrue()).help("perform a buyer strategy analysis");
+        parser.addArgument("--sstrat", "-ss").action(Arguments.storeTrue()).help("perform a seller strategy analysis");
         parser.addArgument("--credibility", "-cr").action(Arguments.storeTrue())
                 .help("make a sellers' credibility distribution analysis");
         parser.addArgument("--logger", "-l").action(Arguments.storeTrue())
@@ -335,6 +348,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         scamAnalysis = parsedArgs.get("scam");
         elasticityAnalysis = parsedArgs.get("elasticity");
         buyerStratAnalysis = parsedArgs.get("bstrat");
+        sellerStratAnalysis = parsedArgs.get("sstrat");
         credibilityAnalysis = parsedArgs.get("credibility");
         Olx.SHOWN_EDGE_COUNT = (boolean) parsedArgs.get("clean") ? 4 : -1;
         logging = parsedArgs.get("logger");
@@ -408,13 +422,16 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean CRED_PLOT = false;
     private boolean ELAS_PLOT = false;
     private boolean BSTRAT_PLOT = false;
+    private boolean SSTRAT_PLOT = false;
+    private boolean CLEAN_EDGES = false;
+    private boolean SHOW_NETWORK = true;
 
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
         return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS",
                 "PERIOD_BUYERS", "SELLER_STOCK", "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS",
-                "OFFER_STRATS", "CTOFFER_STRATS", "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT" };
+                "OFFER_STRATS", "CTOFFER_STRATS", "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT", "SSTRAT_PLOT", "CLEAN_EDGES", "SHOW_NETWORK" };
     }
 
     @Override
@@ -551,19 +568,43 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.BSTRAT_PLOT = BSTRAT_PLOT;
     }
 
+    public boolean getSSTRAT_PLOT() {
+        return SSTRAT_PLOT;
+    }
+
+    public void setSSTRAT_PLOT(boolean SSTRAT_PLOT) {
+        this.SSTRAT_PLOT = SSTRAT_PLOT;
+    }
+
     public long getPERIOD_BUYERS() {
         return PERIOD_BUYERS;
     }
 
-    public void setPERIOD_BUYERS(long pERIOD_BUYERS) {
-        this.PERIOD_BUYERS = pERIOD_BUYERS;
+    public void setPERIOD_BUYERS(long PERIOD_BUYERS) {
+        this.PERIOD_BUYERS = PERIOD_BUYERS;
     }
 
     public int getWAVES_BUYERS() {
         return WAVES_BUYERS;
     }
 
-    public void setWAVES_BUYERS(int wAVES_BUYERS) {
-        this.WAVES_BUYERS = wAVES_BUYERS;
+    public void setWAVES_BUYERS(int WAVES_BUYERS) {
+        this.WAVES_BUYERS = WAVES_BUYERS;
+    }
+
+    public boolean getCLEAN_EDGES() {
+        return CLEAN_EDGES;
+    }
+
+    public void setCLEAN_EDGES(boolean CLEAN_EDGES) {
+        this.CLEAN_EDGES = CLEAN_EDGES;
+    }
+
+    public boolean getSHOW_NETWORK() {
+        return SHOW_NETWORK;
+    }
+
+    public void setSHOW_NETWORK(boolean SHOW_NET) {
+        this.SHOW_NETWORK = SHOW_NET;
     }
 }

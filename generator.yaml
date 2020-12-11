@@ -21,7 +21,7 @@ pickingStrategies:
   - SMART 
   - NAIVE
 offerStrategies:
-  - SMART 
+  - RELTFT 
   - ABSTFT
 counterOfferStrategies:
   - SMART 
