@@ -20,6 +20,7 @@ public class OlxNetwork {
     private Repast3Launcher launcher;
     private Network2DDisplay network;
     private static List<DefaultDrawableNode> nodes = new ArrayList<>();
+    public static boolean DISPLAY_NET = true;
     private int nBuyers;
     private int nSellers;
     private int WIDTH = 1920, HEIGHT = 1080;

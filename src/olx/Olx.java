@@ -127,7 +127,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     private void addBuyersDisplay(List<Buyer> buyers) {
-        this.olxNetwork.addBuyers(buyers);
+
+        if(OlxNetwork.DISPLAY_NET)
+            this.olxNetwork.addBuyers(buyers);
         if (buyerStratAnalysis || this.BSTRAT_PLOT)
             this.buyerStratPlot.addBuyers(buyers);
     }
@@ -188,11 +190,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     }
 
     private Config parseConfigFromParameters() {
-        return new Creator(new Product(this.PRODUCT_NAME, this.PRODUCT_PRICE), this.NUM_SELLERS, this.NUM_BUYERS, 
-                this.WAVES_BUYERS, this.PERIOD_BUYERS, this.SELLER_STOCK, this.BUYER_STOCK, this.parseIntsFromString(this.SCAM_FACTORS),
-                this.parseIntsFromString(this.ELASTICITIES), this.parseStrategiesFromString(this.PICKING_STRATS),
-                this.parseStrategiesFromString(this.OFFER_STRATS), this.parseStrategiesFromString(this.CTOFFER_STRATS),
-                this.parseIntsFromString(this.PATIENCES));
+        return new Creator(new Product(this.PRODUCT_NAME, this.PRODUCT_PRICE), this.NUM_SELLERS, this.NUM_BUYERS,
+                this.WAVES_BUYERS, this.PERIOD_BUYERS, this.SELLER_STOCK, this.BUYER_STOCK,
+                this.parseIntsFromString(this.SCAM_FACTORS), this.parseIntsFromString(this.ELASTICITIES),
+                this.parseStrategiesFromString(this.PICKING_STRATS), this.parseStrategiesFromString(this.OFFER_STRATS),
+                this.parseStrategiesFromString(this.CTOFFER_STRATS), this.parseIntsFromString(this.PATIENCES));
     }
 
     @Override
@@ -209,10 +211,14 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private void buildAndScheduleDisplay() {
 
-        if (this.olxNetwork != null) {
-            this.olxNetwork.close();
+        if (OlxNetwork.DISPLAY_NET) {
+            if (this.olxNetwork != null) {
+                this.olxNetwork.close();
+            }
+            this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
+
         }
-        this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
+
         // graph scam
         if (scamAnalysis || this.SCAM_PLOT) {
 
@@ -306,7 +312,10 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
         parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
-        parser.addArgument("--clean", "-cl").action(Arguments.storeTrue()).help("Whether all edges shown be shown or only the last 4 buyer purchases");
+        parser.addArgument("--clean", "-cl").action(Arguments.storeTrue())
+                .help("Whether all edges shown be shown or only the last 4 buyer purchases");
+        parser.addArgument("--nonet", "-nn").action(Arguments.storeTrue())
+                .help("don't show the buyer/seller network");
 
         Namespace parsedArgs = null;
         try {
@@ -332,6 +341,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
         String confPath = configPath == null ? generatorPath : configPath;
+        boolean noNet = parsedArgs.get("nonet");
+
+        OlxNetwork.DISPLAY_NET = !noNet;
 
         if (configPath != null && generatorPath != null) {
             System.out.println("Can't use both config and generation");
@@ -356,8 +368,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     @Override
     public synchronized void terminated(Agent a) {
-        if (a instanceof NetworkAgent)
-            this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
+        if (a instanceof NetworkAgent) {
+            if (OlxNetwork.DISPLAY_NET) {
+                this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
+            }
+        }
         this.runningAgents.remove(a);
         if (!this.kill)
             return;
@@ -397,9 +412,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
-        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS", "PERIOD_BUYERS", "SELLER_STOCK",
-                "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS", "OFFER_STRATS", "CTOFFER_STRATS",
-                "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT" };
+        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS",
+                "PERIOD_BUYERS", "SELLER_STOCK", "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS",
+                "OFFER_STRATS", "CTOFFER_STRATS", "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT" };
     }
 
     @Override
@@ -511,7 +526,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public void setSCAM_PLOT(boolean SCAM_PLOT) {
         this.SCAM_PLOT = SCAM_PLOT;
     }
-    
+
     public boolean getCRED_PLOT() {
         return CRED_PLOT;
     }

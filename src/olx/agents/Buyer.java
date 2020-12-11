@@ -21,6 +21,7 @@ import olx.agents.strategies.counter_offer.*;
 import olx.behaviours.NegotiateBuyer;
 import olx.draw.Edge;
 import olx.draw.NetworkAgent;
+import olx.draw.OlxNetwork;
 import olx.models.Product;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.CoolFormatter;
@@ -217,7 +218,9 @@ public class Buyer extends Agent implements NetworkAgent {
     
     @Override
     public void takeDown() {
-        this.node.clearOutEdges();
+
+        if(OlxNetwork.DISPLAY_NET)
+            this.node.clearOutEdges();
         for (Handler h: this.logger.getHandlers())
             h.close();
 

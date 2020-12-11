@@ -2,12 +2,12 @@
 product: 
   name: vinil
   price: 100
-numSellers: 8
-numBuyers: 8
-wavesBuyers: 2
-periodBuyers: 5001 
-sellerStock: 10
-buyerStock: 10
+numSellers: 80
+numBuyers: 80
+wavesBuyers: 1
+periodBuyers: 8000 
+sellerStock: 20
+buyerStock: 20
 scamFactors:
   - 100
   - 75
