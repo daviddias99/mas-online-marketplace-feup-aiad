@@ -43,7 +43,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private ContainerController container;
     private List<Seller> sellers;
     private List<Buyer> initialBuyers;
-    private List<Buyer> buyers = new ArrayList<>();
+    private List<Buyer> buyers;
 
     private Map<String, Product> products;
     private Set<Agent> runningAgents;
@@ -156,6 +156,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if (config.getBuyers() != null)
             this.initialBuyers = new ArrayList<>(config.getBuyers());
 
+        this.buyers = new ArrayList<>();
         this.start();
     }
 
