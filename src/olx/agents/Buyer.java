@@ -19,6 +19,7 @@ import jade.lang.acl.ACLMessage;
 import olx.Olx;
 import olx.agents.strategies.counter_offer.*;
 import olx.behaviours.NegotiateBuyer;
+import olx.draw.Edge;
 import olx.draw.NetworkAgent;
 import olx.models.Product;
 import uchicago.src.sim.network.DefaultDrawableNode;
@@ -39,6 +40,7 @@ public class Buyer extends Agent implements NetworkAgent {
     private SequentialBehaviour negotiationsBehaviour;
     private TerminationListener terminationListener;
     private DefaultDrawableNode node;
+    private LinkedList<Edge> lastEdges = new LinkedList<>();
 
     public void setTerminationListener(TerminationListener listener) {
         this.terminationListener = listener;
@@ -230,5 +232,24 @@ public class Buyer extends Agent implements NetworkAgent {
     @JsonIgnore(true)
     public void setNode(DefaultDrawableNode node) {
         this.node = node;
+    }
+
+    public void removeLastEdgeIfApplicable(DefaultDrawableNode node) {
+
+        if(Olx.SHOWN_EDGE_COUNT == -1)
+            return;
+
+        if(this.lastEdges.size() > Olx.SHOWN_EDGE_COUNT){
+            Edge toRemove = this.lastEdges.pop();
+            node.removeOutEdge(toRemove);
+        }
+    }
+
+    public void storeEdge(Edge newEdge) {
+
+        if(Olx.SHOWN_EDGE_COUNT == -1)
+            return;
+
+        this.lastEdges.add(newEdge);
     }
 }

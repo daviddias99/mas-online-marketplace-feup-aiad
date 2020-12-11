@@ -53,6 +53,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean elasticityAnalysis;
     private static boolean buyerStratAnalysis;
     private static boolean credibilityAnalysis;
+    public static int SHOWN_EDGE_COUNT = 4;
     public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
@@ -61,12 +62,12 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.config = config;
         this.kill = kill;
 
-        // Runnable endActions = () -> {
-        //     System.out.println("Performing end actions");
-        //     this.getSchedule().executeEndActions();
-        // };
+        Runnable endActions = () -> {
+            System.out.println("Performing end actions");
+            this.getSchedule().executeEndActions();
+        };
 
-        // java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
+        java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
     }
 
     public void start() {
@@ -305,6 +306,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
         parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
+        parser.addArgument("--clean", "-cl").action(Arguments.storeTrue()).help("Whether all edges shown be shown or only the last 4 buyer purchases");
 
         Namespace parsedArgs = null;
         try {
@@ -325,6 +327,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         elasticityAnalysis = parsedArgs.get("elasticity");
         buyerStratAnalysis = parsedArgs.get("bstrat");
         credibilityAnalysis = parsedArgs.get("credibility");
+        Olx.SHOWN_EDGE_COUNT = (boolean) parsedArgs.get("clean") ? 4 : -1;
         logging = parsedArgs.get("logger");
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
