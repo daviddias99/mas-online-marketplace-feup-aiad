@@ -332,15 +332,13 @@ public class NegotiateBuyer extends ContractNetInitiator {
         DefaultDrawableNode myNode = this.getAgent().getNode();
         Buyer b = this.getAgent();
 
-        if (OlxNetwork.DISPLAY_NET) {
-            if (myNode != null) {
-                DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
-                Edge edge = new Edge(myNode, to);
-                edge.setColor(Color.ORANGE);
-                myNode.addOutEdge(edge);
-                b.storeEdge(edge);
-                b.removeLastEdgeIfApplicable(myNode);
-            }
+        if (myNode != null) {
+            DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
+            Edge edge = new Edge(myNode, to);
+            edge.setColor(Color.ORANGE);
+            myNode.addOutEdge(edge);
+            b.storeEdge(edge);
+            b.removeLastEdgeIfApplicable(myNode);
         }
 
         this.getAgent().changeMoneySpent(scam.getOfferInfo().getOfferedPrice());
@@ -354,16 +352,14 @@ public class NegotiateBuyer extends ContractNetInitiator {
         DefaultDrawableNode myNode = this.getAgent().getNode();
         Buyer b = this.getAgent();
 
-        if (OlxNetwork.DISPLAY_NET) {
-            if (myNode != null) {
-                DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
-                Edge edge = new Edge(myNode, to);
-                edge.setColor(Color.GREEN);
+        if (myNode != null) {
+            DefaultDrawableNode to = OlxNetwork.getNode(Util.localNameToLabel(inform.getSender().getLocalName()));
+            Edge edge = new Edge(myNode, to);
+            edge.setColor(Color.GREEN);
 
-                myNode.addOutEdge(edge);
-                b.storeEdge(edge);
-                b.removeLastEdgeIfApplicable(myNode);
-            }
+            myNode.addOutEdge(edge);
+            b.storeEdge(edge);
+            b.removeLastEdgeIfApplicable(myNode);
         }
 
         b.logger().info(String.format("! %s BOUGHT %s from agent %s", b.getLocalName(), offerInfo,
