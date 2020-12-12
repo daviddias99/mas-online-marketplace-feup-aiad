@@ -20,7 +20,7 @@ public abstract class StratPlot<T extends Agent> {
     protected ArrayList<T> relTFT;
     private String method;
 
-    protected StratPlot(Repast3Launcher launcher, List<T> agents, String method, String folder, String title, List<Color> colors){
+    protected StratPlot(Repast3Launcher launcher, List<T> agents, String method, String folder, String title, String yAxis, List<Color> colors){
         this.smart = new ArrayList<>();
         this.absTFT = new ArrayList<>();
         this.relTFT = new ArrayList<>();
@@ -36,7 +36,7 @@ public abstract class StratPlot<T extends Agent> {
             dir.mkdirs();
 
         this.plot = new OpenSequenceGraph(title, launcher, dir.getPath() + "/" + time + ".csv", PlotModel.CSV);
-        this.plot.setAxisTitles("time","money spent");
+        this.plot.setAxisTitles("time",yAxis);
 
         this.addAgents(agents);
         this.setPlot(colors.get(0), colors.get(1), colors.get(2));
