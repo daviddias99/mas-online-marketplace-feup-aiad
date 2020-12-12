@@ -249,7 +249,6 @@ public class Buyer extends Agent implements NetworkAgent {
     }
 
     public void storeEdge(Edge newEdge) {
-
         if(Olx.SHOWN_EDGE_COUNT == -1)
             return;
 

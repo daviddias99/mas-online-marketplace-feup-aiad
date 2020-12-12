@@ -2,8 +2,8 @@
 product: 
   name: vinil
   price: 100
-numSellers: 80
-numBuyers: 80
+numSellers: 15
+numBuyers: 15
 wavesBuyers: 1
 periodBuyers: 8000 
 sellerStock: 20

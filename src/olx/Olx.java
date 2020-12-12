@@ -423,7 +423,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean ELAS_PLOT = false;
     private boolean BSTRAT_PLOT = false;
     private boolean SSTRAT_PLOT = false;
-    private boolean CLEAN_EDGES = false;
+    private boolean CLEAN_EDGES = true;
     private boolean SHOW_NETWORK = true;
 
     // SAJAS + REPAST
