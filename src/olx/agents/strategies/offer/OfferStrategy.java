@@ -15,6 +15,11 @@ import olx.models.SellerOfferInfo;
  */
 public abstract class OfferStrategy implements Serializable{
     private static final long serialVersionUID = 1L;
+    public enum Type {
+        SMART,
+        RELTFT,
+        ABSTFT,
+    }
 
     public abstract float chooseOffer(OfferInfo currentOffer, OfferInfo previousOffer, SellerOfferInfo ownPreviousOffer,
             Seller seller);
