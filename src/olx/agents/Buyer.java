@@ -219,7 +219,7 @@ public class Buyer extends Agent implements NetworkAgent {
     @Override
     public void takeDown() {
 
-        if(OlxNetwork.DISPLAY_NET)
+        if(this.node != null)
             this.node.clearOutEdges();
         for (Handler h: this.logger.getHandlers())
             h.close();

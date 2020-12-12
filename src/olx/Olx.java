@@ -55,6 +55,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean buyerStratAnalysis;
     private static boolean sellerStratAnalysis;
     private static boolean credibilityAnalysis;
+    private static Boolean noNet = null;
     public static int SHOWN_EDGE_COUNT = 4;
     public static boolean logging;
 
@@ -130,7 +131,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private void addBuyersDisplay(List<Buyer> buyers) {
 
-        if(OlxNetwork.DISPLAY_NET)
+        if(this.olxNetwork != null)
             this.olxNetwork.addBuyers(buyers);
         if (buyerStratAnalysis || this.BSTRAT_PLOT)
             this.buyerStratPlot.addBuyers(buyers);
@@ -202,7 +203,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     @Override
     public void begin() {
         super.begin();
-        OlxNetwork.DISPLAY_NET &= SHOW_NETWORK;
+        if(noNet == null)
+            noNet = !this.SHOW_NETWORK;
         Olx.SHOWN_EDGE_COUNT = CLEAN_EDGES ? Olx.SHOWN_EDGE_COUNT : -1;
         buildAndScheduleDisplay();
     }
@@ -216,12 +218,11 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     private void buildAndScheduleDisplay() {
 
-        if (OlxNetwork.DISPLAY_NET) {
-            if (this.olxNetwork != null) {
+        if (!noNet) {
+            if (this.olxNetwork != null) 
                 this.olxNetwork.close();
-            }
-            this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
 
+            this.olxNetwork = new OlxNetwork(this, this.buyers, this.sellers, this.config.getBuyerStrategies());
         }
 
         // graph scam
@@ -355,9 +356,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
         String confPath = configPath == null ? generatorPath : configPath;
-        boolean noNet = parsedArgs.get("nonet");
-
-        OlxNetwork.DISPLAY_NET = !noNet;
+        if(isBatchMode)
+            noNet = parsedArgs.get("nonet");
 
         if (configPath != null && generatorPath != null) {
             System.out.println("Can't use both config and generation");
@@ -382,11 +382,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
     @Override
     public synchronized void terminated(Agent a) {
-        if (a instanceof NetworkAgent) {
-            if (OlxNetwork.DISPLAY_NET) {
-                this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
-            }
-        }
+        if (a instanceof NetworkAgent && this.olxNetwork != null)
+            this.olxNetwork.removeNode(((NetworkAgent) a).getNode());
+
         this.runningAgents.remove(a);
         if (!this.kill)
             return;

@@ -199,7 +199,7 @@ public class Seller extends Agent implements NetworkAgent {
         int reduceFactor = Util.randomBetween(70, 90);
         this.credibility = reduceFactor * this.credibility / 100;
 
-        if(OlxNetwork.DISPLAY_NET)
+        if(this.node != null)
             this.updateNodeColor();
         return this.credibility;
     }
@@ -209,7 +209,7 @@ public class Seller extends Agent implements NetworkAgent {
         int increaseFactor = Util.randomBetween(110, 140);
         this.credibility = Math.min(100, increaseFactor * this.credibility / 100);
 
-        if(OlxNetwork.DISPLAY_NET)
+        if(this.node != null)
             this.updateNodeColor();
         return this.credibility;
     }
