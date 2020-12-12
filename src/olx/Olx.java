@@ -134,7 +134,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         if(this.olxNetwork != null)
             this.olxNetwork.addBuyers(buyers);
         if (buyerStratAnalysis || this.BSTRAT_PLOT)
-            this.buyerStratPlot.addBuyers(buyers);
+            this.buyerStratPlot.addAgents(buyers);
     }
 
     @Override
@@ -250,7 +250,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
                 this.sellerStratPlot.close();
 
             this.sellerStratPlot = new SellerStratPlot(this, this.sellers);
-            this.sellerStratPlot.addSellers(sellers);
+            this.sellerStratPlot.addAgents(sellers);
         }
         if (credibilityAnalysis || this.CRED_PLOT) {
             if (this.credibilityHistogram != null)
