@@ -2,7 +2,9 @@ package olx.draw;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import olx.models.Product;
 import olx.models.ProductSold;
@@ -11,13 +13,17 @@ import uchicago.src.sim.analysis.Histogram;
 import uchicago.src.sim.engine.ScheduleBase;
 
 public class ProductPriceHistogram {
-    private static int id = 0;
+    private static Map<String, Integer> ids = new HashMap<>();
     private Histogram histogram;
     private Product product;
     private List<ProductSold> productPrices;
 
     public ProductPriceHistogram(Repast3Launcher launcher, ProductSold productSold) {
-        ProductPriceHistogram.id++;
+        int lastId = ids.getOrDefault(productSold.getName(), 0);
+        int id = lastId + 1;
+        ids.put(productSold.getName(), id);
+
+
         this.productPrices = new ArrayList<>();
         this.productPrices.add(productSold);
         this.product = productSold.getProduct();
@@ -31,7 +37,7 @@ public class ProductPriceHistogram {
         if (!dir.exists())
             dir.mkdirs();
 
-        String histTitle = "Price distribution of " + this.product.getName() + " " + ProductPriceHistogram.id;
+        String histTitle = "Price distribution of " + this.product.getName() + " " + id;
         this.histogram = new MyHistogram(histTitle,10, 0, product.getOriginalPrice(), launcher, dir.getPath() + "/" + time + ".csv");
 
         this.histogram.createHistogramItem("Price", this.productPrices, "getPrice", -1, 0);

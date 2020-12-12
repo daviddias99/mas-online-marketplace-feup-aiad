@@ -250,7 +250,7 @@ public class Olx extends Repast3Launcher implements TerminationListener, Product
     }
 
     @Override
-    public void addProductSold(ProductSold productSold) {
+    public synchronized void addProductSold(ProductSold productSold) {
         if (! (productPriceAnalysis || this.PRICE_HIST)) return;
 
         ProductPriceHistogram oldHist = this.productPriceHistogramMap.get(productSold.getName());
