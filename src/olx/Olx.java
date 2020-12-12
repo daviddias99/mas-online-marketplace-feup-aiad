@@ -7,6 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jade.wrapper.ControllerException;
+import olx.draw.*;
+import olx.models.ProductSold;
+import olx.utils.*;
 import sajas.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -18,13 +21,6 @@ import uchicago.src.sim.engine.SimInit;
 import olx.agents.Buyer;
 import olx.agents.BuyerLauncher;
 import olx.agents.Seller;
-import olx.draw.BuyerStratPlot;
-import olx.draw.CredibilityHistogram;
-import olx.draw.ElasticityPlot;
-import olx.draw.NetworkAgent;
-import olx.draw.OlxNetwork;
-import olx.draw.ScamPlot;
-import olx.draw.SellerStratPlot;
 import olx.models.Product;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.helper.HelpScreenException;
@@ -32,13 +28,8 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import olx.utils.Config;
-import olx.utils.Stats;
-import olx.utils.TerminationListener;
-import olx.utils.Creator;
-import olx.utils.JsonConfig;
 
-public class Olx extends Repast3Launcher implements TerminationListener {
+public class Olx extends Repast3Launcher implements TerminationListener, ProductSoldListener {
     private Runtime rt;
     private Profile p;
     private ContainerController container;
@@ -47,6 +38,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private List<Buyer> buyers;
 
     private Map<String, Product> products;
+
     private Set<Agent> runningAgents;
     private Config config;
     private boolean kill;
@@ -59,19 +51,21 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public static int SHOWN_EDGE_COUNT = 4;
     private static boolean IS_BATCH_MODE;
     public static boolean logging;
+    private static boolean productPriceAnalysis;
 
     // config contains the arrays of Products, Buyers and Sellers
     public Olx(Config config, boolean kill) {
         super();
         this.config = config;
         this.kill = kill;
+        this.productPriceHistogramMap = new HashMap<>();
 
-        Runnable endActions = () -> {
-            System.out.println("Performing end actions");
-            this.getSchedule().executeEndActions();
-        };
+        // Runnable endActions = () -> {
+        //     System.out.println("Performing end actions");
+        //     this.getSchedule().executeEndActions();
+        // };
 
-        java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
+        // java.lang.Runtime.getRuntime().addShutdownHook(new Thread(endActions));
     }
 
     public void start() {
@@ -98,6 +92,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         for (int j = 0; j < this.sellers.size(); j++) {
             try {
+                this.sellers.get(j).setProductSoldListener(this);
                 this.container.acceptNewAgent("seller_" + j, this.sellers.get(j)).start();
             } catch (StaleProxyException e) {
                 System.out.println("/!\\ Could not setup seller_" + j);
@@ -151,8 +146,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         this.products = new HashMap<>();
         if (config.getProducts() != null) {
             List<Product> prov = config.getProducts();
-            for (int i = 0; i < prov.size(); i++)
+            for (int i = 0; i < prov.size(); i++) {
                 this.products.put(prov.get(i).getName(), prov.get(i));
+            }
         } else {
             System.out.println("WARNING: no products specified");
         }
@@ -218,6 +214,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private BuyerStratPlot buyerStratPlot;
     private SellerStratPlot sellerStratPlot;
     private CredibilityHistogram credibilityHistogram;
+    private Map<String, ProductPriceHistogram> productPriceHistogramMap;
 
     private void buildAndScheduleDisplay() {
 
@@ -261,6 +258,33 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
             this.credibilityHistogram = new CredibilityHistogram(this, this.sellers);
         }
+
+        if (productPriceAnalysis || this.PRICE_HIST) {
+            for (Map.Entry<String, Product> productEntry : this.products.entrySet()) {
+                String productName = productEntry.getKey();
+
+                ProductPriceHistogram hist = this.productPriceHistogramMap.get(productName);
+                if (hist != null) {
+                    hist.close();
+                    this.productPriceHistogramMap.remove(productName);
+                }
+            }
+        }
+    }
+
+    @Override
+    public synchronized void addProductSold(ProductSold productSold) {
+        if (! (productPriceAnalysis || this.PRICE_HIST)) return;
+
+        ProductPriceHistogram oldHist = this.productPriceHistogramMap.get(productSold.getName());
+
+        if (oldHist == null) {
+            ProductPriceHistogram newHist = new ProductPriceHistogram(this, productSold);
+            this.productPriceHistogramMap.put(productSold.getName(), newHist);
+            return;
+        }
+
+        oldHist.addProductSold(productSold);
     }
 
     private static Config getConfig(String confPath, ArgumentParser parser, boolean generate) {
@@ -327,6 +351,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         parser.addArgument("--logger", "-l").action(Arguments.storeTrue())
                 .help("activate logging per agent (files are always created)");
         parser.addArgument("--elasticity", "-e").action(Arguments.storeTrue()).help("perform a elasticity analysis");
+        parser.addArgument("--price", "-p").action(Arguments.storeTrue()).help("perform a product price analysis");
         parser.addArgument("--config", "-c").help("file (YAML or JSON) with experiment configuration");
         parser.addArgument("--generator", "-g").help("file (YAML or JSON) with generator configuration");
         parser.addArgument("--clean", "-cl").action(Arguments.storeTrue())
@@ -356,6 +381,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         credibilityAnalysis = parsedArgs.get("credibility");
         Olx.SHOWN_EDGE_COUNT = (boolean) parsedArgs.get("clean") ? 4 : -1;
         logging = parsedArgs.get("logger");
+        productPriceAnalysis = parsedArgs.get("price");
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
         String confPath = configPath == null ? generatorPath : configPath;
@@ -424,15 +450,16 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private boolean ELAS_PLOT = false;
     private boolean BSTRAT_PLOT = false;
     private boolean SSTRAT_PLOT = false;
+    private boolean PRICE_HIST = false;
     private boolean CLEAN_EDGES = true;
     private boolean SHOW_NETWORK = true;
 
     // SAJAS + REPAST
     @Override
     public String[] getInitParam() {
-        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS",
-                "PERIOD_BUYERS", "SELLER_STOCK", "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS",
-                "OFFER_STRATS", "CTOFFER_STRATS", "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT", "SSTRAT_PLOT", "CLEAN_EDGES", "SHOW_NETWORK" };
+        return new String[] { "PRODUCT_NAME", "PRODUCT_PRICE", "NUM_SELLERS", "NUM_BUYERS", "WAVES_BUYERS", "PERIOD_BUYERS", "SELLER_STOCK", 
+                "BUYER_STOCK", "SCAM_FACTORS", "ELASTICITIES", "PICKING_STRATS", "OFFER_STRATS", "CTOFFER_STRATS", 
+                "PATIENCES", "SCAM_PLOT", "CRED_PLOT", "ELAS_PLOT", "BSTRAT_PLOT", "PRICE_HIST", "SSTRAT_PLOT", "CLEAN_EDGES", "SHOW_NETWORK" };
     }
 
     @Override
@@ -492,10 +519,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         return SCAM_FACTORS;
     }
 
-    public void setSCAM_FACTORS(String SCAM_FACTORS) {
-
-        this.SCAM_FACTORS = SCAM_FACTORS;
-    }
+    public void setSCAM_FACTORS(String SCAM_FACTORS) { this.SCAM_FACTORS = SCAM_FACTORS; }
 
     public String getELASTICITIES() {
         return ELASTICITIES;
@@ -608,4 +632,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     public void setSHOW_NETWORK(boolean SHOW_NET) {
         this.SHOW_NETWORK = SHOW_NET;
     }
+
+    public boolean getPRICE_HIST() { return PRICE_HIST; }
+
+    public void setPRICE_HIST(boolean PRICE_HIST) { this.PRICE_HIST = PRICE_HIST; }
 }

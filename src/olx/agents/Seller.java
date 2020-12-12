@@ -15,6 +15,7 @@ import olx.agents.strategies.offer.*;
 import olx.agents.strategies.price_picking.*;
 import olx.models.Product;
 import olx.models.Stock;
+import olx.utils.ProductSoldListener;
 import uchicago.src.sim.network.DefaultDrawableNode;
 import olx.utils.CoolFormatter;
 import olx.utils.ProductQuantity;
@@ -56,6 +57,7 @@ public class Seller extends Agent implements NetworkAgent {
     private float wealth;
     private transient Logger logger;
     private DefaultDrawableNode node;
+    private ProductSoldListener productSoldListener;
 
     @JsonCreator
     public Seller(@JsonProperty("products") ProductQuantity[] products, @JsonProperty("scamFactor") int scamF,
@@ -326,5 +328,13 @@ public class Seller extends Agent implements NetworkAgent {
     private void updateNodeColor() {
         this.node.setColor(Util.getSellerColor(this.credibility));
         this.node.setBorderColor(Util.getSellerColor(50));
+    }
+
+    public void setProductSoldListener(ProductSoldListener productSoldListener) {
+        this.productSoldListener = productSoldListener;
+    }
+
+    public ProductSoldListener getProductSoldListener() {
+        return this.productSoldListener;
     }
 }
