@@ -15,7 +15,7 @@ products:
   - name: bmx
     price: 300
   - name: camisola
-    price: 20
+    price: 200
 buyers:
   - products:
       - name: pc
