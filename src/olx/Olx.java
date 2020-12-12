@@ -245,6 +245,7 @@ public class Olx extends Repast3Launcher implements TerminationListener, Product
                 ProductPriceHistogram hist = this.productPriceHistogramMap.get(productName);
                 if (hist != null) {
                     hist.close();
+                    this.productPriceHistogramMap.remove(productName);
                 }
             }
         }
