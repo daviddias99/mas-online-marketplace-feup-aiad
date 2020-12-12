@@ -217,7 +217,9 @@ public class Buyer extends Agent implements NetworkAgent {
     
     @Override
     public void takeDown() {
-        this.node.clearOutEdges();
+
+        if(this.node != null)
+            this.node.clearOutEdges();
         for (Handler h: this.logger.getHandlers())
             h.close();
 
@@ -246,7 +248,6 @@ public class Buyer extends Agent implements NetworkAgent {
     }
 
     public void storeEdge(Edge newEdge) {
-
         if(Olx.SHOWN_EDGE_COUNT == -1)
             return;
 

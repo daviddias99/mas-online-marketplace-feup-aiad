@@ -4,6 +4,7 @@ import olx.behaviours.AskPriceSeller;
 import olx.behaviours.NegotiationDispatcher;
 import olx.behaviours.ResponsePrice;
 import olx.draw.NetworkAgent;
+import olx.draw.OlxNetwork;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -197,7 +198,9 @@ public class Seller extends Agent implements NetworkAgent {
     public int reduceCredibility(){
         int reduceFactor = Util.randomBetween(70, 90);
         this.credibility = reduceFactor * this.credibility / 100;
-        this.updateNodeColor();
+
+        if(this.node != null)
+            this.updateNodeColor();
         return this.credibility;
     }
 
@@ -205,7 +208,9 @@ public class Seller extends Agent implements NetworkAgent {
     public int increaseCredibility(){
         int increaseFactor = Util.randomBetween(110, 140);
         this.credibility = Math.min(100, increaseFactor * this.credibility / 100);
-        this.updateNodeColor();
+
+        if(this.node != null)
+            this.updateNodeColor();
         return this.credibility;
     }
 
