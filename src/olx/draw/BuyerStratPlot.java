@@ -12,7 +12,7 @@ import sajas.sim.repast3.Repast3Launcher;
 public class BuyerStratPlot extends StratPlot<Buyer> {
     private static int id = 0;
     public BuyerStratPlot(Repast3Launcher launcher, List<Buyer> buyers){
-        super(launcher, buyers, "getMoneySpent", "buyer_strat", "Counter Offer Strategy Analysis " + ++id,
+        super(launcher, buyers, "getMoneySpent", "buyer_strat", "Counter Offer Strategy Analysis " + ++id, "money spent",
             Arrays.asList(
                 Util.getBuyerColor(CounterOfferStrategy.Type.SMART), 
                 Util.getBuyerColor(CounterOfferStrategy.Type.RELTFT), 
