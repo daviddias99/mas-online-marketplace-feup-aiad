@@ -9,11 +9,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import olx.agents.Seller;
-import olx.models.OfferInfo;
-import olx.models.Product;
-import olx.models.Scam;
-import olx.models.SellerOfferInfo;
-import olx.models.Stock;
+import olx.models.*;
 import olx.utils.Util;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -177,6 +173,8 @@ public class NegotiateSeller extends SSIteratedContractNetResponder {
                     seller.deregister(buyerOffer.getProduct());
 
                 Stats.productSold(seller, buyerOffer.getProduct(), buyerOffer.getOfferedPrice());
+
+                seller.getProductSoldListener().addProductSold(new ProductSold(buyerOffer.getProduct(), buyerOffer.getOfferedPrice()));
 
                 seller.logger().info(String.format("< %s (%s) sent %s to agent %s saying %s, credibility %d -> %d, quantity left=%d",
                                 seller.getLocalName(), cfp.getConversationId() ,ACLMessage.getPerformative(result.getPerformative()),
