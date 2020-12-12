@@ -57,6 +57,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
     private static boolean credibilityAnalysis;
     private static Boolean noNet = null;
     public static int SHOWN_EDGE_COUNT = 4;
+    private static boolean IS_BATCH_MODE;
     public static boolean logging;
 
     // config contains the arrays of Products, Buyers and Sellers
@@ -205,7 +206,9 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         super.begin();
         if(noNet == null)
             noNet = !this.SHOW_NETWORK;
-        Olx.SHOWN_EDGE_COUNT = CLEAN_EDGES ? Olx.SHOWN_EDGE_COUNT : -1;
+
+        if(! Olx.IS_BATCH_MODE) 
+            Olx.SHOWN_EDGE_COUNT = CLEAN_EDGES ? 4 : -1;
         buildAndScheduleDisplay();
     }
 
@@ -343,8 +346,8 @@ public class Olx extends Repast3Launcher implements TerminationListener {
 
         boolean kill = parsedArgs.get("kill");
         String batchMode = parsedArgs.get("batch");
-        boolean isBatchMode = batchMode != null;
-        int numBatches = isBatchMode ? (batchMode.equals("") ? 1 : Integer.parseInt(batchMode)) : 1;
+        Olx.IS_BATCH_MODE = batchMode != null;
+        int numBatches = Olx.IS_BATCH_MODE ? (batchMode.equals("") ? 1 : Integer.parseInt(batchMode)) : 1;
 
         scamAnalysis = parsedArgs.get("scam");
         elasticityAnalysis = parsedArgs.get("elasticity");
@@ -356,7 +359,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         String configPath = parsedArgs.get("config");
         String generatorPath = parsedArgs.get("generator");
         String confPath = configPath == null ? generatorPath : configPath;
-        if(isBatchMode)
+        if(Olx.IS_BATCH_MODE)
             noNet = parsedArgs.get("nonet");
 
         if (configPath != null && generatorPath != null) {
@@ -367,7 +370,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         boolean generate = generatorPath != null;
         Config config = (configPath != null || generatorPath != null) ? getConfig(confPath, parser, generate) : null;
 
-        if (config != null && !isBatchMode) {
+        if (config != null && !Olx.IS_BATCH_MODE) {
             System.out.println("File configs are meant for batch processing");
             System.exit(-1);
         }
@@ -376,7 +379,7 @@ public class Olx extends Repast3Launcher implements TerminationListener {
         SimInit init = new SimInit();
         init.setNumRuns(numBatches); // works only in batch mode
         Olx olx = new Olx(config, kill);
-        init.loadModel(olx, null, isBatchMode);
+        init.loadModel(olx, null, Olx.IS_BATCH_MODE);
 
     }
 
