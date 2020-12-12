@@ -55,6 +55,7 @@ public class Olx extends Repast3Launcher implements TerminationListener, Product
         super();
         this.config = config;
         this.kill = kill;
+        this.productPriceHistogramMap = new HashMap<>();
 
         Runnable endActions = () -> {
             System.out.println("Performing end actions");
@@ -238,13 +239,13 @@ public class Olx extends Repast3Launcher implements TerminationListener, Product
         }
 
         if (productPriceAnalysis || this.PRICE_HIST) {
-            this.productPriceHistogramMap = new HashMap<>();
             for (Map.Entry<String, Product> productEntry : this.products.entrySet()) {
                 String productName = productEntry.getKey();
 
                 ProductPriceHistogram hist = this.productPriceHistogramMap.get(productName);
-                if (hist != null)
+                if (hist != null) {
                     hist.close();
+                }
             }
         }
     }
