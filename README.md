@@ -1,7 +1,5 @@
 # Online Second-Hand Marketplace Simulation using Multi-agent Systems
 
-# Repos name
-
 **2017/2018** - 4th Year, 1st Semester
 
 **Course:** *Agentes e Inteligência Artificial Distribuida* ([AIAD](https://sigarra.up.pt/feup/en/ucurr_geral.ficha_uc_view?pv_ocorrencia_id=272771)) | Agents and Distributed Artificial Intelligence
